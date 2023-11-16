@@ -115,4 +115,27 @@ enum은 컴파일 타임에 이점이 있습니다. 하지만 enum의 case가 �
 하지만 구조체를 사용한다면 구조체의 프로퍼티를 그룹화 해봅시다. 그룹화 된다면 enum을 사용할 가능성이 생깁니다.
 
 ## Enums for polymorphism
+
+Polymorphism(다형성) means that a single function, method, array, dictionary - you name it - can work with different types.
+
+```swift
+let arr: [Any] = [Date(), "aa", 789]
+```
+위 코드와 같이 Any 타입 배열로 다형성을 만들 수도 있습니다. 하지만 이상적이지 못합니다. Any가 어떤 타입을 표현할지 컴파일 타임에 알 수 없고 런타임에 알게 됩니다. Any 타입이 필요한 경우는 서버로부터 unknown data를 받을 때입니다. 하지만 enum을 사용하면 complie-time safety를 보장받을 수 있습니다.
+
+Date 타입과 Range<Date> 타입을 같은 배열에 저장해야 하는 경우를 살펴봅시다.
+
+```swift
+import Foundation
+
+enum DateTpye {
+	case singleDate(Date)
+	case dateRange(Range<Date>)
+}
+
+let now = Date()
+let hourFromNow = Date(timeIntervalSinceNow: 3600)
+
+
+```
  
