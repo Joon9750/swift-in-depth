@@ -186,6 +186,157 @@ subclassing을 사용한다면 공통 프로퍼티를 부모 클래스에 넣어
 
 These are trade-offs you'll have to make. If you can lock down your data model to a fixed, manageable number of cases, enums can be a good choice.
 
-## Alebraic data types
+## Algebraic data types
 
+Algebraic data는 sum types와 product types로 데이터를 표현합니다. sum types은 "or"로 설명되고 enum이 해당됩니다. product types은 "and"로 설명되고 struct, tuple이 해당됩니다. 
+sum types의 enum은 고정된 개수를 표현합니다. product types은 여러 개수를 표현합니다. 
 
+데이터 모델링할 때 데이터가 표현 가능한 상태의 개수를 체크하는게 중요합니다. 데이터가 표현 가능한 상태가 많을수록 표현 가능한 타입을 추론하기 어렵습니다.
+
+```swift
+enum PaymentType {
+	case invoice
+	case creditcard
+	case cash
+}
+
+struct PaymentStatus {
+	let paymentDate: Date?
+	let isRecurring: Bool
+	let paymentType: PaymentType
+	}
+```
+
+위와 같이 PaymentStatus를 만든다면 2가지(Bool)과 3가지(PaymentType)를 곱하여 6가지 변화를 가지는 데이터입니다. 이를 sum types인 enum을 통해 리팩토링한다면 3가지 변화를 가지는 데이터로 바꿀 수 있습니다.
+
+```swift
+enum PaymentStatus {
+	case invoice(paymentDate: Date?, isRecurring: Bool)
+	case creditcard(paymentDate: Date?, isRecurring: Bool)
+	case cash(paymentDate: Date?, isRecurring: Bool)
+}
+```
+
+위와 같이 수정한다면 PaymentStatus 타입 하나만 다룰 수 있다는 장점이 있습니다. 
+
+## A safer use of strings
+
+string과 enum을 사용하는 경우는 흔합니다.
+enum에서 raw value를 추가할 수 있습니다. 이때 모든 case는 raw value를 가져야 합니다. raw value로는 String, Char, Int, float만 가능합니다.
+
+```swift
+enum Currency: String {
+	case euro = "euro"
+	case usd = "usd"
+	case gbp = "gbp"
+}
+```
+
+enum을 raw value로 사용할 때는 아래와 같이 간략히 사용할 수도 있습니다.
+
+```swift
+enum Currency: String {
+	case euro
+	case usd 
+	case gbp
+}
+```
+
+enum을 raw values로 사용하면 해당 값이 컴파일 타임에 정의됩니다. 그러나 지금까지보던 enum의 연관값들은 런타임에 정의됩니다.
+
+enum을 raw values로 사용하면 올바르지 않은 값을 넣어도 컴파일러가 알아차리지 못합니다. 예를 들어 euro를 eur로 잘못 적었다면 컴파일러는 euro를 eur로 인식해서 버그가 조용히 숨어들게 됩니다.
+
+```swift
+enum Currency: String {
+	case euro = "eur"
+	case usd 
+	case gbp
+}
+
+let parameters = ["filter": currency.rawValue]
+```
+
+위와 같은 버그를 방지하기 위해 currency enum의 raw values를 무시하고 raw values가 필요할 때 데이터를 다시 생성하도록 아래와 같이 구현합니다.
+
+```swift
+enum Currency: String {
+	case euro = "eur"
+	case usd 
+	case gbp
+}
+
+let parameters = [String: String]
+switch currency {
+	case .euro: parameters = ["filter": "euro"]
+	case .usd: parameters = ["filter": "usd"]
+	case .gbp: parameters = ["filter": "gbp"]
+```
+
+위 코드와 같이 enum의 raw value를 무시하고 해당 값이 필요할 때마다 switch로 얻는다면 버그를 방지할 수 있습니다. 
+다시 말해 enum의 raw value를 사용하면 결과적으로 컴파일러의 검사를 잃게 됩니다.
+
+enum을 사용할 때 string과 매칭하는 경우도 빈번합니다.
+
+```swift
+func iconName(for fileExtension: String) -> String {
+	switch fileExtension {
+	case "jpg": return "assetIconJpeg"
+	case "bmp": return "assetIconBitmap"
+	case "gif": return "assetIconGif"
+	default: return "assertIconUnknown"
+	}
+}
+
+iconName(for: "jpg")
+iconName(for: "JPG")
+
+```
+
+위에서 jpg를 함수에 넣었을 때는 성공적으로 매칭이 됩니다. 하지만 JPG에 매칭되는 결과는 없기에 버그가 발생하게 됩니다. 코드 작성자가 실수할 가능성까지 버그로 봅니다. 이를 enum을 통해 개선할 수 있습니다. 
+
+```swift
+enum ImageType: String {
+	case jpg
+	case bmp
+	case gif
+	
+	init?(rawValue: String) {
+		switch rawValue.lowercasted() {
+		case "jpg", "jpeg": self = .jpg
+		case "bmp", "bitmap": self = .bmp
+		case "gif", "gifv": self = .gif
+		default: return nil
+		}
+	}
+}
+
+func iconName(for fileExtension: String) -> String {
+	guard let imageType = ImageType(rawValue: fileExtension) else {
+		return "assertIconUnknown"
+	}
+	switch fileExtension {
+	case "jpg": return "assetIconJpeg"
+	case "bmp": return "assetIconBitmap"
+	case "gif": return "assetIconGif"
+	default: return "assertIconUnknown"
+	}
+}
+
+iconName(for: "jpg")
+iconName(for: "JPG")
+iconName(for: "JPEG")
+
+```
+
+이제는 ImageType에 case가 추가돠면 컴파일러가 알려줍니다. 위의 코드는 대문자에 대응하고 다른 명칭에도 대응하도록 개선한 코드입니다.
+
+## 정리
+
+1. Enums are sometimes an alternative to subclassing, allowing for a flexible architecture.
+2. Enums give you the ability to catch problem at compile time instead of runtime.
+3. You can use enums to group properties together.
+4. Enums are sometimes called sum types, based on algebratic data types.
+5. Structs can be distributed over enums.
+6. When working with enum's raw values, you forego catching problems at compile time.
+7. Handling strings can be made safer by converting them to enums.
+8. When converting a string to an enum, grouping cases and using a lowercased strings makes conversion easier.
