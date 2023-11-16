@@ -8,8 +8,7 @@ chat application 서비스의 message 데이터를 모델링 해봅시다.
 message는 본인이 보낸 text, 채팅방 참여 text, 채팅방 퇴장 text일 수 있습니다.
 추가적으로 text 하나만 보낼 수 있고 풍선 이모티콘도 보낼 수 있는 chat 서비스입니다.
 
-```
-swift
+```swift
 import Foundation
 
 struct Message {
