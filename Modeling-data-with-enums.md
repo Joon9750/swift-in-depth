@@ -48,7 +48,7 @@ isSendingBalloons: false
 
 우리가 만드는 Message 데이터는 유저가 보내는 text 또는 채팅방 참여 text 또는 채팅방 퇴장 text 또는 풍선 이모티콘이어야 합니다.
 
-하지만 구조제는 여러 형태의 값을 만들 가능성이 있다. 이 가능성은 버그로 이어집니다. enum이 "or" 개념이라면 구조체는 "And" 개념인 것입니다.
+하지만 구조체는 여러 형태의 값을 만들 가능성이 있습니다. 이 가능성은 버그로 이어집니다. enum이 "or" 개념이라면 구조체는 "And" 개념인 것입니다.
 
 brokenMessage처럼 hasJoined와 hasLeft가 동시에 true일 수 있는 말도 안되는 상황이 생길 수 있기 때문에 버그를 유발합니다.
 심지어 구조체 타입의 message 유효성을 검사하더라도 유효하지 않다면 이를 런타임에 알게 됩니다.
@@ -87,9 +87,10 @@ let textMessage = Message.text(userId: "2", contents: "Bonjour", date: Date())
 let joinMessage = Message.join(userId: "2", date: Date())
 ```
 
-enum과 tuple을 함께 사용하며 각 case들이 associated value(연관값)을 갖게 됩니다. 이는 프로퍼티가 어떤 케이스에 어울릴지 명확히 보여줍니다.
+enum과 tuple을 함께 사용하여 각 case들이 associated value(연관값)을 갖게 됩니다. 이는 프로퍼티가 어떤 케이스에 어울릴지 명확히 보여줍니다.
 
 enum으로 데이터를 만들면 당연히 switch문이 등장할 것입니다. 하지만 switch문은 하나의 데이터를 얻기 위해 모든 case에 해당하는 코드를 적어야합니다. 이는 중복되는 코드를 발생시킵니다.
+
 if case let 구문을 사용해 반복적인 switch문을 피할 수 있습니다.
 
 ```swift
