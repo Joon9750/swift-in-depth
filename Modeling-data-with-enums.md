@@ -23,11 +23,12 @@ struct Message {
 }
 
 let joinMessage = Message(userId: "1", 
-	contents: nil, 
-	date: Date(), 
-	hasJoined: true, 
-hasLeft: false, 
-isBeingDrafted: false, 
+																										contents: nil, 
+																										date: Date(), 
+																										hasJoined: true,
+																										hasLeft: false, 
+																										isBeingDrafted:
+																								false, 
 isSendingBalloons: false)
 
 let brokenMessage = Message(userId: "1",
