@@ -10,7 +10,7 @@
 
 |      | Chapter Name                                                 | Date         |
 | ---- | ------------------------------------------------------------ | ------------ |
-| 1    | [Modeling data with enum](https://github.com/hongjunehuke/swift-in-depth/blob/master/Modeling-data-with-enums.md) |  |
+| 1    | [Modeling data with enum](https://github.com/hongjunehuke/swift-in-depth/blob/master/Modeling-data-with-enums.md) | 2023.11 |
 | 2    | [Writing cleaner properties]() |  |
 | 3    | [Making optionals second nature]() |  |
 | 4    | [Demystifying initializers]() |  |
