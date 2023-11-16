@@ -121,6 +121,7 @@ Polymorphism(다형성) means that a single function, method, array, dictionary 
 ```swift
 let arr: [Any] = [Date(), "aa", 789]
 ```
+
 위 코드와 같이 Any 타입 배열로 다형성을 만들 수도 있습니다. 하지만 이상적이지 못합니다. Any가 어떤 타입을 표현할지 컴파일 타임에 알 수 없고 런타임에 알게 됩니다. Any 타입이 필요한 경우는 서버로부터 unknown data를 받을 때입니다. 하지만 enum을 사용하면 complie-time safety를 보장받을 수 있습니다.
 
 Date 타입과 Range<Date> 타입을 같은 배열에 저장해야 하는 경우를 살펴봅시다.
@@ -128,6 +129,7 @@ Date 타입과 Range<Date> 타입을 같은 배열에 저장해야 하는 경우
 ```swift
 import Foundation
 
+// enum과 연관값
 enum DateTpye {
 	case singleDate(Date)
 	case dateRange(Range<Date>)
@@ -136,6 +138,54 @@ enum DateTpye {
 let now = Date()
 let hourFromNow = Date(timeIntervalSinceNow: 3600)
 
+// enum을 통한 다형성
+let dates: [DateType] = [
+	DateType.singleDate(now),
+	DateType.dateRange(now..<hourFromNow)
+]
 
+for dateType in dates {
+	switch dateType {
+		case .singleDate(let date): print("Date is \(date)")
+		case .dateRange(let range): print("Range is \(range)")
+	}
+}
 ```
- 
+
+enum을 통해 다른 타입을 배열에 넣음과 동시에 compile-time safety를 얻을 수 있습니다. 여기서 말하는 compile-time safety는 enum에 있는 case의 대응 여부를 컴파일러가 체크하는 것입니다. 만약 enum에 새로운 case가 추가된다면 컴파일러가 switch문의 missing case를 체크해줍니다. 
+
+## Enums instead of subclassing
+
+class를 사용하여 subclassing으로 데이터 계층을 만드는 경우가 많습니다. 하지만 이때의 한계는 자식 클래스에 어울리지 않는 코드를 부모 클래스에서 강제하는 경우가 생깁니다. 만약 자식 클래스가 추가되었을 때 부모 클래스와 어울리지 않게 될 수 있습니다. subclassing 보다 enum을 사용하면 새로운 요구사항이 추가되었을 때 대응하기 쉽습니다. 
+
+subclassing의 경우 Workout 부모 클래스에 Run, Cycle, Pushups가 자식 클래스로 있다고 생각해봅시다. 새로운 abs가 추가되었을 때 Workout 부모 클래스의 자식 클래스로 abs가 추가되어야 하는데 Workout에서 제공하는 프로퍼티가 abs와 어울리지 않을 수 있습니다. 따라서 변경에 용이하지 못합니다.
+
+enum을 사용하면 아래와 같이 변경에 용이합니다. 
+아래와 같이 subclassing이 아닌 enum을 사용해 구현했습니다.
+
+```swift
+enum Workout {
+	case run(Run)
+	case cycle(Cycle)
+	case pushups(Pushups)
+}
+```
+
+이때 abs가 추가된다면 아래 코드와 같이 간단히 추가할 수 있습니다.
+
+```swift
+enum Workout {
+	case run(Run)
+	case cycle(Cycle)
+	case pushups(Pushups)
+	case abs(Abs)
+}
+```
+
+subclassing을 사용한다면 공통 프로퍼티를 부모 클래스에 넣어 자식 클래스의 중복을 방지할 수 있습니다. 하지만 기능 확장이 생기면 부모 클래스를 리팩터링 해야합니다. enum을 사용한다면 기능 확장에 추가적인 리팩터링이 필요 없습니다. 앞에서 봤듯이 enum을 통해 여정히 추상화도 가능합니다.
+
+These are trade-offs you'll have to make. If you can lock down your data model to a fixed, manageable number of cases, enums can be a good choice.
+
+## Alebraic data types
+
+
