@@ -16,3 +16,11 @@
 | 4    | [Demystifying initializers]() |  |
 | 5    | [Effortless error handling]() |  |
 | 6    | [Generics]() |  |
+| 7    | [Putting the pro in protocol-oriented programming]() |  |
+| 8    | [Iterators, sequences, and collections]() |  |
+| 9    | [Understanding map, flatMap, and compactMap]() |  |
+| 10   | [Asynchronous error handling with Result]() |  |
+| 11   | [Protocol extensions]() |  |
+| 12   | [Swift patterns]() |  |
+| 13   | [Delivering quality Swift code]() |  |
+| 14   | [Where to Swift from here]() |  |
