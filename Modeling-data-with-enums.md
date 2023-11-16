@@ -2,11 +2,11 @@
 
 ## Or vs. and
 
-enum은 "or" 타입으로 여겨집니다. 데이터를 모델링 할 때 "or"이 눈에 보인다면 enum을 고려해봅시다.
+enum은 "or" 타입으로 여겨집니다. 데이터를 모델링 할 때 "or"이 눈에 보인다면 enum을 고려합시다.
 
-chat application 서비스의 message 데이터를 모델링 해봅시다. 
+chat application 서비스의 message 데이터를 모델링 해봅니다. 
 message는 본인이 보낸 text, 채팅방 참여 text, 채팅방 퇴장 text일 수 있습니다.
-추가적으로 text 하나만 보낼 수 있고 풍선 이모티콘도 보낼 수 있는 chat 서비스입니다.
+추가적으로 text 하나만 보낼 수 있고 풍선 이모티콘도 보낼 수 있는 chat application 서비스입니다.
 
 ```swift
 import Foundation
