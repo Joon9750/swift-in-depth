@@ -26,20 +26,20 @@ struct Message {
 }
 
 let joinMessage = Message(userId: "1",
-													 contents: nil,
-													 date: Date(),
-													 hasJoined: true,
-													 hasLeft: false,
-													 isBeingDrafted: false,
-													 isSendingBalloons: false)
+													             contents: nil,
+													             date: Date(),
+													             hasJoined: true,
+													             hasLeft: false,
+													             isBeingDrafted: false,
+													             isSendingBalloons: false)
 
 let brokenMessage = Message(userId: "1",
-													  contents: nil,
-													  date: Date(),
-													  hasJoined: true,
-													  hasLeft: true,
-													  isBeingDrafted: false,
-													  isSendingBalloons: false)
+													              contents: nil,
+													              date: Date(),
+													              hasJoined: true,
+													              hasLeft: true,
+													              isBeingDrafted: false,
+													              isSendingBalloons: false)
 ```
 
 위와 같이 구조체를 만드는 방식이 일반적으로 떠올리는 Message 데이터 모델링입니다.
