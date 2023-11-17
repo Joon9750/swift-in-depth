@@ -215,7 +215,7 @@ struct PaymentStatus {
 	let paymentDate: Date?
 	let isRecurring: Bool
 	let paymentType: PaymentType
-	}
+}
 ```
 
 위와 같이 PaymentStatus를 만든다면 2가지(Bool)과 3가지(PaymentType)를 곱하여 6가지 변화를 가지는 데이터로 볼 수 있습니다.
