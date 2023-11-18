@@ -151,10 +151,46 @@ struct LearningPlan {
 ```
 
 구조체는 custom init을 만들지 않느다면, 컴파일러가 모든 프로퍼티를 초기화하는 init을 제공합니다.
-하지만 LearningPlan 구조체가 생성과 동시에 
+하지만 LearningPlan 구조체가 생성과 동시에 lazy 프로퍼티가 초기화 된다면 프로퍼티가 더 이상 수정되지 못하게 됩니다.
+이를 custom init을 통해 해결 가능합니다. 
 
+```swift
+struct LearningPlan {
+  // ... 생략
+  init(level: Int, description: String) {
+    self.level = level
+    self.description = description
+  }
+}
+```
 
+위의 custom init처럼 lazy 프로퍼티를 제외하고 나머지 프로퍼티를 초기화합니다.
 
+lazy 프로퍼티는 중복해서 해출되어도 한 번만 초기화 되고 초기화된 값을 저장합니다.
+
+lazy 프로퍼티에 접근해 값을 바꿀 수 있습니다. 
+하지만 이는 내부 로직을 무시하고 lazy 프로퍼티를 임의로 변경하는 행동이기 때문에 예상과 다른 결과를 초래합니다.
+
+아래 코드에서 plan을 level 18로 초기화하여 plan.contents의 값을 "Watch an English documentary"로 기대합니다.
+하지만 plan.contents = "Let's eat pizza and watch Netflix all day"에서 lazy 프로퍼티 값을 바꾸면서 예상과 다른 결과가 보여집니다.
+
+```swift
+var plan = LearningPlan(level: 18, description: "A special plan for today!")
+plan.contents = "Let's eat pizza and watch Netflix all day"
+print(plan.contents) // "Let's eat pizza and watch Netflix all day"
+```
+
+lazy 프로퍼티 값을 임의로 변경할 가능성을 막는 방법은 접근 제어자에 있습니다.
+lazy 프로퍼티의 접근 제어자를 private(set)으로 설정한다면 변경을 막을 수 있습니다.
+private(set)으로 읽기 전용 프로퍼티가 되어 lazy 프로퍼티의 변경 가능성을 막게 됩니다.
+
+```swift
+struct LearningPlan {
+  lazy private(set) var contents: String = {
+    // 생략
+  }()
+}
+```
 
 
 
