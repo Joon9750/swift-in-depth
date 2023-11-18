@@ -21,33 +21,33 @@ message는 본인이 보낸 text, 채팅방 참여 text, 채팅방 퇴장 text, 
 import Foundation
 
 struct Message {
-	let userId: String
-	let contents: String?
-	let date: Date
+  let userId: String
+  let contents: String?
+  let date: Date
 
-	let hasJoined: Bool
-	let hasLeft: Bool
-	let isBeingDrafted: Bool
-	let isSendingBalloons: Bool
+  let hasJoined: Bool
+  let hasLeft: Bool
+  let isBeingDrafted: Bool
+  let isSendingBalloons: Bool
 }
 
 let joinMessage = Message(
-	userId: "1", 
-	contents: nil, 
-	date: Date(), 
-	hasJoined: true,
-	hasLeft: false, 
-	isBeingDrafted: false, 
-	isSendingBalloons: false)
+  userId: "1", 
+  contents: nil, 
+  date: Date(), 
+  hasJoined: true,
+  hasLeft: false, 
+  isBeingDrafted: false,
+  isSendingBalloons: false)
 
 let brokenMessage = Message(
-	userId: "1", 
-	contents: "Hi there", 
-	date: Date(), 
-	hasJoined: true,
-	hasLeft: true, 
-	isBeingDrafted: false, 
-	isSendingBalloons: false)
+  userId: "1", 
+  contents: "Hi there", 
+  date: Date(), 
+  hasJoined: true,
+  hasLeft: true, 
+  isBeingDrafted: false, 
+  isSendingBalloons: false)
 ```
 
 위와 같이 구조체로 모델을 만드는 방식이 일반적으로 떠올리는 Message 데이터 모델입니다.
@@ -67,11 +67,11 @@ enum과 함께 tuple을 사용하면 더 복잡한 데이터를 표현하기 쉽
 import Foundation
 
 enum Message {
-	case text
-	case draft
-	case join
-	case leave
-	case ballon
+  case text
+  case draft
+  case join
+  case leave
+  case ballon
 }
 ```
 
@@ -80,11 +80,11 @@ import Foundation
 
 // 2. with value
 enum Message {
-	case text(userId: String, contents: String, date: Date)
-	case draft(userId: String, date: Date)
-	case join(userId: String, date: Date)
-	case leave(userId: String, date: Date)
-	case ballon(userId: String, date: Date)
+  case text(userId: String, contents: String, date: Date)
+  case draft(userId: String, date: Date)
+  case join(userId: String, date: Date)
+  case leave(userId: String, date: Date)
+  case ballon(userId: String, date: Date)
 }
 
 let textMessage = Message.text(userId: "2", contents: "Bonjour", date: Date())
@@ -92,8 +92,8 @@ let joinMessage = Message.join(userId: "2", date: Date())
 ```
 
 enum과 tuple을 함께 사용하여 각 case들이 associated value(연관값)을 갖게 됩니다. 이는 프로퍼티가 어떤 케이스에 어울릴지 명확히 보여줍니다.
-
-enum으로 데이터를 만들면 당연히 switch문이 등장할 것입니다. 하지만 switch문은 하나의 데이터를 얻기 위해 모든 case에 해당하는 코드를 적어야 합니다. 이는 중복되는 코드를 발생시킵니다.
+enum으로 데이터를 만들면 당연히 switch문이 등장할 것입니다. 
+하지만 switch문은 하나의 데이터를 얻기 위해 모든 case에 해당하는 코드를 적어야 합니다. 이는 중복되는 코드를 발생시킵니다.
 
 if case let 구문을 사용해 반복적인 switch문을 피할 수 있습니다.
 
@@ -101,7 +101,7 @@ if case let 구문을 사용해 반복적인 switch문을 피할 수 있습니�
 import Foundation
 
 if case let Message.text(userId: id, contents: contents, date: date) = {
-	print("Received: \(contents)")
+  print("Received: \(contents)")
 }
 ```
 
@@ -111,13 +111,12 @@ if case let Message.text(userId: id, contents: contents, date: date) = {
 import Foundation
 
 if case let Message.text(_, contents: contents, _) = {
-	print("Received: \(contents)")
+  print("Received: \(contents)")
 }
 ```
 
 enum은 컴파일 타임에 이점이 있습니다. 하지만 enum의 case가 하나뿐이라면 구조체가 더 좋은 선택일 수 있습니다.
-
-구조체를 사용한다면 구조체의 프로퍼티를 그룹화 해봅시다. 그룹화가 된다면 enum으로 구조체를 수정해봅시다. enum이 더 좋은 선택지일것 입니다.
+구조체를 사용한다면 구조체의 프로퍼티를 그룹화 해봅시다. 그룹화가 된다면 enum으로 구조체를 수정해봅시다. enum이 더 좋은 선택지가 됩니다.
 
 ## Enums for polymorphism
 
@@ -139,8 +138,8 @@ import Foundation
 
 // enum과 연관값
 enum DateTpye {
-	case singleDate(Date)
-	case dateRange(Range<Date>)
+  case singleDate(Date)
+  case dateRange(Range<Date>)
 }
 
 let now = Date()
@@ -148,15 +147,15 @@ let hourFromNow = Date(timeIntervalSinceNow: 3600)
 
 // enum을 통한 다형성
 let dates: [DateType] = [
-	DateType.singleDate(now),
-	DateType.dateRange(now..<hourFromNow)
+  DateType.singleDate(now),
+  DateType.dateRange(now..<hourFromNow)
 ]
 
 for dateType in dates {
-	switch dateType {
-		case .singleDate(let date): print("Date is \(date)")
-		case .dateRange(let range): print("Range is \(range)")
-	}
+  switch dateType {
+  case .singleDate(let date): print("Date is \(date)")
+  case .dateRange(let range): print("Range is \(range)")
+  }
 }
 ```
 
@@ -181,9 +180,9 @@ enum을 사용하면 아래와 같이 변경에 용이합니다.
 
 ```swift
 enum Workout {
-	case run(Run)
-	case cycle(Cycle)
-	case pushups(Pushups)
+  case run(Run)
+  case cycle(Cycle)
+  case pushups(Pushups)
 }
 ```
 
@@ -191,10 +190,10 @@ enum Workout {
 
 ```swift
 enum Workout {
-	case run(Run)
-	case cycle(Cycle)
-	case pushups(Pushups)
-	case abs(Abs)
+  case run(Run)
+  case cycle(Cycle)
+  case pushups(Pushups)
+  case abs(Abs)
 }
 ```
 
@@ -216,15 +215,15 @@ sum types의 enum은 고정된 개수의 데이터를 표현합니다. product t
 
 ```swift
 enum PaymentType {
-	case invoice
-	case creditcard
-	case cash
+  case invoice
+  case creditcard
+  case cash
 }
 
 struct PaymentStatus {
-	let paymentDate: Date?
-	let isRecurring: Bool
-	let paymentType: PaymentType
+  let paymentDate: Date?
+  let isRecurring: Bool
+  let paymentType: PaymentType
 }
 ```
 
@@ -233,9 +232,9 @@ struct PaymentStatus {
 
 ```swift
 enum PaymentStatus {
-	case invoice(paymentDate: Date?, isRecurring: Bool)
-	case creditcard(paymentDate: Date?, isRecurring: Bool)
-	case cash(paymentDate: Date?, isRecurring: Bool)
+  case invoice(paymentDate: Date?, isRecurring: Bool)
+  case creditcard(paymentDate: Date?, isRecurring: Bool)
+  case cash(paymentDate: Date?, isRecurring: Bool)
 }
 ```
 
@@ -250,9 +249,9 @@ raw value로는 String, Char, Int, float만 가능합니다.
 
 ```swift
 enum Currency: String {
-	case euro = "euro"
-	case usd = "usd"
-	case gbp = "gbp"
+  case euro = "euro"
+  case usd = "usd"
+  case gbp = "gbp"
 }
 ```
 
@@ -260,9 +259,9 @@ enum을 raw value로 사용할 때는 아래와 같이 간략히 사용할 수�
 
 ```swift
 enum Currency: String {
-	case euro
-	case usd 
-	case gbp
+  case euro
+  case usd 
+  case gbp
 }
 ```
 
@@ -270,32 +269,34 @@ enum Currency: String {
 
 enum을 raw values와 사용할 때 코드 작성자에 의한 버그에 주의해야 합니다.
 enum을 raw values로 사용하면 올바르지 않은 값을 넣어도 컴파일러가 알아차리지 못합니다. 
-예를 들어 euro를 eur로 잘못 적었다면 컴파일러는 euro를 eur로 인식해서 버그가 숨어들게 됩니다.
+
+아래 코드와 같이 euro를 eur로 잘못 적었다면 컴파일러는 euro를 eur로 인식해서 버그가 숨어들게 됩니다.
 
 ```swift
 enum Currency: String {
-	case euro = "eur"
-	case usd 
-	case gbp
+  case euro = "eur"
+  case usd 
+  case gbp
 }
 
 let parameters = ["filter": currency.rawValue]
 ```
 
-위와 같은 버그를 방지하기 위해 currency enum의 raw values를 무시하고 raw values가 필요할 때 데이터를 다시 생성하도록 아래와 같이 구현합니다.
+다음과 같은 버그를 방지하기 위해 currency enum의 raw values를 무시하고 raw values가 필요할 때 데이터를 다시 생성하도록 아래와 같이 구현합니다.
 
 ```swift
 enum Currency: String {
-	case euro = "eur"
-	case usd 
-	case gbp
+  case euro = "eur"
+  case usd 
+  case gbp
 }
 
 let parameters = [String: String]
 switch currency {
-	case .euro: parameters = ["filter": "euro"]
-	case .usd: parameters = ["filter": "usd"]
-	case .gbp: parameters = ["filter": "gbp"]
+  case .euro: parameters = ["filter": "euro"]
+  case .usd: parameters = ["filter": "usd"]
+  case .gbp: parameters = ["filter": "gbp"]
+}
 ```
 
 위 코드와 같이 enum의 raw value를 무시하고 해당 값이 필요할 때마다 switch로 얻는다면 버그를 방지할 수 있습니다. 
@@ -305,17 +306,16 @@ enum을 사용할 때 string과 매칭하는 경우도 빈번합니다.
 
 ```swift
 func iconName(for fileExtension: String) -> String {
-	switch fileExtension {
-	case "jpg": return "assetIconJpeg"
-	case "bmp": return "assetIconBitmap"
-	case "gif": return "assetIconGif"
-	default: return "assertIconUnknown"
-	}
+  switch fileExtension {
+  case "jpg": return "assetIconJpeg"
+  case "bmp": return "assetIconBitmap"
+  case "gif": return "assetIconGif"
+  default: return "assertIconUnknown"
+  }
 }
 
 iconName(for: "jpg")
 iconName(for: "JPG")
-
 ```
 
 위에서 jpg를 함수에 넣었을 때는 성공적으로 매칭이 됩니다. 
@@ -324,39 +324,39 @@ iconName(for: "JPG")
 
 ```swift
 enum ImageType: String {
-	case jpg
-	case bmp
-	case gif
+  case jpg
+  case bmp
+  case gif
 	
-	init?(rawValue: String) {
-		switch rawValue.lowercasted() {
-		case "jpg", "jpeg": self = .jpg
-		case "bmp", "bitmap": self = .bmp
-		case "gif", "gifv": self = .gif
-		default: return nil
-		}
-	}
+  init?(rawValue: String) {
+    switch rawValue.lowercasted() {
+    case "jpg", "jpeg": self = .jpg
+    case "bmp", "bitmap": self = .bmp
+    case "gif", "gifv": self = .gif
+    default: return nil
+    }
+  }
 }
 
 func iconName(for fileExtension: String) -> String {
-	guard let imageType = ImageType(rawValue: fileExtension) else {
-		return "assertIconUnknown"
-	}
-	switch fileExtension {
-	case "jpg": return "assetIconJpeg"
-	case "bmp": return "assetIconBitmap"
-	case "gif": return "assetIconGif"
-	default: return "assertIconUnknown"
-	}
+  guard let imageType = ImageType(rawValue: fileExtension) else {
+    return "assertIconUnknown"
+  }
+
+  switch fileExtension {
+  case "jpg": return "assetIconJpeg"
+  case "bmp": return "assetIconBitmap"
+  case "gif": return "assetIconGif"
+  default: return "assertIconUnknown"
+  }
 }
 
 iconName(for: "jpg")
 iconName(for: "JPG")
 iconName(for: "JPEG")
-
 ```
 
-이제는 ImageType에 case가 추가돠면 컴파일러가 알려줍니다. 위의 코드는 대문자에 대응하고 다른 명칭에도 대응하도록 개선한 코드입니다.
+이제는 ImageType에 case가 추가돠면 컴파일러가 알려줍니다. 위의 코드는 대문자에 대응하고 다른 jpg, jpeg와 같이 다른 명칭에도 대응하도록 개선한 코드입니다.
 
 ## 정리
 
