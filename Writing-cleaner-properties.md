@@ -231,7 +231,17 @@ lazy 프로퍼티를 가진 객체가 복사될 때 더 주의 해야합니다.
 해당 변경 사항이 lazy 프로퍼티에 영향을 미칠 수 없기 때문에 lazy 프로퍼티 내부에서 참조하는 변수를 불변하게 만듭시다.
 
 ## Property observers
+Property observers are actions triggered when a stored property changes value.
 
+저장 역할과 함께 연산 기능까지 프로퍼티에서 구현하고 싶을 때 Property observers를 사용합니다.
+Property observers로는 didSet과 willSet이 있습니다.
+
+didSet은 변수 변경 이후 trigger되고 
+willSet은 변수 변경 이전에 trigger됩니다.
+
+스위프트에서는 init으로 초기화 되는 경우 didSet이 따로 호출되지 않습니다.
+따라서 아래와 같은 문제가 생깁니다.
+아래 코드는 사용자가 이름을 입력했을 때 공백이 포함될 경우 공백을 지워주는 코드입니다.
 
 
 
