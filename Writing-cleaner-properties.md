@@ -182,7 +182,7 @@ print(plan.contents) // "Let's eat pizza and watch Netflix all day"
 
 lazy 프로퍼티 값을 임의로 변경할 가능성을 막는 방법은 접근 제어자에 있습니다.
 lazy 프로퍼티의 접근 제어자를 private(set)으로 설정한다면 변경을 막을 수 있습니다.
-private(set)으로 읽기 전용 프로퍼티가 되어 lazy 프로퍼티의 변경 가능성을 막게 됩니다.
+private(set)으로 읽기 전용 프로퍼티가 되어 lazy 프로퍼티의 구조체 외부에서의 변경 가능성을 막습니다.
 
 ```swift
 struct LearningPlan {
@@ -192,11 +192,45 @@ struct LearningPlan {
 }
 ```
 
+Once you initialized a lazy property, you cannot change it.
 
+앞에서 이야기했듯이 lazy 프로퍼티는 한 번 초기화되면 이후로 변경되지 않습니다.
+하지만 lazy 프로퍼티 안에서 쓰이는(참조하는) 변수가 변경 가능성이 있다면 어떻게 될까요?
+아래 코드를 확인해봅시다.
 
+```swift
+var intensePlan = LearningPlan(level: 138, description: "A special plan for today!")
+intensePlan.contents
+var easyPlan = intensePlan
+easyPlan.level = 0
+print(easyPlan.contents) // "Read two academic papers."
+```
 
+코드에서는 easyPlan의 level을 0으로 만들어 0에 해당하는 contents를 기대하지만 실제로는 기존 intensePlan의 138에 해당하는 contents가 출력됩니다.
 
+lazy 프로퍼티가 초기화 된 이후 lazy 프로퍼티 안에서 쓰이는(참조하는) 변수가 변경되었다면, lazy 프로퍼티에 초기에 저장된 값이 변경되진 않습니다.
+오히려 코드를 읽는 사람에게 혼란을 주게 됩니다.
 
+아래 코드처럼 객체 복사 이후 lazy 프로퍼티를 호출한다면 intensePlan, easyPlan의 level에 어울리는 contents가 출력됩니다.
+
+```swift
+var intensePlan = LearningPlan(level: 138, description: "A special plan for today!")
+var easyPlan = intensePlan
+easyPlan.level = 0
+print(intensePlan.contents) // "Read two academic papers."
+print(easyPlan.contents) // "Watch an English documentary."
+```
+
+lazy 프로퍼티 안에서 쓰이는(참조하는) 변수가 변경 가능성이 있다면 굉장히 복잡해집니다.
+따라서 lazy 프로퍼티 안에서 쓰이는(참조하는) 변수는 let으로 선언하여 이 문제를 해결합시다.
+
+lazy 프로퍼티 안에서 쓰이는 변수를 let으로 선언하여 immutable한 lazy 프로퍼티로 만들어 복잡성을 줄입시다.
+lazy 프로퍼티를 가진 객체가 복사될 때 더 주의 해야합니다.
+
+다시 말해, lazy 프로퍼티가 초기화된 이후 lazy 프로퍼티 내부에서 참조하는 변수가 변경되더라도 
+해당 변경 사항이 lazy 프로퍼티에 영향을 미칠 수 없기 때문에 lazy 프로퍼티 내부에서 참조하는 변수를 불변하게 만듭시다.
+
+## Property observers
 
 
 
