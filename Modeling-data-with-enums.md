@@ -1,5 +1,15 @@
 # Modeling data with enums
 
+## This chapter covers
+- How enums are an alternative to subclassing
+- Using enums for polymorhism
+- Learning how enums are "or" types
+- Modeling data with enums instead of structs
+- How enums and structs are algebraic types
+- Converting structs to enums
+- Safely handling enums with raw values
+- Converting strings to enums to create robust code
+
 ## Or vs. and
 
 enum은 "or" 타입으로 여겨집니다. 데이터를 모델링 할 때 "or"이 눈에 보인다면 enum을 고려합시다.
