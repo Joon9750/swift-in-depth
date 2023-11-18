@@ -243,6 +243,82 @@ willSet은 변수 변경 이전에 trigger됩니다.
 따라서 아래와 같은 문제가 생깁니다.
 아래 코드는 사용자가 이름을 입력했을 때 공백이 포함될 경우 공백을 지워주는 코드입니다.
 
+```swift
+import Foundation
+
+class Player {
+  let id: String
+
+  var name: String {
+    didSet {
+      print("My previous name was \(oldValue)")
+      name = name.trimmingCharacters(in: .whitespaces)
+    }
+  }
+
+  init(id: String, name: String){
+    self.id = id
+    self.name = name
+  }
+}
+
+let jeff = Player(id: "1", name: "SuperJeff  ")
+print(jeff.name) // "SuperJeff   "
+print(jeff.name.count) // 13
+
+jeff.name = "SuperJeff  "
+print(jeff.name) // "SuperJeff"
+print(jeff.name.count) // 9
+```
+
+위 코드에서 name 프로퍼티의 didSet에는 공백 문자를 지워주는 기능을 제공하고 있습니다.
+하지만 init을 통해 name 프로퍼티를 초기화 했을 때 didSet에 도달하지 못해 공백 문자를 지우지 못했습니다.
+위에서 말했듯이 스위프트에서는 init으로 프로퍼티를 초기화할 때는 Property observers가 호출되지 않습니다.
+
+만약 init으로 프로퍼티를 초기화할 때부터 Property observers를 호출하고 싶다면, defer 클로저를 사용하면 가능합니다.
+defer 클로저는 함수 안에 위치하고 해당 함수가 종료되었을 때 호출되는 클로저입니다.
+아래 코드와 같이 init안에 defer 클로저를 추가하여, defer 클로저에서 변수를 초기화하여 didSet을 호출할 수 있습니다.
+
+```swift
+class Player {
+  // 생략
+
+  init(id: String, name: String) {
+    defer { self.name = name }
+    self.id = id
+    self.name = name // 생략 가능하다.
+  }
+} 
+```
+
+defer 클로저는 init과 별개이기 때문에 defer에서 name 초기화하면 didSet이 호출됩니다.
+물론 defer 클로저가 생겨난 이유가 init에서 Property observers를 호출하기 위함은 아닙니다.
+그치만 근사한 방법입니다.
+
+## Summary
+- You can use computed properties for properties with sepcific behavior but with-out storage.
+- Computed properties are functions masquerading as properties.
+- You can use computed properties when a value can be different each time you call it.
+- Only lightweight functions should be made into computed properties.
+- Lazy properties are excellent for expensive or time-consuming computations.
+- Use lazy properties to delay a computation or if it may not even run at all.
+- Lazy properties allow you to refer to other properties inside classes and structs.
+- You can use the private(set) annotation to make properties read-only to outsiders of a class or struct.
+- When a lazy property refers to another preperty, make sure to keep this other property immutable to keep complexity low.
+- You can use property observers such as willSet and didSet to add behavior on stored properties.
+- You can use defer to trigger property observers from an initializer.
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
