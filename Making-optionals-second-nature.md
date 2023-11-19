@@ -413,6 +413,7 @@ print(isFaceIdEnabled)  // true
 지금부터 optional Bool 타입이 세 가지 상태(true/false/nil)를 가지는 경우를 살펴봅시다.
 
 optional Bool 타입을 세 가지 상태로 사용할 때 더 여러 상황에 어울립니다.
+optional Bool 타입을 세 가지 상태로 사용할 때 enum과 함께 사용합시다.
 optional Bool의 내부 값에 따라 enum의 case에 매칭하는 방법으로 세 가지 상태를 나타낼 수 있습니다.
 
 다시 말해, optional Bool의 내부 값을 custom enum으로 변환해 사용합시다. 이때 RawRepresentable Protocol까지 사용하면 더욱 swift 다워집니다.
@@ -424,16 +425,74 @@ RawRepresentable Protocol을 채택하여 타입을 rawValue로 변환하고 그
 아래 코드를 보고 이해해봅시다.
 
 ```swift
+enum UserPreference: RawRepresentable {
+  case enabled  // true가 매칭되는 case
+  case disabled  // false가 매칭되는 case
+  case notSet  // nil이 매칭되는 case
 
+  init(rawValue: Bool?) {
+    // rawValue를 switch문과 함께 쓸 수 있는 이유는 rawValue 타임을 옵셔널로 받기 때문입니다.
+    // 옵셔널은 enum이기 때문에 switch문과 함께 쓸 수 있습니다.
+    switch rawValue {
+    case true?: self = .enabled
+    case false?: self = .disabled
+    default: self = .notSet
+    }
+  }
+
+  // RawRepresentable protocol을 따르면 rawValue를 구현해야 합니다.
+  // rawValue 프로퍼티로 enum case에 대응하는 rawValue를 리턴해야 합니다.
+  var rawValue: Bool? {
+    switch self {
+    case .enabled: return true
+    case .disabled: return false
+    case .notSet: return nil
+    }
+  }
+}
 ```
 
+위와 같이 optional Bool을 enum과 함께 사용해 세 가지 상태를 표현할 때 컴파일 타임에 이점도 있고 더 여러 상황에 적합하지만, 
+결국 새로운 타입(enum)을 만드는 것이기 때문에 코드를 더럽힐 가능성이 있으니 주의해야 합니다.
 
+## Force unwrapping guidelines
+옵셔널을 강제 언래핑 했을 때 옵셔널이 nil이라면 충돌이 발생합니다.
+아래 코드와 같이 !를 사용해 옵셔널을 강제 언래핑합니다.
 
+```swift
+let forceUnwrappedUrl = URL(string: "https://www.the.com")!
+```
 
+강제 언래핑은 실패 시 앱이 충돌하기 때문에 사용을 최대한 피합시다. (그냥 쓰지 맙시다.)
 
+강제 언래핑으로 충돌을 발생시키기보다 충돌이 발생할 수 있는 경우라면, 충돌 메뉴얼을 만들어 더 디버깅에 필요한 정보를 제공하는 방식이 바람직합니다.
+fatalerror 함수를 사용해서 충돌을 메뉴얼화 해봅시다.
 
+```swift
+guard let url = URL(string: path) else {
+  fatalerror("Could not create url on \(#line) in \(#function)")
+}
+```
 
+## Taming implicity unwrapped optionals
+Implicity unwrapped optionals(IUO)은 옵셔널이지만 언래핑하지 않고도 내부 값에 접근할 수 있는 옵셔널입니다.
+옵셔널 내부 값에 접근할 때마다 옵셔널 언래핑을 하면 코드가 길어지고 가독성이 떨어지기 때문에 프로그램 특정 시점 이후로 옵셔널에 값이 항상 있다면 IUO를 사용할 수 있습니다.
 
+하지만... 프로그램 특정 시점 이후로 옵셔널에 값이 항상 있다고 어떻게 장담할지 모르겠습니다.
+
+일단 사용방법은 아래와 같습니다.
+
+```swift
+let lastName: String! = "Smith"
+```
+
+## Summary 
+- Optionals are enums with syntactic sugar sprinkled over them
+- You can pattern match on optionals
+- Patter match on multiple optionals at once by putting them inside a tuple
+- You can use nil-coalescing(??) to fall back to default values
+- Use optional chaining to dig deep into optional values
+- You can use nil-coalescing(??) to transform an optional Boolean into a regular Boolean
 
 
 
