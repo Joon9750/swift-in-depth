@@ -210,26 +210,58 @@ displayName의 호출부에서는 특정 이름을 기대하지 빈 문자열을
 따라서 컴파일 타임에 displayName이 값을 가지지 않음을 알 수 있습니다.
 
 아래 코드는 옵셔널 언래핑 실패시 빈 문자열을 던지던 displayName을 optional string을 던지도록 수정한 코드입니다.
-옵셔널을 리턴하며 호출부에서 옵셔널을 언래핑할 책임을 줍니다.
+옵셔널을 리턴하며 호출부에서 옵셔널을 언래핑할 책임을 갖게 됩니다.
+이는 컴파일러의 도움을 받기 때문에 더 안전한 코드가 됩니다.
 
 ```swift
 struct Customer {
   // 생략
 
   var displayName: String? {
-        guard let firstName = firstName, let lastName = lastName else {
+    guard let firstName = firstName, let lastName = lastName else {
       return nil  // nil을 리턴하며 optional string을 던지게 됩니다.
     }
     return "\(firstName) \(lastName)"
   }
 }
+
+if let displayName = customer.displayName {
+  createConfirmationMessage(name: displayName, product: "Economy size party tub")
+} else {
+  createConfirmationMessage(name: "customer", product: "Economy size party tub")
+}
 ```
 
+## Granular control over optionals
+위의 예에서 displayName은 firstName과 lastName을 모두 요구하고 있습니다.
+만약 firstName과 lastName 중 하나라도 있다면 displayName을 형성하도록 만들려면 어떻게 해야할까요?
+이런 경우 옵셔널을 세분화해서 다뤄야합니다.
 
+?와 switch 그리고 tuple을 사용하여 옵셔널을 세분화하여 언래핑할 수 있습니다. (패턴 매칭과 비슷한 느낌입니다.)
 
+아래 코드로 확인해봅시다.
 
+```swift
+struct Customer {
+  // 생략
+  let firstName: String?
+  let lastName: String?
+  
+  var displayName: String? {
+    // switch + optional in tuple + ?
+    switch (firstName, lastName) {
+    case let (first?, last?): return first + " " + last  // return에 쓰이는 first와 last는 옵셔널 언래핑된 상태입니다.
+    case let (first?, nil): return first  // nil 값을 노골적으로 매칭할 수 있다.
+    case let (nil,last?): return last
+    default: return nil 
+  }
+}
+```
 
+위와 같이 손님이 풀네임을 입력하지 않을 경우, 일부 이름으로 풀네임을 대신할 수 있습니다.
 
+다만, tuple에 너무 많은 옵셔널을 넣는 행위는 경계해야합니다.
+3개 미만의 옵셔널이 tuple에 적합합니다.
 
 
 
