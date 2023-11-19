@@ -493,16 +493,9 @@ let lastName: String! = "Smith"
 - You can use nil-coalescing(??) to fall back to default values
 - Use optional chaining to dig deep into optional values
 - You can use nil-coalescing(??) to transform an optional Boolean into a regular Boolean
-
-
-
-
-
-
-
-
-
-
-
-
-
+- You can transform an optional Boolean into an enum for three explicit states
+- Return optional strings instead of empty strings when a value is expected
+- Use force unwrapping only if your program can't recover from a nil value
+- Use force unwrapping when you want to delay error handling, such as when prototyping
+- It's safer to force unwrap optionals if you know better than the compiler
+- Use implicity unwrapped optionals for properties that are instantiated right after initialization
