@@ -384,17 +384,48 @@ imageView.image = customer.favoriteProduct?.image ?? UIImage(named: "missing_ima
 ```
 
 위 코드처럼 옵셔널 체이닝으로 접근한 옵셔널 값을 if let 또는 ??로 옵셔널 언래핑할 수 있습니다.
-옵셔널 체이닝으로 옵셔널 값이 갖는 옵셔널 값을 언래핑할 때 간결히 할 수 있습니다.
+옵셔널 체이닝으로 옵셔널 값이 갖는 옵셔널에 접근할 때 더욱 간결히 접근할 수 있습니다.
 
+## Constraining optional Booleans
+스위프트에서 optional Bool의 상태는 true / false / nil이 될 수 있습니다.
+상황의 맥락에 따라 optional Bool 타입 값이 nil일 때 nil을 true / false / nil로 취급할 수 있습니다.
 
+가장 먼저 optional Bool 타입이 두 가지 상태(true/false)를 가지는 경우를 살펴봅시다.
+optional Bool 타입이 nil일 때 해당 값을 true / false로 취급할 경우 Bool 타입은 두 가지 상태를 갖게 됩니다.
+이때는 ??를 통해 default 값을 설정하는 방식으로 구현할 수 있습니다.
+위에서 보았듯이 ??는 언래핑과 동시에 해당 값이 nil일 경우 default 값을 따라가도록 합니다.
 
+아래 코드를 살펴봅시다.
 
+```swift
+let preferences = ["autoLogin": true, "faceIdEnabled": true]
 
+let isFaceIdEnabled = preferences["faceIdEnabled"]
+print(isFaceIdEnabled)  // Optional(true) 
 
+let isFaceIdEnabled = preferences["faceIdEnabled"] ?? false
+print(isFaceIdEnabled)  // true
+```
 
+물론 optional Bool 타입이 두 가지 상태(true/false)를 가질 경우 무조건 default를 false로 설정하는건 아닙니다.
+상황에 따라 defalut를 true 또는 false로 설정해야 합니다.
 
+지금부터 optional Bool 타입이 세 가지 상태(true/false/nil)를 가지는 경우를 살펴봅시다.
 
+optional Bool 타입을 세 가지 상태로 사용할 때 더 여러 상황에 어울립니다.
+optional Bool의 내부 값에 따라 enum의 case에 매칭하는 방법으로 세 가지 상태를 나타낼 수 있습니다.
 
+다시 말해, optional Bool의 내부 값을 custom enum으로 변환해 사용합시다. 이때 RawRepresentable Protocol까지 사용하면 더욱 swift 다워집니다.
+
+RawRepresentable Protocol은 Swift에서 enum은 하나 이상의 associated value를 가질 수 있는데 이 값의 rawValue를 정의한 프로토콜입니다. (rawValue를 지원합니다.)
+RawRepresentable Protocol을 채택하여 타입을 rawValue로 변환하고 그 반대의 변환도 지원합니다.
+특정 rawValue를 enum의 case로 매칭시켜 서로에게 대응할 수 있습니다. (Bool(rawValue) <-> Enum)
+
+아래 코드를 보고 이해해봅시다.
+
+```swift
+
+```
 
 
 
