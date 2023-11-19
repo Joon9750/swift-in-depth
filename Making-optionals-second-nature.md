@@ -147,14 +147,100 @@ if
 ```
 
 ## Variable shadowing
-"같은 이름으로 언래핑하자!"
+"같은 이름으로 언래핑합시다!"
 
 언래핑 이후 결과를 저장하는 변수명을 옵셔널 변수명과 같도록 만듭시다.
 새로운 변수명에 언래핑의 결과를 저장하는 방식은 권장하지 않습니다.
+오히려 새로운 변수명은 혼란을 일으킵니다.
 
 ```swift
-extension Customer: Customer
+extension Customer: Customer {
+  var description: String {
+    var customDescription: String = "\(id), \(email)"
+
+    // 같은 이름으로 언래핑합시다!
+    if let firstName = firstName {
+      customDescription += ", \(firstName)"
+    }
+    if let lastName = lastName {
+      customDescription += "\(lastName)"
+    }
+
+    return customDescription
+  }
+}
 ```
+
+## When optionals are prohibited
+지금까지는 if let을 사용해 옵셔널을 언래핑했습니다.
+if let은 옵셔널이 nil일 경우 함수를 종료시키지 않고 계속해서 함수를 진행시킵니다.
+따라서 if let은 옵셔널이 nil이 필요한 경우 사용합니다.
+
+만약 옵셔널 언래핑에 nil이 필요 없을 경우 guard let을 사용합시다.
+guard let에서 옵셔널이 nil이라면 해당 함수를 종료시킵니다.
+
+```swift
+struct Customer {
+  let id: String
+  let email: String
+  let firstName: String?
+  let lastName: String?
+
+  var displayName: String {
+    guard let firstName = firstName, let lastName = lastName else {
+      return ""
+    }
+    return "\(firstName) \(lastName)"
+  }
+}
+```
+
+guard let을 통해 옵셔널을 언래핑하면 guard let 구문 아래로는 옵셔널 타입이 내려갈 일이 없어진다.
+
+## Returing optional strings
+optional string의 경우 언래핑되지 않았을 때 빈 문자열("")을 리턴하는건 흔하게 볼 수 있습니다.
+빈 문자열을 리턴하는게 틀렸다는건 아닙니다. 
+
+하지만 일부 경우에는 빈 문자열을 리턴하는것 보다 optional string을 리턴하는게 유용할 때가 있습니다.
+예를 들어 위의 Customer 구조체가 가진 displayName에서 언래핑 실패 이후 빈 문자열을 던질 경우, displayName을 호출하는 부분에서 코드 작성자가 직접 displayName.isEmpty를 체크해야합니다.
+displayName의 호출부에서는 특정 이름을 기대하지 빈 문자열을 기대하고 있지 않습니다.
+심지어 isEmpty를 체크하지 않더라도 컴파일 타임에 체크하지 않았다는 사실을 알 수 없습니다.
+
+이럴 때 빈 문자열이 아닌 optional string을 리턴하면 displayName 호출부에서는 옵셔널을 받을 가능성이 생기기며 리턴 받는 optional string을 언래핑해야할 의무가 생깁니다.
+따라서 컴파일 타임에 displayName이 값을 가지지 않음을 알 수 있습니다.
+
+아래 코드는 옵셔널 언래핑 실패시 빈 문자열을 던지던 displayName을 optional string을 던지도록 수정한 코드입니다.
+옵셔널을 리턴하며 호출부에서 옵셔널을 언래핑할 책임을 줍니다.
+
+```swift
+struct Customer {
+  // 생략
+
+  var displayName: String? {
+        guard let firstName = firstName, let lastName = lastName else {
+      return nil  // nil을 리턴하며 optional string을 던지게 됩니다.
+    }
+    return "\(firstName) \(lastName)"
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
