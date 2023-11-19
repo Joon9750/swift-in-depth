@@ -263,8 +263,13 @@ struct Customer {
 다만, tuple에 너무 많은 옵셔널을 넣는 행위는 경계해야합니다.
 3개 미만의 옵셔널이 tuple에 적합합니다.
 
+## Falling back when an optional is nil
+fallback value(??)는 옵셔널이 nil일 경우 default 값으로 대신하며 옵셔널을 언래핑합니다.
 
-
+아래 코드로 확인해봅시다.
+```swift
+let title: String = customer.displayer
+```
 
 
 
