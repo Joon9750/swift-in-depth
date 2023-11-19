@@ -264,23 +264,77 @@ struct Customer {
 3개 미만의 옵셔널이 tuple에 적합합니다.
 
 ## Falling back when an optional is nil
-fallback value(??)는 옵셔널이 nil일 경우 default 값으로 대신하며 옵셔널을 언래핑합니다.
+fallback value(??)는 옵셔널 언래핑 종료 중 하나입니다. 
+옵셔널이 nil일 경우 default 값으로 대신하며 언래핑합니다.
 
 아래 코드로 확인해봅시다.
 ```swift
-let title: String = customer.displayer
+let title: String = customer.displayer ?? "customer"
+createConfirmationMessage(name: title, product: "Economy size party tub")
 ```
 
+## Simplifying optional enums
+앞서 말했듯이 옵셔널은 enum으로 구현되어 있습니다.
+그렇다면 optional enum은 enum안에 enum이 구현된 것입니다.
 
+optional enum을 언래핑할 때 if let을 대신하여 ?을 사용해 코드를 개선할 수 있습니다.
+아래 코드를 보고 이해해봅시다.
 
+```swift
+enum Membership {
+  case gold
+  case silver
+}
 
+struct Customer {
+  // 생략
+  let merbership: Membership?
+}
+```
 
+위와 같이 Memebership enum을 Customer 구조체에서 옵셔널로 선언했습니다.
+이때 if let을 사용하여 언래핑한다면 아래와 같습니다.
 
+```swift
+if let membership = customer.membership {
+  switch membership {
+  case .gold: print("its gold")
+  case .silver: print("its silver")
+  }
+} else {
+  print("none")
+}
+```
 
+if let을 대신해서 ?를 사용한다면 옵셔널 언래핑과 옵셔널 내부 값 접근을 동시에 할 수 있습니다.
+이는 코드를 더 짧게 만듭니다.
+아래 방법으로 추가적인 if let없이 enum의 패턴 매칭과 동시에 옵셔널 언래핑을 할 수 있습니다.
 
+```swift
+switch customer.membership {
+case .gold?: print("its gold")
+case .silver?: print("its silver")
+case nil: print("none")
+}
+```
 
+여기서 문제입니다.
 
+만약 아래 코드와 같이 PasteBoardContents enum과 PasteBoardEvent enum이 있을 때 describeAction 함수를 완성해봅시다. 
 
+```swift
+enum PasteBoardContents {
+  case url(url:String)
+  case emailAddress(emailAddress: String)
+  case other(content: String)
+}
+
+enum PasteBoardEvent {
+  case added
+  case erased
+  case pasted
+}
+```
 
 
 
