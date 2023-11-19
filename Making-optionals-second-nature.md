@@ -334,7 +334,80 @@ enum PasteBoardEvent {
   case erased
   case pasted
 }
+
+func describeAction(event: PasteBoardEvent?, contents: PastBoardEvent?) -> String {}
 ```
+
+describeAction 함수로 옵셔널이 2개 들어오기 때문에 두 옵셔널을 튜플에 넣고 ?와 함께 패턴 매칭하여 옵셔널을 언래핑하는 방식이 적절합니다.
+아래 코드를 통해 확인해봅시다.
+
+```swift
+func describeAction(event: PasteBoardEvent?, contents: PastBoardEvent?) -> String {
+  switch (event, contents) {
+  case let (.added?, url(url)?): return "User added a url to pasteboard: \(url)"  // url 값이 return에 쓰이기 때문에 let이 붙었습니다.
+  case (.added?, _): return "User added something to pasteboard"
+  case (.erased?, .emailAddress?): return "User erased an email address from the pasteboard"
+  default: return "The pasteboard is updated"
+}
+```
+
+## Chaining optionals
+옵셔널 체이닝은 옵셔널이 본인의 프로퍼티로 또 다른 옵셔널을 가질 때, 옵셔널의 옵셔널 프로퍼티에 접근하기 위해 사용됩니다.
+?를 사용해 옵셔널 체이닝을 표현합니다.
+옵셔널 체이닝으로 옵셔널의 옵셔널 프로퍼티에 접근할 수 있지만 해당한 프로퍼티 또한 옵셔널이기 때문에 추가적인 옵셔널 언래핑이 있어야 순수 값을 추출 가능합니다.
+
+아래 코드를 통해 살펴봅시다.
+
+```swift
+struct Product {
+  let id: String
+  let name: String
+  let image: UIImage?
+}
+
+struct Customer {
+  // 생략
+  let favoriteProduct: Product?
+}
+
+let imageView = UIImageView()
+// optional value입니다. 옵셔널 체이닝을 통해 favoriteProduct의 image 옵셔널 값에 접근하고 있습니다.
+imageView.image = customer.favoriteProduct?.image
+
+if let image = customer.favoriteProduct?.image {
+  imageView.image = image  // if let으로 더 이상 optional value가 아닙니다.
+} else {
+  imageView.image = UIImage(named: "missing_image")
+}
+
+imageView.image = customer.favoriteProduct?.image ?? UIImage(named: "missing_image")
+```
+
+위 코드처럼 옵셔널 체이닝으로 접근한 옵셔널 값을 if let 또는 ??로 옵셔널 언래핑할 수 있습니다.
+옵셔널 체이닝으로 옵셔널 값이 갖는 옵셔널 값을 언래핑할 때 간결히 할 수 있습니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
