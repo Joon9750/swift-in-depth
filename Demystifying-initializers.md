@@ -69,6 +69,7 @@ enum case의 컬렉션으로 만들어진 allCases 프로퍼티는 컬렉션이�
 연관 값을 가진 enum은 무한한 변화가 가능하기 때문입니다.
 
 아래 코드를 확인해 봅시다.
+
 ```swift
 enum Pawn: CaseIterable {
   case dog, cat, ketchupBottle, iron, shoe, hat
@@ -87,9 +88,88 @@ Nevertheless, subclassing is still a valid tool that Swift offers.
 먼저 초기화는 Designated init과 convenience init으로 두 가지가 있습니다.
 그리고 초기화는 본인의 모든 프로퍼티를 초기화함과 상속받은 부모 클래스의 프로퍼티들을 customizing 할 목적을 가집니다.
 
-Designated init(지정 초기자)은 모든 프로퍼티를 초기화하며 클래스 타입에 반드시 한 개 이상의 지정 초기자가 필요합니다.
+Designated init(지정 초기자)은 모든 프로퍼티를 초기화해야 하며 클래스 타입에 반드시 한 개 이상의 Designated init이 필요합니다.
+부모 클래스가 있을 경우 자식 클래스는 부모 클래스의 Designated init을 상속받습니다.
 
-convenience init(편의 초기자)은 
+convenience init(편의 초기자)은 내부에서 마지막에는 반드시 Designated init를 호출해야 합니다. (self.init())
+convenience init를 통해 default value를 제공하거나 단순화한 init을 제공할 수 있고 다른 convenience init를 호출할 수 있습니다.
+
+아래 코드는 Designated init과 convenience init을 사용한 예시 코드입니다.
+
+```swift
+class BoardGame {
+  let players: [Player]
+  let numberOfTiles: Int
+
+  // Designated init
+  init(players: [Player], numberOfTiles: Int) {
+    self.players = players
+    self.numberOfTiles = numberOfTiles
+  }
+
+  covenience init(players: [Player]) {
+    self.init(players: players, numberOfTiles: 32)  // 여기서 default value를 제공합니다.
+  }
+
+  convenience init(names: [String]) {
+    var players = [Player]()
+    for name in names {
+      players.append(Player(name: name))
+    }
+    self.init(players: players, numberOfTiles: 32)  // 마지막에는 반드시 Designated init을 호출하고 있습니다.
+  }
+}
+
+let boardGame = BoardGame(names: ["hong", "kim", "kang"])
+
+let players = [
+  Player(name: "hong"),
+  Player(name: "kim"),
+  Player(name: "kang")
+]
+let boardGame = BoardGame(players: players)
+
+let boardGame = BoardGame(players: players, numberOfTiles: 32) 
+```
+
+클래스는 구조체와 달리 memberwise init(default init)을 제공하지 않습니다.
+
+지금부터 클래스를 subclassing 할 때를 살펴봅시다.
+기본적으로 자식 클래스는 부모 클래스의 모든 init(Designated init & covenience init)을 상속받습니다.
+따라서 자식 클래스도 부모 클래스와 동일한 방식으로 초기화 가능합니다.
+
+하지만 자식 클래스에서 부모 클래스에 없는 새로운 프로퍼티를 추가했을 때는 다릅니다.
+자식 클래스에 새로운 프로퍼티가 추가되면 자식 클래스에 있던 부모 클래스의 모든 init은 사라집니다.
+위에서 말했듯이 클래스의 모든 프로퍼티는 초기화되어야 합니다. 하지만 부모 클래스에 없는 프로퍼티가 자식 클래스에 추가되며 더 이상
+부모 클래스 init으로는 자식 클래스의 프로퍼티를 초기화할 수 없어지게 됩니다.
+
+이때 우린 새로운 designated init을 구현해야 합니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
