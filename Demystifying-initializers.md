@@ -181,8 +181,21 @@ instructions가 추가되며 부모 클래스의 모든 init을 상속받지 못
 아래 코드를 살펴봅시다.
 
 ```swift
-class Mutability
+class Mutability: BoardGame { 
+  // 생략
+  override init(players: [Player], numberOfTiles: Int) {
+    self.instructions = "Read the manual"  // super.init 호출 전에 초기화되어야 합니다.
+    super.init(players, numberOfTiles: numberOfTiles)  // 필수입니다.
+  }
+}
 ```
+
+super.init으로 부모 클래스로부터 상속받는 프로퍼티를 초기화하기 전에 자식 클래스에 새로 추가된 프로퍼티를 먼저 초기화해야 합니다.
+
+In a class hierarchy, convenience init go horizontal, and designated init go vertical!
+
+## Minimizing class initializers
+
 
 
 
