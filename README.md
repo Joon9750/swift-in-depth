@@ -13,7 +13,7 @@
 | 1    | [Modeling data with enum](https://github.com/hongjunehuke/swift-in-depth/blob/master/Modeling-data-with-enums.md) | 2023.11.16 |
 | 2    | [Writing cleaner properties](https://github.com/hongjunehuke/swift-in-depth/blob/master/Writing-cleaner-properties.md) | 2023.11.18 |
 | 3    | [Making optionals second nature](Making-optionals-second-nature.md) | 2023.11.19 |
-| 4    | [Demystifying initializers]() |  |
+| 4    | [Demystifying initializers](https://github.com/hongjunehuke/swift-in-depth/blob/master/Demystifying-initializers.md) | 2023.11.20 |
 | 5    | [Effortless error handling]() |  |
 | 6    | [Generics]() |  |
 | 7    | [Putting the pro in protocol-oriented programming]() |  |
