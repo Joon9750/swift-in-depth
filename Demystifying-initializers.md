@@ -144,11 +144,45 @@ let boardGame = BoardGame(players: players, numberOfTiles: 32)
 부모 클래스 init으로는 자식 클래스의 프로퍼티를 초기화할 수 없어지게 됩니다.
 
 이때 우린 새로운 designated init을 구현해야 합니다.
+자식 클래스에 초기화 되어야 하는 새로운 프로퍼티가 추가되기 전까지는 자식 클래스에서 부모 클래스의 init을 모두 상속 받았습니다.
+하지만 자식 클래스에 초기화 되어야 하는 새로운 프로퍼티가 추가되며 자식 클래스의 새로운 designated init을 구현하고 designated init에서 부모 클래스의 designated init을 호출하는 방식으로
+프로퍼티를 초기화해야 합니다.
 
+아래 코드로 확인해 봅시다.
 
+```swift
+class MutabilityLand: BoardGame {
+  var scoreBoard = [String: Int]()
+  var winner: Player?
 
+  // 초기화 되어야 하는 새로운 프로퍼티
+  let instructions: String
 
+  // 자식 클래스의 designated init
+  init(players: [Player], instructions: String, numberOfTiles: Int) {
+    self.instructions = instructions
+    super.init(players: players, numberOfTiles: numberOfTiles)
+  }
+}
+```
 
+위 코드에서 scoreBoard와 winner는 초기화될 필요 없는 프로퍼티입니다. 따라서 자식 클래스에 scoreBoard와 winner 프로퍼티만 추가 됐다면 부모 클래스의 모든 init을 상속받을 수 있습니다.
+하지만 MutabilityLand 클래스의 instructions 프로퍼티는 초기화 되어야 하는 새로운 프로퍼티입니다.
+instructions가 추가되며 부모 클래스의 모든 init을 상속받지 못합니다.
+따라서 위와 같이 자식 클래스에 새로운 designated init을 만들어 초기화 되어야 하는 새로운 프로퍼티를 초기화함과 동시에 super.init을 호출하여 부모 클래스로 부터 상속받은 프로퍼티를 초기화 했습니다.
+
+여기서 주의해야할 점은 super.init은 부모 클래스의 designated init을 자식 클래스에서 호출하는것 뿐이지 부모 클래스의 init을 상속받은건 아닙니다.
+
+하지만 자식 클래스에 초기화될 필요가 있는 새로운 프로퍼티가 생겨도 부모 클래스의 init을 상속받는 방법이 있습니다!
+
+자식 클래스에서 부모 클래스의 designated init을 override하면 자식 클래스는 부모 클래스의 모든 init을 상속받을 수 있습니다.
+물론 override한 부모 클래스의 designated init에서는 자식 클래스의 새로운 프로퍼티를 반드시 초기화해야 합니다.
+
+아래 코드를 살펴봅시다.
+
+```swift
+class Mutability
+```
 
 
 
