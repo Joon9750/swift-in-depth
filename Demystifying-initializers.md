@@ -196,7 +196,16 @@ In a class hierarchy, convenience init go horizontal, and designated init go ver
 
 ## Minimizing class initializers
 
+위에서 보았듯이 subclassing과 함께 자식 클래스에 초기화가 필요한 프로퍼티가 추가되었을 때 부모 클래스의 init을 상속받기 위해 designated init을 상속했습니다.
+하지만 이 동작이 반복될수록 자식 클래스의 designated init이 1개씩 늘어나게 됩니다.
 
+만약 부모 클래스의 designated init 1개와 convenience init 2개를 가질 때 자식 클래스에서 부모 클래스의 designated init을 override한다고 가정해봅시다.
+결과적으로 자식 클래스가 갖게 되는 init은 부모 클래스에서 상속받는 convenience init 2개와 override designated init 그리고 자식 클래스 본인만의 (반드시 가져야하는) designated init이 있습니다.
+
+만약 subclassing 될 때마다 위의 동작이 반복되면 최하단의 자식 클래스는 여러 designated init을 가지게 될것입니다.
+(override designated init도 designated init입니다.) 이는 계층을 복잡하게 만들 수 있습니다.
+
+지금부터 자식 클래스에 초기화가 필요한 프로퍼티가 추가되어도 부모 클래스의 init을 상속받으며 designated init을 1개로 유지하는 방법을 살펴봅시다.
 
 
 
