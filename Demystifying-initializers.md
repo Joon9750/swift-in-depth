@@ -197,21 +197,67 @@ In a class hierarchy, convenience init go horizontal, and designated init go ver
 ## Minimizing class initializers
 
 위에서 보았듯이 subclassing과 함께 자식 클래스에 초기화가 필요한 프로퍼티가 추가되었을 때 부모 클래스의 init을 상속받기 위해 designated init을 상속했습니다.
-하지만 이 동작이 반복될수록 자식 클래스의 designated init이 1개씩 늘어나게 됩니다.
+하지만 이 동작이 반복될수록 자식 클래스의 designated init이 한 개씩 늘어나게 됩니다.
 
-만약 부모 클래스의 designated init 1개와 convenience init 2개를 가질 때 자식 클래스에서 부모 클래스의 designated init을 override한다고 가정해봅시다.
-결과적으로 자식 클래스가 갖게 되는 init은 부모 클래스에서 상속받는 convenience init 2개와 override designated init 그리고 자식 클래스 본인만의 (반드시 가져야하는) designated init이 있습니다.
+만약 부모 클래스의 designated init 한 개와 convenience init 두 개를 가질 때 자식 클래스에서 부모 클래스의 designated init을 override한다고 가정해봅시다.
+결과적으로 자식 클래스가 갖게 되는 init은 부모 클래스에서 상속받는 convenience init 두 개와 override designated init 그리고 자식 클래스 본인만의 (반드시 가져야하는) designated init이 있습니다.
 
-만약 subclassing 될 때마다 위의 동작이 반복되면 최하단의 자식 클래스는 여러 designated init을 가지게 될것입니다.
+만약 subclassing 될 때마다 위의 동작이 반복되면 자식 클래스는 여러 designated init을 가지게 될것입니다.
 (override designated init도 designated init입니다.) 이는 계층을 복잡하게 만들 수 있습니다.
 
-지금부터 자식 클래스에 초기화가 필요한 프로퍼티가 추가되어도 부모 클래스의 init을 상속받으며 designated init을 1개로 유지하는 방법을 살펴봅시다.
+지금부터 자식 클래스에 초기화가 필요한 프로퍼티가 추가되어도 부모 클래스의 init을 상속받으며 designated init을 한 개로 유지하는 방법을 살펴봅시다.
 
+designated init을 override 할 때 convenience init으로 부모 클래스의 designated init을 override한다면 자식 클래스의 designated init을 한 개로 유지할 수 있습니다.
+여기서 부모 클래스의 designated init을 자식 클래스의 convenience init으로 override하고 자식 클래스의 convenience override init에서 자식 클래스의 designated init을 호출하고 designated init에서 부모 클래스의 designated init을 
+호출하도록 구현하면 됩니다.
 
+아래 코드로 확인해봅시다.
 
+```swift
+class MutabilityLand: BoardGame {
+  var scoreBoard = [String: Int]()
+  var winner: Player?
 
+  let instructions: String
 
+  // 부모 designed init을 override하는 convenience override init
+  convenience override init(players: [Player], numberOfTiles: Int) {
+    // The initializer now points sideways (self.init) versus upwards (super.init)
+    self.init(player: players, instructions: "Read the manual", numberOfTiles: numberOfTiles)
+  }
 
+  init(players: [Player], instructions: String, numberOfTiles: Int) {
+    self.instructions = instructions
+    super.self(players: players, numberOfTiles: numberOfTiles)
+  }
+}
+```
+
+위의 코드처럼 override init(designated init)을 convenience override init으로 바꾸며 designated init을 두 개에서 한 개로 줄입니다.
+이제는 MutabilityLand의 자식 클래스가 생기면 자식 클래스에서는 하나의 designated init만 override하면 MutabilityLand의 모든 init을 상속 받을 수 있습니다.
+
+그치만 designated init의 성격상 designated init에서 모든 프로퍼티가 초기화되어야 합니다.
+따라서 자식 클래스에 추가된 초기화가 필요한 프로퍼티는 designated init에서 초기화하고 부모 클래스의 designated init을 호출합시다.
+다시 말하지만 designated init은 모든 클래스에 한 개 이상 존재해야 하고 모든 프로퍼티를 초기화할 수 있어야 합니다.
+
+```swift
+class MutabilityLandJunior: MutabilityLand { 
+  let soundsEnabled: Bool
+
+  init(soundsEnabled: Bool, players: [Player], instructions: String, numberOfTiles: Int) {
+    self.soundsEnabled = soundsEnabled
+    super.init(players: players, instructions: instructions, numberOfTiles: numberOfTiles)
+  }
+
+  // 부모 클래스의 designated init을 convenience init으로 override 했습니다.
+  convenience override init(players: [Player], instructions: String, numberOfTiles: Int) {
+    self.init(soundsEnabled: false, player: players, instructions: "Read the manual", numberOfTiles: numberOfTiles)
+  }
+}
+```
+Thanks to convenience override, this subclass gets many initializers for free.
+
+## Required initializers
 
 
 
