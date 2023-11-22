@@ -347,19 +347,17 @@ BoardGame이 BoardGameType 프로토콜을 따르기 때문에 BoardGame의 자�
 init을 가진 프로토콜을 채택한 클래스를 final로 만든다면, 자식 클래스로 subclassing 될 가능성이 없어졌기 때문에 init을 required 할 필요가 없어집니다.
 required 자체가 subclassing의 상황에 대응하기 위해 사용하는데 final로 subclassing 기능을 막는다면 init을 가진 프로토콜, factory method 경우 모두 init에 required 키워드를 붙일 필요가 없습니다.
 
+## Summary
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Structs and classes want all their non-optional properties initialized
+- Structs generate "free" memberwise initializers
+- Structs lose memberwise initializers if you add a custom initializer
+- If you extend structs with your custom initializers, you can have both memberwise and custom initializers
+- Classes must have one or more designated initializers
+- Convenience initializers point to designated initializers
+- If a subclass has its own stored prperties, it won't directly inherit its superclass initializers
+- If a subclass overrides designated initializers, it gets the convenience initializers from the superclass
+- When overriding a superclass initializer with a convenience initializer, a subclass keeps the number of designated initializers down
+- The required keyword makes sure that subclasses implement an initializer and that factory methods work on subclasses
+- Once a protocol has an initializer, the required keyword makes sure that subclasses conform to the protocol
+- By making a class final, initializers can drop the required keyword
