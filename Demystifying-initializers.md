@@ -259,12 +259,69 @@ Thanks to convenience override, this subclass gets many initializers for free.
 
 ## Required initializers
 
+Required initializers play a crucial role when subclassing classes.
 
+init 앞에 required를 붙여서 자식 클래스가 해당 init을 필수로 구현하도록 만들 수 있습니다.
+required init을 사용하는 경우는 크게 두 가지입니다.
 
+1. factory methods
+2. protocol with have init
 
+먼저 factory methods는 인스턴스를 사전에 구성하도록 하는 전략입니다. 
+따라서 아래 makeGame과 같이 Self를 리턴하는 함수를 구현하게 될 것입니다.
 
+```swift
+class BoardGame {
+  // ...생략
 
+  class func makeGame(players: [Player]) -> Self {
+    let boardGame = self.init(players: players, numberOfTiles: 32)
+    return boardGame
+  }
+}
+```
 
+Self를 리턴하는 함수는 말 그대로 본인의 타입을 리턴하는 함수입니다.
+위의 makeGame 함수는 BoardGame 타입을 리턴하게 됩니다.
+BoardGame 인스턴스를 self.init을 통해 만들어 집니다.
+
+하지만 위 코드에는 required error가 발생합니다. 
+makeGame 함수가 self.init을 사용하기 때문에 자식 클래스가 생겼을 경우 리턴 타입인 Self와 makeGame 함수에서
+만드는 self.init의 Self와 일치하지 않을 수 있습니다.
+
+따라서 이 경우 자식 클래스에서 init을 구현하도록 강제해야합니다.
+자식 클래스에서 required init을 재정의할 때는 override 키워드 대신 required 키워드를 사용합니다.
+
+아래 코드를 확인해 봅시다.
+
+```swift
+class BoardGame {
+  // ...생략
+
+  class func makeGame(players: [Player]) -> Self {
+    let boardGame = self.init(players: players, numberOfTiles: 32)
+    return boardGame
+  }
+
+  required init(players: [Player], numberOfTiles: Int) {
+    self.players = players
+    self.numberOfTiles = numberOfTiles
+  }
+}
+
+class Mutability: BoardGame {
+  //... 생략
+
+  // convenience init으로 부모 클래스의 required init을 재정의했습니다.
+  covenience required init(players: [Player], numberOfTiles: Int) {
+    // self.init에서 초기화 이후, 부모 클래스의 designated init 호출합니다.
+    self.init(players: players, instructions: "Read the manual", numberOfTiles: numberOfTiles)
+  }
+}
+```
+
+두 번째로 required init이 필요한 경우는 protocol이 init을 가졌을 때입니다.
+클래스가 해당 protocol을 채택하면 반드시 required init을 구현해야 합니다.
 
 
 
