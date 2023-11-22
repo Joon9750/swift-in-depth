@@ -14,7 +14,7 @@
 | 2    | [Writing cleaner properties](https://github.com/hongjunehuke/swift-in-depth/blob/master/Writing-cleaner-properties.md) | 2023.11.18 |
 | 3    | [Making optionals second nature](Making-optionals-second-nature.md) | 2023.11.19 |
 | 4    | [Demystifying initializers](https://github.com/hongjunehuke/swift-in-depth/blob/master/Demystifying-initializers.md) | 2023.11.20 |
-| 5    | [Effortless error handling]() |  |
+| 5    | [Effortless error handling](Effortless-error-handling.md) | 2023.11.23 |
 | 6    | [Generics]() |  |
 | 7    | [Putting the pro in protocol-oriented programming]() |  |
 | 8    | [Iterators, sequences, and collections]() |  |
