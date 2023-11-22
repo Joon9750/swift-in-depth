@@ -320,11 +320,32 @@ class Mutability: BoardGame {
 }
 ```
 
-두 번째로 required init이 필요한 경우는 protocol이 init을 가졌을 때입니다.
-클래스가 해당 protocol을 채택하면 반드시 required init을 구현해야 합니다.
+두 번째로 required init이 필요한 경우는 프로토콜이 init을 가졌을 때입니다.
+클래스가 해당 프로토콜을 채택하면 반드시 required init을 구현해야 합니다.
 
+아래와 같이 프로토콜이 init을 가질 수 있습니다.
 
+```swift
+protocol BoardGameType {
+  init(players: [Player], numberOfTiles: Int)
+}
 
+class BoardGame: BoardGameType {
+  // ...생략
+  required init(players: [Player], numberOfTiles: Int) {
+    self.players = players
+    self.numberOfTiles = numberOfTiles
+  }
+}
+```
+
+BoardGame이 BoardGameType 프로토콜을 따르기 때문에 BoardGame의 자식 클래스들도 BoardGameType을 따라야 합니다.
+따라서 BoardGame의 init에 required 키워드를 붙여 자식 클래스에서 init의 구현을 강제합니다.
+
+만약, 클래스에 final 키워드를 붙였다면 어떨까요?
+
+init을 가진 프로토콜을 채택한 클래스를 final로 만든다면, 자식 클래스로 subclassing 될 가능성이 없어졌기 때문에 init을 required 할 필요가 없어집니다.
+required 자체가 subclassing의 상황에 대응하기 위해 사용하는데 final로 subclassing 기능을 막는다면 init을 가진 프로토콜, factory method 경우 모두 init에 required 키워드를 붙일 필요가 없습니다.
 
 
 
