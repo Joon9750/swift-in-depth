@@ -210,6 +210,127 @@ defer 클로저를 사용하면 에러가 발생하기 이전의 상태를 정�
 
 ## Error propagation and catching
 
+"My favorite way of dealing with problems is to give them to somebody else."
+
+에러는 전달됩니다. 보통은 하위 수준의 함수에서 위로 에러를 전달합니다.
+함수 호출은 상위 함수에서 하위 함수로 내려가고 하위 함수에서 발생한 에러는 함수 호출을 거슬러 상위 함수로 전달됩니다.
+하위 수준 함수들은 에러 핸들링 방법을 모르고 발생하는 에러를 상위 함수로 던질 뿐입니다. 상위 함수에서 에러를 핸들링합니다.
+
+아래 코드로 확인해봅시다.
+
+```swift
+struct Recipe {
+  let ingredients: [String]
+  let steps: [String]
+}
+
+enum ParseRecipeError: Error {
+  case parseError
+  case noRecipeDetected
+  case noIngredientsDetected
+}
+
+struct RecipeExtractor {
+  let html: String
+
+  func extractRecipe() -> Recipe? {
+    do {
+      return try parseWebpage(html)
+    } catch {
+      print("Could not parse recipe")
+      return nil
+    }
+  }
+
+  private func parseWebpage(_ html: String) throws -> Recipe {
+    let ingredients = try parseIngredients(html)
+    let steps = try parseSteps(html)
+    return Recipe(ingredients: ingredients, steps: steps)
+  }
+
+  private func parseIngrediants(_ html: String) throws -> [String] {
+    // ... Parsing happens here
+
+    // .. Unless an error is thrown
+    throw ParseRecipeError.noIngredientsDetected
+  }
+
+  prviate func parseSteps(_ html: String) throws -> [String] {
+    // ... Parsing happens here
+
+    // .. Unless an error is thrown
+    throw ParseRecipeError.noRecipeDetected
+  }
+}
+```
+
+위 코드로 함수 호출의 흐름과 에러 전달 흐름을 확인할 수 있습니다.
+
+하지만 위와 같이 에러를 상위 계층으로 전달하면 발생하는 단점이있습니다.
+에러에 대한 정보는 에러가 발생한 하위 계층에서 더욱 자세히 알 수 있습니다. 예를 들어 어떤 동작의 실패로 발생한 에러이고 각 변수의 상태가 어떤지 에러가 발생한 하위 계층에서는 명확이 알 수 있습니다.
+하지만 에러를 상위 계층으로 전달하면 에러에 대한 자세한 정보 없이 어떤 에러가 발생했다는 사실만 전달됩니다.
+유용한 정보를 잃는것 입니다.
+
+따라서 에러를 상위 계층으로 전달할 때 에러와 함께 유용한 정보를 함께 전달해야 합니다.
+에러에 대한 유용한 정보는 에러를 핸들링하는 상위 계층에 유용합니다.
+
+아래 ParseRecipeError의 parseError 케이스처럼 enum의 케이스에 튜플을 추가하는 방식으로 에러에 대한 정보를 추가할 수 있습니다.
+
+```swift
+enum ParseRecipeError: Error {
+  case parseError(line: Int, symbol: String)
+  case noRecipeDetected
+  case noIngredientsDetected
+}
+
+struct RecipeExtractor {
+  let html: String
+
+  func extractRecipe() -> Recipe? {
+    do {
+      return try parseWebpage(html)
+    } catch let ParseRecipeError.parseError(line, symbol) {
+      print("Parsing failed at line: \(line) and symbol: \(symbol)")
+      return nil
+    } catch {
+      print("Could not parse recipe")
+      return nil
+    }
+  }
+    
+  // ...snip
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
