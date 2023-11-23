@@ -19,7 +19,18 @@ Errors revealed at runtime은 네트워크 상태가 불안정하거나 만료�
 
 에러를 던지고 다루는 부분도 중요하지만 에러를 던질 때 애플리케이션을 예측 가능한 상태로 유지하는 것도 굉장히 중요합니다.
 
+스위프트는 에러를 처리할 때 Error 프로토콜을 제안합니다. Error 프로토콜은 필수로 구현해야 할 요구사항이 없습니다.
 
+enum은 각 case 별로 독립적이기 때문에 에러의 구조를 enum으로 잡는건 적합니다.
+하지만 모든 에러를 enum으로 만들 필요는 없습니다. 
+
+```swift
+enum ParesLocationError: Error {
+  case invalidData
+  case locationDoesNotExist
+  case middleOfTheOcean
+}
+```
 
 
 
