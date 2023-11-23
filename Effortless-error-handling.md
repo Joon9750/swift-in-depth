@@ -332,10 +332,21 @@ extension ParseRecipeError: LocalizedError {
   var failureReason: String? {
     switch self {
     case let .parseError(line: line, symbol: symbol):
-      return 
+      return String(format: NSLocalizedString("Parsing data failed at line: %i and symbol: %@, comment: "Parsing error line symbol"), line, symbol)
+    case .noIngredientsDetected:
+      // ...snip
+    case .noRecipeDetected:
+      // ...snip
+    }
+  }
+
+  var recoverySuggestion: String? {
+    return "Please try a different type"
+  }
+}
 ```
 
-
+에러에 human-readable(by LocalizedError)을 추가하여 안정적으로 에러를 전달할 수 있습니다.
 
 
 
