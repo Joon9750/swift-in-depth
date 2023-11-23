@@ -274,7 +274,7 @@ struct RecipeExtractor {
 따라서 에러를 상위 계층으로 전달할 때 에러와 함께 유용한 정보를 함께 전달해야 합니다.
 에러에 대한 유용한 정보는 에러를 핸들링하는 상위 계층에 유용합니다.
 
-아래 ParseRecipeError의 parseError 케이스처럼 enum의 케이스에 튜플을 추가하는 방식으로 에러에 대한 정보를 추가할 수 있습니다.
+아래 ParseRecipeError의 parseError 케이스처럼 enum의 케이스에 튜플을 추가하는 방식으로 에로와 같게 에러에 대한 정보를 전달할 수 있습니다.
 
 ```swift
 enum ParseRecipeError: Error {
@@ -302,9 +302,38 @@ struct RecipeExtractor {
 }
 ```
 
+위와 같이 에러에 정보를 추가할 때 enum에 튜플로 구현할 수 있지만, LocalizedError 프로토콜을 사용할 수도 있습니다.
+LocalizedError 프로토콜은 에러의 정보를 추가하는 역할을 합니다. 
 
+LocalizedError 프로토콜은 네 가지 프로퍼티를 지원하며 에러에 대한 정보를 추가합니다.
+네 가지 프로퍼티는 아래와 같습니다. 네 가지 프로퍼티는 필수로 구현할 필요는 없습니다.
 
+- var errorDescription: String? -> 에러 정보를 추가합니다.
+- var failureReason: String? -> 에러 발생 이유를 설명합니다.
+- var helpAnchor: String? -> apple's help viewer 링크로 연결합니다.
+- var recoverySuggestion: String? -> 에러에 대처하는 방법을 설명합니다.
 
+보통은 LocalizedError 프로토콜의 errorDescription, recoverySuggestion 프로퍼티 정도로 충분합니다.
+아래 코드는 LocalizedError 프로토콜을 채택하여 에러에 정보를 추가한 코드입니다.
+
+```swift
+extension ParseRecipeError: LocalizedError {
+  var errorDescription: String? {
+    switch self {
+    case .parseError:
+      return NSLocalizedString("The HTML file had unexpected symbols.", comment: "Parsing error reason unexpected symbols")
+    case .noIngredientsDetected:
+      return NSLocalizedString("No ingredients were detected.", comment: "Parsing error no ingredients")
+    case .noRecipeDetected:
+      return NSLocalizedString("No recipe was detected.", comment: "Parsing error no recipe")
+    }
+  }
+
+  var failureReason: String? {
+    switch self {
+    case let .parseError(line: line, symbol: symbol):
+      return 
+```
 
 
 
