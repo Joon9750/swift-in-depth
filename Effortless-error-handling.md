@@ -103,15 +103,17 @@ func parseLocation(_ latitude: String, _ longitude: String) throws -> Location {
 
 앞으로 에러를 던진 이후 애플리케이션 상태를 유지하기 위한 세 가지 방법을 살펴보겠습니다.
 
+첫번째 방법은 함수가 외부의 상태를 조작하지 않도록 만드는 것입니다.
+
 "Make func immutable"
 
-첫번째 방법은 함수가 외부의 상태를 조작하지 않도록 만드는 것입니다.
 함수의 인자로 들어온 값만 함수가 조작해 리턴한다면 외부의 상태를 조작하지 않는 함수입니다.
 외부의 값을 변경하지 않으면 에러를 던지더라도 애플리케이션 상태을 유지할 수 있습니다.
 
+두번째 방법은 작업이 에러 없이 끝났다면 작업의 결과(새로운 상태)를 저장하는 것입니다.
+
 "use temporary value"
 
-두번째 방법은 작업이 에러 없이 끝났다면 작업의 결과(새로운 상태)를 저장하는 것입니다.
 작업이 에러 없이 끝나기 전까지 작업의 결과는 temporary value(임시 변수)에 저장하는 방법입니다.
 
 아래 코드는 temporary value를 사용하지 않은 코드와 사용한 코드입니다.
@@ -152,9 +154,9 @@ struct TodoList {
   private var values = [String]()
 
   mutating func append(strings: [String]) throws {
+    var tempValues = [String]()
     for string in strings {
       let trimmedString = string.trimmingCharacters(in: .whitespacesAndNewlines)
-      var tempValues = [String]()
     
       if trimmedString.isEmpty {
         throw ListError.invalidValue
@@ -162,20 +164,51 @@ struct TodoList {
         tempValues.append(trimmedString)
       }
     }
-    return tempValues
+    values.append(tempValues)
   }
 }
 ```
 
 임시 변수 tempValues를 선언해 모든 for 루프에서 에러를 던지지 않을 때 작업의 결과를 리턴하며 에러 발생 상태에서 애플리케이션 상태를 유지할 수 있게 됩니다.
+for 루프 중간에 에러가 발생하면 임시 변수는 사라지고 임시 변수를 실제 값에 대입하지 않습니다.
+이로써 todoList를 에러가 발생하기 전 상태로 유지할 수 있습니다.
 
+마지막 방법은 defer 클로저를 사용하는 방법입니다.
 
+"Recovery code with defer"
 
+에러가 발생했을 때 에러 발생 이전의 변경사항을 되돌리는 방식입니다. defer 클로저는 함수가 끝나면 실행됩니다. 함수에서 에러가 발생되었는지 유무와 관계없이 defer 클로저는 함수 끝에 실행됩니다.
+defer 클로저에서 에러 발생 여부를 판단하고 에러가 발생했다면 에러 발생 이전의 상태로 되돌려 애플리케이션 상태를 유지합니다.
 
+아래 코드에서는 파일의 저장 개수를 함수 입력으로 들어온 data 개수와 비교하여 에러 발생 여부를 판단하고 있습니다.
 
+```swift
+import Foundation
 
+func writeToFiles(data: [URL: String]) throws {
+  var storedUrls = [URL]()
+  defer {
+    if storedUrls.count != data.count {
+      for url in storedUrls {
+        try! FileManager.default.removeItem(at: url)
+      }
+    }
+  }
 
+  for (url, contents) in data {
+    try contents.write(to: url, atomically: true, encoding: String.Encoding.utf8)
+    storedUrls.append(url)
+  }
+}
+```
 
+defer 클로저는 writeToFiles 함수의 종료가 정상적인 종료인지 비정상적인 종료(에러 던짐)인지 구분해야 합니다.
+writeToFiles 함수는 데이터 개수를 비교해 구분했습니다.
+
+defer 클로저를 사용하면 에러가 발생하기 이전의 상태를 정확하게 유지하기 유리합니다. 하지만 여러 상황이 섞여있다면 defer 클로저가 대응해야 할 상황이 많아져 오히려 복잡성을 
+높일 수 있습니다.
+
+## Error propagation and catching
 
 
 
