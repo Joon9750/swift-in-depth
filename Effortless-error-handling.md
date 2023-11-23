@@ -103,11 +103,42 @@ func parseLocation(_ latitude: String, _ longitude: String) throws -> Location {
 
 앞으로 에러를 던진 이후 애플리케이션 상태를 유지하기 위한 세 가지 방법을 살펴보겠습니다.
 
+Make func immutable
 
+첫번째 방법은 함수가 외부의 상태를 조작하지 않도록 만드는 것입니다.
+함수의 인자로 들어온 값만 함수가 조작해 리턴한다면 외부의 상태를 조작하지 않는 함수입니다.
+외부의 값을 변경하지 않으면 에러를 던지더라도 애플리케이션 상태을 유지할 수 있습니다.
 
+use temporary value
 
+두번째 방법은 작업이 에러 없이 끝났다면 작업의 결과(새로운 상태)를 저장하는 것입니다.
+작업이 에러 없이 끝나기 전까지 작업의 결과는 temporary value(임시 변수)에 저장하는 방법입니다.
 
+아래 코드는 temporary value를 사용하지 않은 코드와 사용한 코드입니다.
 
+```swift
+enum ListError: Error {
+  case invalidValue
+}
+
+struct TodoList {
+  private var values = [String]()
+
+  mutating func append(strings: [String]) throws {
+    for string in strings {
+      let trimmedString = string.trimmingCharacters(in: .whitespacesAndNewlines)
+
+      if trimmedString.isEmpty {
+        throw ListError.invalidValue
+      } else {
+        values.append(trimmedString)
+      }
+    }
+  }
+}
+```
+
+위 코드는 에러가 for 루프 중에 발생하지 않는다면 문제가 없지만, for 루프 중 에러가 발생해 에러를 던질 경우 애플리케이션 상태를 
 
 
 
