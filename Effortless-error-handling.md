@@ -308,10 +308,10 @@ LocalizedError 프로토콜은 에러의 정보를 추가하는 역할을 합니
 LocalizedError 프로토콜은 네 가지 프로퍼티를 지원하며 에러에 대한 정보를 추가합니다.
 네 가지 프로퍼티는 아래와 같습니다. 네 가지 프로퍼티는 필수로 구현할 필요는 없습니다.
 
-- var errorDescription: String? -> 에러 정보를 추가합니다.
-- var failureReason: String? -> 에러 발생 이유를 설명합니다.
-- var helpAnchor: String? -> apple's help viewer 링크로 연결합니다.
-- var recoverySuggestion: String? -> 에러에 대처하는 방법을 설명합니다.
+- var errorDescription: String?   에러 정보를 추가합니다.
+- var failureReason: String?      에러 발생 이유를 설명합니다.
+- var helpAnchor: String?         apple's help viewer 링크로 연결합니다.
+- var recoverySuggestion: String? 에러에 대처하는 방법을 설명합니다.
 
 보통은 LocalizedError 프로토콜의 errorDescription, recoverySuggestion 프로퍼티 정도로 충분합니다.
 아래 코드는 LocalizedError 프로토콜을 채택하여 에러에 정보를 추가한 코드입니다.
