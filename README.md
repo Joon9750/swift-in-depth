@@ -1,6 +1,6 @@
 # Swift-in-depth
 
-: swift in depth 읽고 정리합니다.
+: swift in depth을 읽고 정리합니다.
 
 ## Tools
 
