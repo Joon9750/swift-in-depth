@@ -274,6 +274,20 @@ lazy var contents: () -> String = {
 contents 프로퍼티는 () -> String 클로저를 리턴하고 있습니다. 따라서 [weak self]를 통해서 메모리 누수를 방지해주어야 합니다.
 contents 프로퍼티에 의해 메모리에는 값이 아닌 클로저가 올라가 있고 해당 클로저는 self의 참조를 유지하고 있습니다.
 
+```swift
+lazy var contents: () -> String = { [weak self] in
+  print("I'm taking my sweet time to calculate.")
+  sleep(2)
+
+  switch self?.level {
+  case ..<25: return "Watch an English documentary."
+  case ..<50: return "Translate a newspaper article."
+  case ..<25: return "Read two academic papers."
+  case default: return "Try to read English for 30 minutes."
+  }
+}()
+```
+
 따라서 앞에서 lazy var 프로퍼티가 값을 리턴한다면 프로퍼티 초기화 이후 계속해서 동일한 값을 리턴하지만 클로저를 리턴하는 경우 클로저 안에서 참조하는 변수의
 변경에 따라 리턴 값이 달라질 수 있습니다.
 
