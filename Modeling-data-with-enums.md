@@ -12,11 +12,13 @@
 
 ## Or vs. and
 
-enum은 "or" 타입으로 여겨집니다. 
-데이터를 모델링 할 때 "or" 성격이 보인다면 enum을 고려합시다.
+열거형은 "or" 타입으로 여겨집니다. 
+데이터를 모델링 할 때 "or" 성격이 보인다면 열거형을 고려합시다.
 
-enum을 사용해 채팅 서비스의 메세지 데이터를 모델링해 봅시다. 
-메세지는 본인이 보낸 텍스트, 채팅방 참여 텍스트, 채팅방 퇴장 텍스트, 풍선 이모티콘 중 하나씩 보낼 수 있는 채팅 서비스입니다.
+아래 코드는 채팅 서비스의 메세지 데이터를 모델링한 코드입니다.
+메세지 데이터는 보내는 메세지, 채팅방 참여 메세지, 채팅방 퇴장 메세지, 풍선 이모티콘 중 하나의 상태를 가집니다.
+
+먼저 구조체를 통해 메세지 데이터를 만든 코드를 살펴봅시다.
 
 ```swift
 import Foundation
@@ -52,17 +54,20 @@ let brokenMessage = Message(
 ```
 
 위와 같이 구조체로 모델을 만드는 방식이 일반적으로 떠올리는 메세지 데이터 모델입니다.
-우리가 만드는 Message 데이터는 본인이 보낸 텍스트, 채팅방 참여 텍스트, 채팅방 퇴장 텍스트, 풍선 이모티콘이어야 합니다.
-하지만 구조체는 여러 형태의 값을 만들 가능성이 있습니다. 이 가능성은 버그로 이어집니다. 
+열거형이 "or" 개념이라면 구조체는 "And" 개념입니다.
 
-enum이 "or" 개념이라면 구조체는 "And" 개념입니다.
+우리가 만드는 메세지 데이터는 본인이 보낸 텍스트, 채팅방 참여 텍스트, 채팅방 퇴장 텍스트, 풍선 이모티콘이어야 합니다.
+하지만 구조체는 여러 형태의 값을 만들 가능성이 있습니다.
+예를 들어 hasJoined와 hasLeft가 동시에 true인 요상한 객체를 만들 수 있습니다.
+만약 메세지 데이터의 유효성을 검사하려 하더라도, 구조체의 내부값이 잘못됐다는 사실을 컴파일 타임이 아닌 런타임에 알 수 밖에 없습니다.
 
-brokenMessage처럼 hasJoined와 hasLeft가 동시에 true일 수 있는 말도 안 되는 상황이 생길 수 있습니다.
-심지어 구조체 타입의 message 유효성을 검사하더라도 유효하지 않다면 이를 런타임에 알게 됩니다.
-이럴 때 데이터 모델링에 enum을 사용하면 버그를 줄이고 유효하지 않은 message는 컴파일 타임 체크할 수 있습니다.
+이는 결국 버그로 이어집니다. 
 
-데이터 모델링에서 상호 배타적인(or) 성격을 가졌다면 구조체보다는 enum을 고려합시다.
-enum과 함께 tuple을 사용하면 더 복잡한 데이터를 표현하기 쉽습니다. 
+우린 열거형을 사용해 객체의 상태를 한정시키고 유효하지 않은 데이터를 컴파일 타임에 체크할 수 있습니다.
+데이터 모델링에서 상호 배타적인(or) 성격을 가졌다면 구조체보다는 열거형을 고려합시다.
+열거형과 함께 튜플을 사용하면 더 복잡한 데이터를 표현하기 쉽습니다. 
+
+아래 코드로 확인해 봅시다.
 
 ```swift
 import Foundation
@@ -79,7 +84,7 @@ enum Message {
 ```swift
 import Foundation
 
-// 2. with value
+// 2. with value (enum + tuple)
 enum Message {
   case text(userId: String, contents: String, date: Date)
   case draft(userId: String, date: Date)
@@ -92,11 +97,17 @@ let textMessage = Message.text(userId: "2", contents: "Bonjour", date: Date())
 let joinMessage = Message.join(userId: "2", date: Date())
 ```
 
-enum과 tuple을 함께 사용하여 각 case들이 associated value(연관값)를 갖게 됩니다. 이는 프로퍼티가 어떤 케이스에 어울릴지 명확히 보여줍니다.
-enum으로 데이터를 만들면 당연히 switch 문이 등장할 것입니다. 
-하지만 switch문은 하나의 데이터를 얻기 위해 모든 case에 해당하는 코드를 적어야 합니다. 이는 중복되는 코드를 발생시킵니다.
+이전 구조체와 달리 열거형은 다섯가지 케이스 중 하나를 선택했다면 해당 케이스에서 지원하는 튜플 속 프로퍼티만 요구합니다.
+해당 요구사항을 따르지 않으면 당연히 컴파일 타임에 오류가 발생합니다.
+열거형으로 메세지 데이터를 만들며 어떤 상황(case)에 어떤 데이터가 필요한지 명시하고 컴파일 타임에 검사할 수 있게 됩니다.
+
+여기서 "or" 성격의 열거형에 강점이 드러납니다.
+
+물론 열거형은 필연적으로 switch 구문을 요구합니다. 반복적인 switch 구문은 중복되는 코드를 발생시키기도 합니다.
+우린 if case let 구문으로 반복적인 switch 구문을 줄일 수 있습니다.
 
 if case let 구문을 사용해 반복적인 switch 문을 피할 수 있습니다.
+아래 코드를 확인해 봅시다.
 
 ```swift
 import Foundation
@@ -106,7 +117,7 @@ if case let Message.text(userId: id, contents: contents, date: date) = {
 }
 ```
 
-위 코드에서 userId와 date 변수는 사용하지 않기 때문에 와일드카드(_)로 신경 쓰지 않을 수 있습니다.
+위 코드에서 userId와 date 변수는 사용하지 않기 때문에 와일드카드(_)를 사용해 무시할 수 있습니다
 
 ```swift
 import Foundation
@@ -116,8 +127,33 @@ if case let Message.text(_, contents: contents, _) = {
 }
 ```
 
-enum은 컴파일 타임에 이점이 있습니다. 하지만 enum의 case가 하나뿐이라면 구조체가 더 좋은 선택일 수 있습니다.
-구조체를 사용한다면 구조체의 프로퍼티를 그룹화해 봅시다. 그룹화가 된다면 enum으로 구조체를 수정해 봅시다. enum이 더 좋은 선택지가 됩니다.
+살펴봤듯이 열거형은 컴파일 타임에 이점이 있습니다. 하지만 열거형의 case가 하나뿐이라면 구조체가 더 좋은 선택일 수 있습니다.
+
+본인이 작성한 코드에 구조체가 보인다면 구조체 속 프로퍼티들을 사용되는 케이스 별로 그룹화해 봅시다.
+아래 메세지 구조체의 프로퍼티를 text, draft, join, leave, ballon 케이스 중 사용되는 부분에 적절히 그룹화한걸 볼 수 있습니다.
+
+```swift
+struct Message {
+  let userId: String
+  let contents: String?
+  let date: Date
+
+  let hasJoined: Bool
+  let hasLeft: Bool
+  let isBeingDrafted: Bool
+  let isSendingBalloons: Bool
+}
+
+enum Message {
+  case text(userId: String, contents: String, date: Date)
+  case draft(userId: String, date: Date)
+  case join(userId: String, date: Date)
+  case leave(userId: String, date: Date)
+  case ballon(userId: String, date: Date)
+}
+```
+
+구조체의 프로퍼티가 그룹화 된다면 열거형으로 구조체를 수정해 봅시다. 열거형이 더 좋은 선택지가 됩니다.
 
 ## Enums for polymorphism
 
@@ -127,11 +163,16 @@ Polymorphism(다형성) means that a single function, method, array, dictionary 
 let arr: [Any] = [Date(), "aa", 789]
 ```
 
-위 코드와 같이 Any 타입 배열로 다형성을 만들 수도 있습니다. 하지만 이상적이지 못합니다.
-Any가 어떤 타입으로 표현될지 컴파일 타임에 알 수 없고 런타임에 알게 됩니다. 
-Any 타입이 필요한 경우는 서버로부터 unknown data를 받을 때 정도입니다. 
+위 코드와 같이 Any 타입 배열로 다형성을 만들 수도 있습니다. 하지만 Any 타입의 무분별한 사용은 피하는게 좋겠습니다.
+Any가 어떤 타입으로 표현될지 컴파일 타임에 알 수 없고 런타임에서야 알게 됩니다. 
 
-enum을 사용하면 다형성을 구현함과 동시에 complie-time safety를 보장받을 수 있습니다.
+Any 타입이 쓰이는 경우는 서버로부터 unknown data를 받을 때 정도입니다. 
+
+열거형을 사용하면 다형성을 구현함과 동시에 컴파일 타임 안전성을 보장받을 수 있습니다.
+열거형이 제공한는 컴파일 타임 안전성은 열거형에 있는 케이스의 대응 여부를 컴파일러가 체크하는 것입니다.
+열거형의 케이스에 대응하지 않아도 컴파일 타임 에러가 발생하고 열거형 케이스가 요구하는 데이터를 전달하지 않아도 컴파일 에러가 발생합니다.
+
+열거형이 컴파일 타임 안전성을 보장한다는건 알겠는데 열거형이 다형성을 이룬다는 건 무슨 이야기일까요?
 Date 타입과 Range<Date> 타입을 같은 배열에 저장해야 하는 경우를 살펴봅시다.
 
 ```swift
@@ -160,9 +201,7 @@ for dateType in dates {
 }
 ```
 
-enum을 통해 다른 타입을 배열에 넣음과 동시에 compile-time safety를 얻을 수 있습니다. 
-여기서 말하는 compile-time safety는 enum에 있는 case의 대응 여부를 컴파일러가 체크하는 것입니다. 
-만약 enum에 새로운 case가 추가된다면 컴파일러가 switch 문의 missing case를 체크해 줍니다. 
+열거형과 함께 튜플을 사용해 데이터 타입이 다른 Date과 Range<Date>을 각 케이스 별 튜플에 넣으며 DateType 열거형으로 다형성을 이루게 됩니다.
 
 ## Enums instead of subclassing
 
