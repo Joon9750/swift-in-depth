@@ -201,22 +201,33 @@ for dateType in dates {
 }
 ```
 
-열거형과 함께 튜플을 사용해 데이터 타입이 다른 Date과 Range<Date>을 각 케이스 별 튜플에 넣으며 DateType 열거형으로 다형성을 이루게 됩니다.
+열거형과 함께 튜플을 사용해 데이터 타입이 다른 Date과 Range<Date>을 각 케이스 별 튜플에 넣어 다형성을 이루게 됩니다.
 
 ## Enums instead of subclassing
 
-class를 사용하여 subclassing으로 데이터 계층을 만드는 경우가 많습니다. 
-하지만 이때의 한계는 자식 클래스에 어울리지 않는 코드를 부모 클래스에서 강제하는 경우가 생깁니다. 
-만약 자식 클래스가 추가될 필요가 생겼을 때 부모 클래스가 추가될 자식 클래스와 어울리지 않을 수 있습니다. 
-subclassing보다 enum을 사용하면 새로운 요구사항에 대응하기 쉽습니다. 
+개발을 하다보면 클래스를 사용 서브클래싱으로 데이터 계층을 만드는 경우가 많습니다. 
 
-Workout 부모 클래스에 Run, Cycle, Pushups가 자식 클래스로 있다고 가정해 봅시다.
-새로운 abs가 추가될 때 subclassing은 부모 클래스 Workout의 자식 클래스로 abs가 추가됩니다.
-부모클래스 Workout에서 제공하는 기능들이 abs와 어울리지 않을 수 있습니다. 
-따라서 subclassing은 변경에 용이하지 못합니다.
+하지만 이때 자식 클래스에 어울리지 않는 코드를 부모 클래스가 가졌다면 해당 코드를 어쩔 수 없이 자식 클래스에 강제해야 하는 경우가 생깁니다.
+기능이 변경되거나 추가되었을 때 자식 클래스를 만들며 상속 받는 부모 클래스와 어울리지 않을 수 있습니다.
 
-enum을 사용하면 아래와 같이 변경에 용이합니다. 
-아래와 같이 subclassing이 아닌 enum을 사용해 구현했습니다.
+열거형을 사용하면 새로운 요구사항에 대응하기 더 쉽습니다.
+
+여러 운동 객체(Run, Cylcle)를 생성한다고 가정해 봅시다.
+서브 클래싱 방식으로 구현한다면 Workout 부모 클래스를 만들고 여러 운동 객체를 Workout 클래스의 자식 클래스로 만들것 입니다.
+Workout 부모 클래스의 프로퍼티로 id, startTime, endTime, distance가 있습니다. 그리고 Run, Cycle 자식 클래스는 Workout 클래스의 프로퍼티가 모두 필요합니다. 
+Workout 클래스는 부모 클래스로서 부족함이 없습니다.
+
+하지만 id, repetitions, date 프로퍼티만 요구하는 Pushups 객체가 추가된다면 문제가 생깁니다.
+Workout 부모 클래스에서 id를 제외한 모든 프로퍼티는 새로 추가된 Pushups 객체에 어울리지 않게 됩니다.
+
+만약 여기서 Workout 부모 클래스를 수정한다면 id 프로퍼티를 제외한 나머지 프로퍼티는 삭제됩니다.
+너무 많은 수정이 따르게 됩니다.
+
+심지어 id를 요구하지 않는 abs 객체가 추가된다면 더 이상 Workout 부모 클래스는 부모 클래스로서 역할하지 못합니다.
+서브클래싱 방식은 자식 클래스의 중복을 줄일 수 있지만 변경에 용이하지 못합니다.
+
+열거형을 사용하면 서브 클래싱과 달리 변경에 용이합니다. 
+아래 코드는 열거형을 사용해 운동 객체를 구현한 코드입니다.
 
 ```swift
 enum Workout {
@@ -226,7 +237,7 @@ enum Workout {
 }
 ```
 
-이때 abs가 추가된다면 아래 코드와 같이 간단히 추가할 수 있습니다.
+여기서 abs가 추가된다면 아래 코드와 같이 간단히 추가할 수 있습니다.
 
 ```swift
 enum Workout {
@@ -237,18 +248,17 @@ enum Workout {
 }
 ```
 
-물론 subclassing을 사용한다면 공통 프로퍼티나 함수를 부모 클래스에 넣어 자식 클래스들에서의 중복을 줄일 수 있습니다. 
-하지만 기능 확장이 생기면 부모 클래스를 리팩터링해야 합니다. 
-enum을 사용한다면 기능 확장에 추가적인 리팩터링이 필요 없습니다. 
-앞에서 봤듯이 class와 마찬가지로 enum을 통해 추상화도 가능합니다.
+물론 서브 클래싱을 사용한다면 공통 프로퍼티나 함수를 부모 클래스에 넣어 자식 클래스들에서의 중복을 줄일 수 있습니다. 
+하지만 기능이 추가되거나 변경되면 부모 클래스를 리팩터링해야 합니다. 
+열거형을 사용한다면 기능 확장에 추가적인 리팩터링이 필요 없습니다. 
 
 These are trade-offs you'll have to make. If you can lock down your data model to a fixed, manageable number of cases, enums can be a good choice.
 
 ## Algebraic data types
 
 Algebraic data에는 sum types와 product types이 있습니다. 
-sum types은 "or"로 설명되고 enum이 해당합니다. product types은 "and"로 설명되고 struct, tuple이 해당합니다. 
-sum types의 enum은 고정된 개수의 데이터를 표현합니다. product types은 여러 개수의 데이터를 표현합니다. 
+sum types은 "or"로 설명되고 열거형이 해당합니다. product types은 "and"로 설명되고 구조체와 튜플이 해당합니다. 
+sum types의 열거형은 고정된 개수의 데이터를 표현합니다. product types은 여러 개수의 데이터를 표현합니다. 
 
 데이터 모델링할 때 데이터가 표현할 수 있는 상태의 수를 체크하는 게 중요합니다. 
 데이터가 표현할 수 있는 상태가 많을수록 표현할 수 있는 타입을 추론하기 어렵습니다.
@@ -268,7 +278,7 @@ struct PaymentStatus {
 ```
 
 위와 같이 PaymentStatus를 만든다면 2가지(Bool)와 3가지(PaymentType)를 곱하여 6가지 변화를 가지는 데이터로 볼 수 있습니다.
-이를 sum types인 enum을 통해 리팩토링한다면 3가지 변화를 가지는 데이터로 바꿀 수 있습니다.
+이를 sum types인 열거형을 통해 리팩토링한다면 3가지 변화를 가지는 데이터로 바꿀 수 있습니다.
 
 ```swift
 enum PaymentStatus {
@@ -282,9 +292,9 @@ enum PaymentStatus {
 
 ## A safer use of strings
 
-string과 enum을 사용하는 경우는 흔합니다.
-enum에서 raw value를 추가할 수 있습니다. 
-이때 모든 case는 raw value를 가져야 합니다. 
+string과 열거형을 함께 사용하는 경우는 흔합니다.
+열거형에서 raw value를 추가할 수 있습니다. 
+이때 모든 케이스스는 raw value를 가져야 합니다. 
 raw value로는 String, Char, Int, float만 가능합니다.
 
 ```swift
@@ -295,7 +305,7 @@ enum Currency: String {
 }
 ```
 
-enum을 raw value로 사용할 때는 아래와 같이 간략히 사용할 수도 있습니다.
+열거형을 raw value로 사용할 때는 아래와 같이 간략히 사용할 수도 있습니다.
 
 ```swift
 enum Currency: String {
@@ -305,10 +315,10 @@ enum Currency: String {
 }
 ```
 
-지금까지 보던 enum의 연관 값들은 런타임에 정의됩니다. 하지만 enum을 raw values로 사용하면 해당 값은 컴파일 타임에 정의됩니다.
+지금까지 보던 열거형의 연관 값(튜플)들은 런타임에 정의됩니다. 하지만 열거형을 raw values로 사용하면 해당 값은 컴파일 타임에 정의됩니다.
 
-enum을 raw values와 사용할 때 코드 작성자에 의한 버그에 주의해야 합니다.
-enum을 raw values로 사용하면 올바르지 않은 값을 넣어도 컴파일러가 알아차리지 못합니다. 
+열거형을 raw values와 사용할 때 코드 작성자에 의한 버그에 주의해야 합니다.
+열거형을 raw values로 사용하면 올바르지 않은 값을 넣어도 컴파일러가 알아차리지 못합니다. 
 
 아래 코드와 같이 euro를 eur로 잘못 적었다면 컴파일러는 euro를 eur로 인식해서 버그가 숨어들게 됩니다.
 
@@ -322,7 +332,7 @@ enum Currency: String {
 let parameters = ["filter": currency.rawValue]
 ```
 
-다음과 같은 버그를 방지하기 위해 currency enum의 raw values를 무시하고 raw values가 필요할 때 데이터를 다시 생성하도록 아래와 같이 구현합니다.
+다음과 같은 버그를 방지하기 위해 currency 열거형형의 raw values를 무시하고 raw values가 필요할 때 데이터를 다시 생성하도록 아래와 같이 구현합니다.
 
 ```swift
 enum Currency: String {
@@ -339,10 +349,10 @@ switch currency {
 }
 ```
 
-위 코드와 같이 enum의 raw value를 무시하고 해당 값이 필요할 때마다 switch로 얻는다면 버그를 방지할 수 있습니다. 
-다시 말해 enum의 raw value를 사용하면 결과적으로 컴파일러의 검사를 잃게 됩니다.
+위 코드와 같이 열거형의 raw value를 무시하고 해당 값이 필요할 때마다 switch로 얻는다면 버그를 방지할 수 있습니다. 
+다시 말해 열거형의 raw value를 사용하면 결과적으로 컴파일러 타임 안전성을 잃게 됩니다.
 
-enum을 사용할 때 string과 매칭하는 경우도 빈번합니다.
+열거형을 사용할 때 string과 패턴 매칭하는 경우도 빈번합니다.
 
 ```swift
 func iconName(for fileExtension: String) -> String {
@@ -358,7 +368,7 @@ iconName(for: "jpg")
 iconName(for: "JPG")
 ```
 
-위에서 jpg를 함수에 넣었을 때는 성공적으로 매칭이 됩니다. 
+위에서 jpg를 iconName 함수에 넣었을 때는 성공적으로 패턴 매칭이 됩니다. 
 하지만 JPG에 매칭되는 결과는 없기에 버그가 발생하게 됩니다. 코드 작성자가 실수할 가능성까지 버그로 봅니다. 
 이를 enum을 통해 개선할 수 있습니다. 
 
