@@ -235,6 +235,48 @@ lazy 프로퍼티를 가진 객체가 복사될 때 더 주의해야 합니다.
 다시 말해, lazy 프로퍼티가 초기화된 이후 lazy 프로퍼티 내부에서 참조하는 변수가 변경되더라도 
 해당 변경 사항이 lazy 프로퍼티에 영향을 미칠 수 없기 때문에 lazy 프로퍼티 내부에서 참조하는 변수를 불변하게 만듭시다.
 
+lazy var 프로퍼티를 사용하다보면 retain cycle을 주의해야 합니다.
+
+아래와 같이 블록{} 마지막에 () 가 붙은 형태는 nonescaping closure라고 해서 실행 즉시 결과를 반환함을 가정하기 때문에 클로저 내부에서 self를 명시적으로 참조할 필요가 없고, self instance의 retain count를 올리지도 않기 때문에 retain cycle을 걱정할 필요가 없습니다.
+
+마지막에 () 을 통해서 즉시 실행하고 결과를 돌려주기에 메모리 누수는 없습니다.
+
+```swift
+lazy var contents: String = {
+  print("I'm taking my sweet time to calculate.")
+  sleep(2)
+
+  switch level {
+  case ..<25: return "Watch an English documentary."
+  case ..<50: return "Translate a newspaper article."
+  case ..<25: return "Read two academic papers."
+  case default: return "Try to read English for 30 minutes."
+  }
+}()
+```
+
+반면 아래와 같은 형태로 closure를 타입으로 선언 후 사용하면 self를 명시적으로 참조해야 하고, closure가 실행되고 나서도 self의 retain count가 증가한 상태로 유지되기 때문에 weak capture없이 self를 사용하면 retain cycle이 발생할 수 있습니다.
+
+```swift
+lazy var contents: () -> String = {
+  print("I'm taking my sweet time to calculate.")
+  sleep(2)
+
+  switch self.level {
+  case ..<25: return "Watch an English documentary."
+  case ..<50: return "Translate a newspaper article."
+  case ..<25: return "Read two academic papers."
+  case default: return "Try to read English for 30 minutes."
+  }
+}()
+```
+
+contents 프로퍼티는 () -> String 클로저를 리턴하고 있습니다. 따라서 [weak self]를 통해서 메모리 누수를 방지해주어야 합니다.
+contents 프로퍼티에 의해 메모리에는 값이 아닌 클로저가 올라가 있고 해당 클로저는 self의 참조를 유지하고 있습니다.
+
+따라서 앞에서 lazy var 프로퍼티가 값을 리턴한다면 프로퍼티 초기화 이후 계속해서 동일한 값을 리턴하지만 클로저를 리턴하는 경우 클로저 안에서 참조하는 변수의
+변경에 따라 리턴 값이 달라질 수 있습니다.
+
 ## Property observers
 Property observers are actions triggered when a stored property changes value.
 
