@@ -291,6 +291,20 @@ lazy var contents: () -> String = { [weak self] in
 따라서 앞에서 lazy var 프로퍼티가 값을 리턴한다면 프로퍼티 초기화 이후 계속해서 동일한 값을 리턴하지만 클로저를 리턴하는 경우 클로저 안에서 참조하는 변수의
 변경에 따라 리턴 값이 달라질 수 있습니다.
 
+그렇다면 lazy 프로퍼티는 항상 옳을까요?
+
+아쉽게도 아닙니다.
+
+lazy 프로퍼티는 비동기 작업, 멀티 쓰레드 환경에서 안전하지 못합니다.
+lazy 프로퍼티가 단일 쓰레드 환경에서는 초기 접근에만 동작하고 이후에는 첫 동작의 결과를 리턴하지만 멀티 쓰레드 환경에서는 이 특징이 보장되지 않습니다.
+
+아래 링크는 멀티 쓰레드 환경에서 lazy 프로퍼티가 가지는 취약점을 잘 설명한 글입니다.
+책을 읽으며 lazy 프로퍼티를 초기화에 높은 비용이 드는 경우 사용하면 유용하겠다고 생각했지만 thread-safe하지 않다는 글을 보니 자주 사용할지 의구심이 들긴합니다. 
+
+[Swift-Lazy-진짜-필요할-때만-씁시다](https://velog.io/@niro/Swift-Lazy-%EC%A7%84%EC%A7%9C-%ED%95%84%EC%9A%94%ED%95%A0-%EB%95%8C%EB%A7%8C-%EC%94%81%EC%8B%9C%EB%8B%A4)
+
+[Swift의 lazy var](https://brunch.co.kr/@tilltue/71)
+
 ## Property observers
 Property observers are actions triggered when a stored property changes value.
 
