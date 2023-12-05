@@ -47,8 +47,8 @@ public enum Optional<Wrapped> {
 ```
 
 스위프트에서 문법적 편리함을 위해 제공하는 기능들을 syntactic sugar라고 부릅니다.
-변수의 옵셔널 선언을 ?로 할 수 있는 이유도 syntactic sugar의 도움에 있습니다.
-원래라면 위와 같은 enum은 Optional<Wrapped>로 자료형이 선언되어야 합니다. 
+변수의 옵셔널 선언을 ?로 할 수 있는 이유도 사실은 syntactic sugar의 도움에 있습니다.
+원래라면 위와 같은 enum은 Optional<Wrapped> 형태의 자료형으로 선언되어야 합니다. 
 syntactic sugar 덕분에 ?선언만으로 옵셔널을 선언할 수 있습니다.
 
 관용적으로 Optional<Wrapped>보다 ?를 사용한 방식이 더 어울립니다.
