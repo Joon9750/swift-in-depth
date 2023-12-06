@@ -31,7 +31,7 @@ let player = Player(name: "June", pawn = .shoe)
 ```
 
 만약 구조체에 custom init을 만들었다면 memberwise init(모든 프로퍼티를 초기화하는 default init)은 호출되지 않습니다.
-custom init을 만들었다고 memeberwise init을 굳이 왜 지원하지 않을까? 라는 생각을 할 수 있습니다.
+custom init을 만들었다고 memeberwise init을 왜 굳이 지원하지 않을까? 라는 생각을 할 수 있습니다.
 하지만 이는 memeberwise init으로 custom init의 초기화 동작을 우회하는 행위를 방지하기 위함입니다. 이는 안정성 측면에서 훌륭한 방식입니다.
 
 물론 memeberwise init을 제공 받는 동시에 custom init을 구현하는 방법도 존재합니다.
@@ -216,11 +216,12 @@ In a class hierarchy, convenience init go horizontal, and designated init go ver
 만약 subclassing 될 때마다 위의 동작이 반복되면 자식 클래스는 여러 designated init을 가지게 될것입니다.
 (override designated init도 designated init입니다.) 이는 계층을 복잡하게 만들 수 있습니다.
 
-지금부터 자식 클래스에 초기화가 필요한 프로퍼티가 추가되어도 부모 클래스의 init을 상속받으며 designated init을 한 개로 유지하는 방법을 살펴봅시다.
+자식 클래스에 초기화가 필요한 프로퍼티가 추가되어도 부모 클래스의 init을 모두 상속받으며 designated init을 한 개로 유지하는 방법을 살펴봅시다.
 
 designated init을 override 할 때 convenience init으로 부모 클래스의 designated init을 override한다면 자식 클래스의 designated init을 한 개로 유지할 수 있습니다.
-여기서 부모 클래스의 designated init을 자식 클래스의 convenience init으로 override하고 자식 클래스의 convenience override init에서 자식 클래스의 designated init을 호출하고 designated init에서 부모 클래스의 designated init을 
-호출하도록 구현하면 됩니다.
+
+여기서 부모 클래스의 designated init을 자식 클래스의 convenience init으로 override 할 때 자식 클래스의 convenience override init에서 자식 클래스의 designated init을 호출하고 designated init에서 부모 클래스의 designated init을 
+호출하도록 구현하면 부모 클래스의 모든 init을 상속 받으며 하위 자식 클래스의 designated init을 한 개로 유지할 수 있습니다.
 
 아래 코드로 확인해봅시다.
 
@@ -231,12 +232,13 @@ class MutabilityLand: BoardGame {
 
   let instructions: String
 
-  // 부모 designed init을 override하는 convenience override init
+  // 부모 designated init을 override하는 convenience override init
   convenience override init(players: [Player], numberOfTiles: Int) {
     // The initializer now points sideways (self.init) versus upwards (super.init)
     self.init(player: players, instructions: "Read the manual", numberOfTiles: numberOfTiles)
   }
 
+  // 자식 클래스의 designated int
   init(players: [Player], instructions: String, numberOfTiles: Int) {
     self.instructions = instructions
     super.self(players: players, numberOfTiles: numberOfTiles)
@@ -244,10 +246,10 @@ class MutabilityLand: BoardGame {
 }
 ```
 
-위의 코드처럼 override init(designated init)을 convenience override init으로 바꾸며 designated init을 두 개에서 한 개로 줄입니다.
+위의 코드처럼 override init(designated init)을 convenience override init으로 바꾸면 자식 클래스의 designated init을 두 개에서 한 개로 줄입니다.
 이제는 MutabilityLand의 자식 클래스가 생기면 자식 클래스에서는 하나의 designated init만 override하면 MutabilityLand의 모든 init을 상속 받을 수 있습니다.
 
-그치만 designated init의 성격상 designated init에서 모든 프로퍼티가 초기화되어야 합니다.
+물론 designated init의 특성상 designated init에서 모든 프로퍼티가 초기화되어야 합니다.
 따라서 자식 클래스에 추가된 초기화가 필요한 프로퍼티는 designated init에서 초기화하고 부모 클래스의 designated init을 호출합시다.
 다시 말하지만 designated init은 모든 클래스에 한 개 이상 존재해야 하고 모든 프로퍼티를 초기화할 수 있어야 합니다.
 
@@ -266,13 +268,14 @@ class MutabilityLandJunior: MutabilityLand {
   }
 }
 ```
+
 Thanks to convenience override, this subclass gets many initializers for free.
 
 ## Required initializers
 
 Required initializers play a crucial role when subclassing classes.
 
-init 앞에 required를 붙여서 자식 클래스가 해당 init을 필수로 구현하도록 만들 수 있습니다.
+init 앞에 required를 붙여 자식 클래스가 해당 init을 필수로 구현하도록 만들 수 있습니다.
 required init을 사용하는 경우는 크게 두 가지입니다.
 
 1. factory methods
@@ -297,8 +300,8 @@ Self를 리턴하는 함수는 말 그대로 본인의 타입을 리턴하는 �
 BoardGame 인스턴스를 self.init을 통해 만들어 집니다.
 
 하지만 위 코드에는 required error가 발생합니다. 
-makeGame 함수가 self.init을 사용하기 때문에 자식 클래스가 생겼을 경우 리턴 타입인 Self와 makeGame 함수에서
-만드는 self.init의 Self와 일치하지 않을 수 있습니다.
+makeGame 함수가 self.init을 사용하기 때문에 BoardGame 클래스의 자식 클래스가 생겼을 경우 리턴 타입인 Self와 makeGame 함수에서
+만드는 self.init의 타입이 일치하지 않을 수 있습니다.
 
 따라서 이 경우 자식 클래스에서 init을 구현하도록 강제해야합니다.
 자식 클래스에서 required init을 재정의할 때는 override 키워드 대신 required 키워드를 사용합니다.
