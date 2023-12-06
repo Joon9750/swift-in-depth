@@ -363,8 +363,10 @@ func describeAction(event: PasteBoardEvent?, contents: PastBoardEvent?) -> Strin
 
 ## Chaining optionals
 옵셔널 체이닝은 옵셔널이 본인의 프로퍼티로 또 다른 옵셔널을 가질 때, 옵셔널의 옵셔널 프로퍼티에 접근하기 위해 사용됩니다.
+
 ?를 사용해 옵셔널 체이닝을 표현합니다.
-옵셔널 체이닝으로 옵셔널의 옵셔널 프로퍼티에 접근할 수 있지만 해당한 프로퍼티 또한 옵셔널이기 때문에 추가적인 옵셔널 언래핑이 있어야 순수 값을 추출 가능합니다.
+옵셔널 체이닝으로 옵셔널의 옵셔널 프로퍼티에 접근할 수 있지만 옵셔널 체이닝을 통해 내부 옵셔널에 접근만 한 것입니다.
+해당한 프로퍼티 또한 옵셔널이기 때문에 추가적인 옵셔널 언래핑이 있어야 순수 값을 추출 가능합니다.
 
 아래 코드를 통해 살펴봅시다.
 
@@ -393,15 +395,18 @@ if let image = customer.favoriteProduct?.image {
 imageView.image = customer.favoriteProduct?.image ?? UIImage(named: "missing_image")
 ```
 
-위 코드처럼 옵셔널 체이닝으로 접근한 옵셔널 값을 if let 또는 ??로 옵셔널 언래핑할 수 있습니다.
+위 코드에서 Customer의 favoriteProduct는 옵셔널 프로퍼티 속 옵셔널 프로퍼티입니다. 옵셔널 체이닝으로 접근한 옵셔널 값을 if let 또는 ??로 언래핑할 수 있습니다.
 옵셔널 체이닝으로 옵셔널 값이 갖는 옵셔널에 접근할 때 더욱 간결히 접근할 수 있습니다.
 
 ## Constraining optional Booleans
+Bool은  true / false 두 가지 상태를 가집니다.
+그렇다면 optional Bool은 몇 가지 상태를 가질까요?
+
 스위프트에서 optional Bool의 상태는 true / false / nil이 될 수 있습니다.
 상황의 맥락에 따라 optional Bool 타입 값이 nil일 때 nil을 true / false / nil로 취급할 수 있습니다.
 
 가장 먼저 optional Bool 타입이 두 가지 상태(true/false)를 가지는 경우를 살펴봅시다.
-optional Bool 타입이 nil일 때 해당 값을 true / false로 취급할 경우 Bool 타입은 두 가지 상태를 갖게 됩니다.
+optional Bool 타입이 nil일 때 해당 값을 true 또는 false로 취급할 경우 Bool 타입은 두 가지 상태를 갖게 됩니다.
 이때는 ??을 통해 default 값을 설정하는 방식으로 구현할 수 있습니다.
 위에서 보았듯이 ??는 언래핑과 동시에 해당 값이 nil일 경우 default 값을 따라가도록 합니다.
 
@@ -422,13 +427,15 @@ print(isFaceIdEnabled)  // true
 
 지금부터 optional Bool 타입이 세 가지 상태(true/false/nil)를 가지는 경우를 살펴봅시다.
 
-optional Bool 타입을 세 가지 상태로 사용할 때 더 여러 상황에 어울립니다.
-optional Bool 타입을 세 가지 상태로 사용할 때 enum과 함께 사용합시다.
-optional Bool의 내부 값에 따라 enum의 case에 매칭하는 방법으로 세 가지 상태를 나타낼 수 있습니다.
+optional Bool 타입을 세 가지 상태로 사용할 때 더 여러 상황에 어울립니다. (더 유용합니다.)
+optional Bool 타입을 세 가지 상태로 사용할 때 열거형의 성격을 활용하게 됩니다.
+optional Bool 내부 값에 따라 열거형의 case에 패턴 매칭하는 방법으로 세 가지 상태를 나타낼 수 있습니다.
 
 다시 말해, optional Bool의 내부 값을 custom enum으로 변환해 사용합시다. 이때 RawRepresentable Protocol까지 사용하면 더욱 swift 다워집니다.
 
-RawRepresentable Protocol은 Swift에서 enum은 하나 이상의 associated value를 가질 수 있는데 이 값의 rawValue를 정의한 프로토콜입니다. (rawValue를 지원합니다.)
+[Apple Developer Documentation](https://developer.apple.com/documentation/swift/rawrepresentable)
+
+Swift에서 열거형이 하나 이상의 연관 값을 가질 때 이 값의 rawValue를 정의하도록 만들어주는 프로토콜이 RawRepresentable Protocol입니다. (rawValue를 지원합니다.)
 RawRepresentable Protocol을 채택하여 타입을 rawValue로 변환하고 그 반대의 변환도 지원합니다.
 특정 rawValue를 enum의 case로 매칭시켜 서로에게 대응할 수 있습니다. (Bool(rawValue) <-> Enum)
 
@@ -462,8 +469,8 @@ enum UserPreference: RawRepresentable {
 }
 ```
 
-위와 같이 optional Bool을 enum과 함께 사용해 세 가지 상태를 표현할 때 컴파일 타임에 이점도 있고 더 여러 상황에 적합하지만, 
-결국 새로운 타입(enum)을 만드는 것이기 때문에 코드를 더럽힐 가능성이 있으니 주의해야 합니다.
+위와 같이 optional Bool을 enum과 함께 사용해 세 가지 상태를 표현할 때 컴파일 타임 안전성도 보장 받고 더 여러 상황에 유용합니다. 
+하지만 새로운 타입(enum)을 만드는 것이기 때문에 코드를 더럽힐 가능성이 있으니 주의해야 합니다.
 
 ## Force unwrapping guidelines
 옵셔널을 강제 언래핑 했을 때 옵셔널이 nil이라면 충돌이 발생합니다.
