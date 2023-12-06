@@ -52,6 +52,7 @@ public enum Optional<Wrapped> {
 syntactic sugar 덕분에 ?선언만으로 옵셔널을 선언할 수 있습니다.
 
 관용적으로 Optional<Wrapped>보다 ?를 사용한 방식이 더 어울립니다.
+아래 코드는 Optional<Wrapped>와 ?를 사용한 코드입니다.
 
 ```swift
 // with syntatic sugar
