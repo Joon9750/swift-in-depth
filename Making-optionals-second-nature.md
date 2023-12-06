@@ -51,11 +51,11 @@ public enum Optional<Wrapped> {
 원래라면 위와 같은 enum은 Optional<Wrapped> 형태의 자료형으로 선언되어야 합니다. 
 syntactic sugar 덕분에 ?선언만으로 옵셔널을 선언할 수 있습니다.
 
-관용적으로 Optional<Wrapped>보다 ?를 사용한 방식이 더 어울립니다.
-아래 코드는 Optional<Wrapped>와 ?를 사용한 코드입니다.
+관용적으로 Optional<Wrapped>보다 ?를 사용한 방식이 주로 쓰입니다.
+아래 코드는 Optional<Wrapped>와 ?를 사용해 옵셔널 변수를 선언한 코드입니다.
 
 ```swift
-// with syntatic sugar
+// with syntatic sugar : ?
 struct Customer {
   let id: String
   let email: String
@@ -64,7 +64,7 @@ struct Customer {
   let lastName: String?
 }
 
-// without syntatic sugar
+// without syntatic sugar : Optional<Wrapped>
 struct Customer {
   let id: String
   let email: String
@@ -75,7 +75,8 @@ struct Customer {
 ```
 
 옵셔널의 내부 값에 접근하려면 옵셔널을 언래핑해야 합니다.
-옵셔널 언래핑하면 가장 먼저 떠오르는 건 if let입니다.
+
+옵셔널 언래핑하면 가장 먼저 떠오르는 건 if let입니다. 물론 guard let을 사용해 옵셔널을 언래핑할 수 있습니다.
 아래 코드는 if let을 사용한 옵셔널 언래핑 예시입니다.
 
 ```swift
@@ -84,27 +85,6 @@ let customer = Customer(id: "30", email: "mayeloe@naver.com", firstName: "Jake",
 print(customer.firstName)  // "Optional("Jake")
 if let firstName = customer.firstName {
   print(firstName)  // "Jake"
-}
-```
-
-enum은 case에 따른 패턴 매칭이 가능합니다.
-따라서 Optional도 enum으로 구현되었기에 패턴 매칭이 가능합니다.
-아래 코드와 같이 Optional을 언래핑할 때 패턴 매칭을 사용하는 것도 유용합니다.
-
-Optional의 패턴 매칭에도 syntactic sugar가 도움을 줍니다.
-아래 코드를 확인해 봅시다. syntactic sugar의 유무와 관계없이 동일한 기능을 하는 코드입니다.
-
-```swift
-// Optional pattern match without syntactic sugar 
-switch customer.firstName {
-  case .some(let name): print("First name is \(name)")
-  case .none: print("Customer didn't enter a first name")
-}
-
-// Optional pattern match with syntactic sugar
-switch customer.firstName {
-  case let name?: print("First name is \(name)")
-  case nil: print("Customer didn't enter a first name")
 }
 ```
 
@@ -148,6 +128,27 @@ if
 }
 ```
 
+열거형은 case에 따른 패턴 매칭이 가능합니다.
+Optional도 열거형으로 구현되었기 때문에 패턴 매칭이 가능합니다.
+아래 코드와 같이 Optional을 언래핑할 때 패턴 매칭이 유용히 사용됩니다.
+
+Optional의 패턴 매칭에도 syntactic sugar가 도움을 줍니다.
+아래 코드를 확인해 봅시다. syntactic sugar의 유무와 관계없이 동일한 기능을 하는 코드입니다.
+
+```swift
+// Optional pattern match without syntactic sugar 
+switch customer.firstName {
+  case .some(let name): print("First name is \(name)")
+  case .none: print("Customer didn't enter a first name")
+}
+
+// Optional pattern match with syntactic sugar
+switch customer.firstName {
+  case let name?: print("First name is \(name)")
+  case nil: print("Customer didn't enter a first name")
+}
+```
+
 ## Variable shadowing
 "같은 이름으로 언래핑합시다!"
 
@@ -178,7 +179,7 @@ extension Customer: Customer {
 if let은 옵셔널이 nil일 경우 함수를 종료시키지 않고 계속해서 함수를 진행합니다.
 따라서 if let은 옵셔널이 nil이 필요한 경우 사용합니다.
 
-만약 옵셔널 언래핑에 nil이 필요 없으면 guard let이 더 적합합니다.
+만약 옵셔널 언래핑에 nil이 필요 없다면 guard let이 더 적합합니다.
 guard let에서 옵셔널이 nil이라면 해당 함수를 종료시킵니다.
 
 ```swift
@@ -197,19 +198,20 @@ struct Customer {
 }
 ```
 
-guard let을 통해 옵셔널을 언래핑하면 guard let 구문 아래로는 옵셔널 타입이 내려갈 일이 없어진다.
+guard let을 통해 옵셔널을 언래핑하면 guard let 구문 아래로는 옵셔널 타입이 내려갈 일이 없어집니다.
 
 ## Returing optional strings
 optional string의 경우 언래핑되지 않았을 때 빈 문자열("")을 리턴하는건 흔하게 볼 수 있습니다.
 빈 문자열을 리턴하는게 틀렸다는 건 아닙니다. 
 
 하지만 일부 경우에는 빈 문자열을 리턴하는것 보다 optional string을 리턴하는게 유용할 때가 있습니다.
-예를 들어 위의 Customer 구조체가 가진 displayName에서 언래핑 실패 이후 빈 문자열을 던질 경우, displayName을 호출하는 부분에서 코드 작성자가 직접 displayName.isEmpty를 체크해야 합니다.
-displayName의 호출 부에서는 특정 이름을 기대하지 빈 문자열을 기대하고 있지 않습니다.
-심지어 isEmpty를 체크하지 않더라도 컴파일 타임에 체크하지 않았다는 사실을 알 수 없습니다.
 
-이럴 때 빈 문자열이 아닌 optional string을 리턴하면 displayName 호출부에서는 옵셔널을 받을 가능성이 생기기며 리턴 받는 optional string을 언래핑해야할 의무가 생깁니다.
-따라서 컴파일 타임에 displayName이 값을 가지지 않음을 알 수 있습니다.
+예를 들어 위의 Customer 구조체가 가진 displayName에서 언래핑 실패 이후 빈 문자열을 던질 경우, displayName을 호출하는 부분에서 코드 작성자가 직접 displayName.isEmpty를 체크해야 합니다.
+만약 displayName.isEmpty를 호출부 중 하나라도 빼먹는다면 버그로 이어지고 빼먹었다는 사실을 컴파일러가 알려주지 못합니다.
+또한 displayName의 호출 부에서는 특정 이름을 기대하지 빈 문자열을 기대하고 있지 않습니다.
+
+이럴 때 빈 문자열이 아닌 optional string을 리턴하면 displayName 호출부에서는 옵셔널을 리턴 받아 처리하기 때문에 옵셔널 언래핑 과정을 거치며 컴파일 타임 안전성을 제공받습니다.
+만약 nil을 리턴한다면 언래핑 과정에서 컴파일러가 displayName이 값을 가지지 않음을 알 수 있습니다.
 
 아래 코드는 옵셔널 언래핑 실패 시 빈 문자열을 던지던 displayName을 optional string을 던지도록 수정한 코드입니다.
 옵셔널을 리턴하며 호출 부에서 옵셔널을 언래핑할 책임을 갖게 됩니다.
@@ -238,8 +240,9 @@ if let displayName = customer.displayName {
 위의 예에서 displayName은 firstName과 lastName을 모두 요구하고 있습니다.
 만약 firstName과 lastName 중 하나라도 있다면 displayName을 형성하도록 만들려면 어떻게 해야 할까요?
 이런 경우 옵셔널을 세분화해서 다뤄야 합니다.
+옵셔널을 세분화한다는게 무엇일까요? 결국 옵셔널 열거형을 패턴 매칭하겠다는 의미입니다.
 
-?와 switch 그리고 tuple을 사용하여 옵셔널을 세분화하여 언래핑할 수 있습니다. (패턴 매칭과 비슷한 느낌입니다.)
+?와 switch 그리고 튜플을 사용하여 옵셔널을 세분화하여 언래핑할 수 있습니다. (패턴 매칭과 비슷한 느낌입니다.)
 
 아래 코드로 확인해 봅시다.
 
@@ -262,23 +265,26 @@ struct Customer {
 
 위와 같이 손님이 풀네임을 입력하지 않을 경우, 일부 이름으로 풀네임을 대신할 수 있습니다.
 
-다만, tuple에 너무 많은 옵셔널을 넣는 행위는 경계해야 합니다.
-3개 미만의 옵셔널이 tuple에 적합합니다.
+위 코드에서는 튜플이 옵셔널 두 개를 가지고 있습니다.
+하지만 튜플에 너무 많은 옵셔널을 넣는 행위는 경계해야 합니다.
+3개 미만의 옵셔널을 갖는 튜플이 적합합니다.
 
 ## Falling back when an optional is nil
 fallback value(??)는 옵셔널 언래핑 종료 중 하나입니다. 
 옵셔널이 nil일 경우 default 값으로 대신하며 언래핑합니다.
 
 아래 코드로 확인해 봅시다.
+
 ```swift
 let title: String = customer.displayer ?? "customer"
 createConfirmationMessage(name: title, product: "Economy size party tub")
 ```
 
 ## Simplifying optional enums
-앞서 말했듯이 옵셔널은 enum으로 구현되어 있습니다.
-그렇다면 optional enum은 enum안에 enum이 구현된 것입니다.
+앞서 말했듯이 옵셔널은 열거형으로 구현되어 있습니다.
+그렇다면 optional enum은 열거형 내부에 열거형이 구현된 것입니다.
 
+?를 사용하면 옵셔널 언래핑과 옵셔널 내부 값 접근을 동시에 할 수 있습니다.
 optional enum을 언래핑할 때 if let을 대신하여 ?을 사용해 코드를 개선할 수 있습니다.
 아래 코드를 보고 이해해 봅시다.
 
@@ -310,6 +316,7 @@ if let membership = customer.membership {
 
 if let을 대신해서 ?를 사용한다면 옵셔널 언래핑과 옵셔널 내부 값 접근을 동시에 할 수 있습니다.
 이는 코드를 더 짧게 만듭니다.
+
 아래 방법으로 추가적인 if let 없이 enum의 패턴 매칭과 동시에 옵셔널 언래핑을 할 수 있습니다.
 
 ```swift
@@ -322,7 +329,7 @@ case nil: print("none")
 
 여기서 문제입니다.
 
-만약 아래 코드와 같이 PasteBoardContents enum과 PasteBoardEvent enum이 있을 때 describeAction 함수를 완성해 봅시다. 
+만약 아래 코드와 같이 PasteBoardContents enum과 PasteBoardEvent enum이 있을 때 describeAction 함수 구현부를 완성해 봅시다. 
 
 ```swift
 enum PasteBoardContents {
@@ -341,6 +348,7 @@ func describeAction(event: PasteBoardEvent?, contents: PastBoardEvent?) -> Strin
 ```
 
 describeAction 함수로 옵셔널이 2개 들어오기 때문에 두 옵셔널을 튜플에 넣고 ?와 함께 패턴 매칭하여 옵셔널을 언래핑하는 방식이 적절합니다.
+
 아래 코드를 통해 확인해 봅시다.
 
 ```swift
