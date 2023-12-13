@@ -550,7 +550,11 @@ func loadFile(name: String) -> Data? {
 호출부에서는 항상 에러를 옵셔널로 변환할 수 있습니다. try?를 사용하면 옵셔널로 에러를 catch 할 수 있습니다.
 하지만 에러의 발생 이유가 중요하다면 옵셔널이 아닌 에러를 던져야 합니다. 옵셔널의 경우 에러의 발생 이유에는 집중하지 않기 때문입니다.
 
+## Summary
 
+- Even though errors are usually enums, any type can implement the Error protocol
+- Inferring from a function which errors it throws isn't possible, but you can use Quick Help to soften the pain
+- Keep throwing code in a predictable state for when an error occurs. You 
 
 
 
