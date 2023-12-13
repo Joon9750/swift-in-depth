@@ -371,9 +371,13 @@ extension ParseRecipeError: CustomNSError {
 let nsError: NSError = ParseRecipeError.parseError(line: 3, symbol: "#") as NSError
 ```
 
+에러를 처리하는 위치는 어디가 바람직할까요?
+저차원 함수에서 에러를 핸들링하기 보다 고차원 함수로 에러를 전달하여 고차원 함수에서 에러를 핸들링하는 방식이 바람직합니다.
+에러 핸들링을 중앙 집중화 하는것이 중요합니다. 그렇다면 중앙 집중화된 에러 핸들링은 어떤 형태일까요?
+아래 코드를 살펴봅시다.
 
-
-
+아래 코드는 ErrorHandler에서 에러 핸들링의 모든 책임을 가집니다. 중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 에러 핸들링 코드가 여러곳에 흝어져 있다면 변경 사항에 대응하기 어려워집니다.
+ErrorHandler에서는 함수 오버라이드를 통해 여러 유형의 에러를 핸들링하고 있습니다. ErrorHandler 구조체에서는 static 변수로 싱글턴 패턴을 구현하여 에러 핸들링이 필요한 상황에 어디서든 접근 가능하도록 만들었습니다.
 
 
 
