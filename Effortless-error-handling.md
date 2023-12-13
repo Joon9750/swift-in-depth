@@ -543,12 +543,12 @@ try?와 비슷한 성격이지만 에러가 발생되면 크래쉬를 발생시�
 ```swift
 func loadFile(name: String) -> Data? {
   let url = playgroundSharedDatadirectory.appendingPathComponent(name)
-  return try? Dta(contentsOf: url)
+  return try? Data(contentsOf: url)  // Data에서 발생하는 에러는 try?를 통해 옵셔널로 감싸집니다. (에러의 경우 nil이 됩니다.)
 }
 ```
 
-
-
+호출부에서는 항상 에러를 옵셔널로 변환할 수 있습니다. try?를 사용하면 옵셔널로 에러를 catch 할 수 있습니다.
+하지만 에러의 발생 이유가 중요하다면 옵셔널이 아닌 에러를 던져야 합니다. 옵셔널의 경우 에러의 발생 이유에는 집중하지 않기 때문입니다.
 
 
 
