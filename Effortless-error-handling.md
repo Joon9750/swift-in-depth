@@ -348,10 +348,28 @@ extension ParseRecipeError: LocalizedError {
 
 에러에 human-readable(by LocalizedError)을 추가하여 안정적으로 에러를 전달할 수 있습니다.
 
+Swift.Error를 NSError로 변환할 때 우리는 CustomNSError 프로토콜을 채택하여 에러의 타입을 변환합니다.
+Swift.Error를 NSError로 변환할 때 CustomNSError 프로토콜을 사용하지 않으면 에러가 NSError에 적합한 code와 domain 정보가 없을 수 있습니다.
 
+아래 코드와 같이 CustomNSError 프로토콜을 채택하여 NSError가 필요한 경우 대응합시다.
 
+```swift
+extension ParseRecipeError: CustomNSError {
+  static var errorDomain: String { return "com.recipeextractor" }
 
+  var errorCode: Int { return 300 }
 
+  var errorUserInfo: [String: Any] {
+    return [
+      NSLocalizedDescriptionKey: errorDescription ?? "",
+      NSLocalizedFailureReasonErrorKey: failureReason ?? "",
+      NSLocalizedRecoverySuggestionErrorKey: recoverySuggestion ?? ""
+    ]
+  }
+}
+
+let nsError: NSError = ParseRecipeError.parseError(line: 3, symbol: "#") as NSError
+```
 
 
 
