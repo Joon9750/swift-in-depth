@@ -552,9 +552,11 @@ func loadFile(name: String) -> Data? {
 
 ## Summary
 
-- Even though errors are usually enums, any type can implement the Error protocol
-- Inferring from a function which errors it throws isn't possible, but you can use Quick Help to soften the pain
-- Keep throwing code in a predictable state for when an error occurs. You 
+- Even though errors are usually enums, any type can implement the Error protocol.
+- Inferring from a function which errors it throws isn't possible, but you can use Quick Help to soften the pain.
+- Keep throwing code in a predictable state for when an error occurs. You can achieve a predictable state via imuutable fuctions, working with copies or temporary values, and using defer to undo any mutations that may occur before an error is thrown.
+- You can handle errors four ways: do catch, try? and try! and propagation higher in the stack.
+- An error can contain
 
 
 
