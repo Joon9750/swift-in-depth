@@ -374,13 +374,81 @@ let nsError: NSError = ParseRecipeError.parseError(line: 3, symbol: "#") as NSEr
 에러를 처리하는 위치는 어디가 바람직할까요?
 저차원 함수에서 에러를 핸들링하기 보다 고차원 함수로 에러를 전달하여 고차원 함수에서 에러를 핸들링하는 방식이 바람직합니다.
 에러 핸들링을 중앙 집중화 하는것이 중요합니다. 그렇다면 중앙 집중화된 에러 핸들링은 어떤 형태일까요?
+
 아래 코드를 살펴봅시다.
 
-아래 코드는 ErrorHandler에서 에러 핸들링의 모든 책임을 가집니다. 중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 에러 핸들링 코드가 여러곳에 흝어져 있다면 변경 사항에 대응하기 어려워집니다.
+```swift
+struct ErrorHandler {
+  static let default = ErrorHandler()
+
+  let genericMessage = "Sorry! Something went wrong"
+
+  func handleError(_ error: Error) {
+    presentToUser(massage: genericMessgae)
+  }
+
+  func handleError(_ error: LocalizedError) {
+    if let errorDescription = error.errorDescription {
+      presentToUser(message: errorDescription)
+    } else {
+      presentToUser(message: genericMessage)
+    }
+  }
+
+  func presentToUser(message: String) {
+    print(message)
+  }
+}
+```
+
+위 코드의 ErrorHandler에서 에러 핸들링의 모든 책임을 가집니다. 중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 에러 핸들링 코드가 여러곳에 흝어져 있다면 변경 사항에 대응하기 어려워집니다.
 ErrorHandler에서는 함수 오버라이드를 통해 여러 유형의 에러를 핸들링하고 있습니다. ErrorHandler 구조체에서는 static 변수로 싱글턴 패턴을 구현하여 에러 핸들링이 필요한 상황에 어디서든 접근 가능하도록 만들었습니다.
 
+```swift
+struct RecipeExtractor {
+  let html: String
 
+  func extractRecipe() throws -> Recipe {
+    return try parseHTML(html)
+  }
 
+  private func parseHTML(_ html: String) throws -> Recipe {
+    let ingredients = try extractIngredients(html)
+    let steps = try extractSteps(html)
+    return Recipe(ingredients: ingredients, steps: steps)
+  }
+    
+  // ...snip
+}
+
+let html = ...
+let recipeExtractor = RecipeExtractor(html: html)
+
+do {
+  let recipe = try recipeExtractor.extractRecipe()
+} catch {
+  ErrorHandler.default.handleError(error)
+}
+```
+
+위에서 RecipeExtractor 구조체의 extractRecipe 함수는 Recipe?를 리턴하고 있었습니다.
+하지만 extractRecipe 함수가 nil을 만났을 때 에러를 던지도록 구현했다면 Recipe을 옵셔널로 감싸지 않고 리턴할 수 있습니다.
+nil의 경우 함수에서 에러를 리턴하기 때문입니다.
+
+do catch 구문을 살펴보면 함수 호출부에서 에러를 catch 하고 해당 에러를 ErrorHandler로 넘기고 있습니다.
+함수 호출부에서 에러 대응 방식들이 중앙 집중화 되어있는 에러 핸들러로 에러를 넘겼습니다.
+이는 에러 대응에 변경 사항이 생길 경우 대응하기 쉽고 에러 핸들링을 중앙 집중화할 수 있습니다.
+
+물론 에러 핸들링을 한 곳으로 모으면 에러 핸들링 객체가 너무 커질 수 있습니다.
+이때는 더 작은 단위로 핸들러를 나누도록 합시다.
+
+## Delivering pleasant APIs
+
+에러를 전달하고 핸들링하는 행위는 바람직합니다.
+하지만 에러들은 개발자에게 핸들링 책임을 지게합니다. 이는 부담으로 여겨질 수 있습니다.
+또한 에러를 던지지 않도록 APIs를 구현하면 더욱 빠르고 쉬운 APIs를 만들 수 있습니다.
+
+에러 전달을 최소화하는 방법을 살펴봅시다.
 
 
 
