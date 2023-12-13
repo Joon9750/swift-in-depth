@@ -556,7 +556,13 @@ func loadFile(name: String) -> Data? {
 - Inferring from a function which errors it throws isn't possible, but you can use Quick Help to soften the pain.
 - Keep throwing code in a predictable state for when an error occurs. You can achieve a predictable state via imuutable fuctions, working with copies or temporary values, and using defer to undo any mutations that may occur before an error is thrown.
 - You can handle errors four ways: do catch, try? and try! and propagation higher in the stack.
-- An error can contain
+- An error can contain technical information to help to troubleshoot. User-facing messages can be deduced from the technical information, by implementing the LocalizedError protocol.
+- By implementing the CustomNSError you can bridge an error to NSError.
+- A good practice for handling  errors is via centralized error handling. With centralized error handling, you can easily change how to handle errors.
+- You can prevent throwing errors by turning them into optionals via the try? keyword.
+- If you're certain that an error won't occur, you can turn to retrieve a value from a throwing function with the try! keyword, with the risk of a crashing application.
+- If there is a single reason for failure, consider returning an optional instead of creating a throwing function.
+- A good practice is to capture validity in a type. Instead of having a throwing function you repeatedly use, create a type with a throwing initializer and pass this type around with the confidence of knowing that the type is validated.
 
 
 
