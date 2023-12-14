@@ -27,7 +27,7 @@ func firstLast(array: [Int]) -> (Int, Int) {
 }
 
 // 제네릭 O
-func firstLast<T> (array:[T]) -> (T, T) {
+func firstLast<T>(array:[T]) -> (T, T) {
   return (array[0], array[array.count -1])
 }
 ```
@@ -46,7 +46,7 @@ func firstLast<T> (array:[T]) -> (T, T) {
 아래 코드로 확인해 봅시다.
 
 ```swift
-func illegalWrap<T> (value: T) -> [Int] {
+func illegalWrap<T>(value: T) -> [Int] {
   return [value]
 }
 ```
@@ -56,7 +56,41 @@ illegalWrap 함수는 제네릭 타입의 value를 입력 받고 [Int]를 리턴
 
 아래 코드로 더 확인해 봅시다.
 
+```swift
+// 컴파일 에러
+func wrap<T> (value: Int, secondValue: T) -> ([Int], U) {
+  return ([value], secondValue)
+}
 
+// 컴파일 가능
+func wrap<T>(value: Int, secondValue: T) -> ([Int], T) {
+  return ([value], secondValue)
+}
+
+// 컴파일 에러
+func wrap(value: Int, secondValue: T) -> ([Int], T) {
+  return ([value], secondValue)
+}
+
+// 컴파일 에러
+func wrap<T>(value: Int, secondValue: T) -> ([Int], Int) {
+  return ([value], secondValue)
+}
+
+// 컴파일 가능
+func wrap<T>(value: Int, secondValue: T) -> ([Int], Int)? {
+  if let secondValue = secondValue as? Int {
+    return ([value], secondValue)
+  } else {
+    return nil
+  }
+}
+```
+
+제네릭을 사용하면 컴파일러가 Value Witness Tables 메타 데이터를 활용하여 제네릭 함수를 구체화하는 과정에서 구체적인 타입(Int 등)으로 치환된 코드를 컴파일러가 반복적으로 생성합니다.
+제네릭을 사용하면 어떤 값을 다룰지 컴파일 타임에 알 수 있다는 장점이 있습니다. (좀 더 찾아 구체적으로 설명하겠습니다.)
+
+## Constraining generics
 
 
 
