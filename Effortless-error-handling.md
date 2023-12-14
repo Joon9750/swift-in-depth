@@ -296,18 +296,18 @@ struct RecipeExtractor {
 }
 ```
 
-위와 같이 에러에 정보를 추가할 때 열거형에 튜플을 추가하여 구현할 수 있지만, LocalizedError 프로토콜을 사용할 수도 있습니다.
-LocalizedError 프로토콜은 에러의 정보를 추가하는 역할을 합니다. 
+위와 같이 에러에 정보를 추가할 때 열거형에 튜플을 추가하여 구현할 수 있지만, LocalizedError 프로토콜을 사용하여 더 명확한 에러에 대한 정보를 전달할 수 있습니다.
+LocalizedError 프로토콜은 에러의 정보를 보충하는 역할을 합니다. 
 
-LocalizedError 프로토콜은 네 가지 프로퍼티를 지원하며 에러에 대한 정보를 추가하도록 도와줍니다.
-네 가지 프로퍼티는 아래와 같습니다. 네 가지 프로퍼티는 필수로 구현할 필요는 없습니다.
+LocalizedError 프로토콜은 네 가지 프로퍼티를 지원하며 에러에 대한 정보를 보충하도록 도와줍니다.
+네 가지 프로퍼티는 아래와 같습니다. 네 가지 프로퍼티는 항상 구현할 필요는 없습니다. 사용할 프로퍼티만 선택하여 구현하면 됩니다.
 
-- var errorDescription: String?   에러 정보를 추가합니다.
-- var failureReason: String?      에러 발생 이유를 설명합니다.
-- var helpAnchor: String?         apple's help viewer 링크로 연결합니다.
-- var recoverySuggestion: String? 에러에 대처하는 방법을 설명합니다.
+- var errorDescription: String?, 에러 정보를 추가합니다.
+- var failureReason: String?, 에러 발생 이유를 설명합니다.
+- var helpAnchor: String?, apple's help viewer 링크로 연결합니다.
+- var recoverySuggestion: String?, 에러에 대처하는 방법을 설명합니다.
 
-보통은 LocalizedError 프로토콜의 errorDescription, recoverySuggestion 프로퍼티 정도로 충분합니다.
+보통은 LocalizedError 프로토콜의 errorDescription, recoverySuggestion 프로퍼티 정도로 충분히 에러에 대한 정보를 전달할 수 있습니다. 
 아래 코드는 LocalizedError 프로토콜을 채택하여 에러에 정보를 추가한 코드입니다.
 
 ```swift
@@ -342,8 +342,10 @@ extension ParseRecipeError: LocalizedError {
 
 에러에 human-readable(by LocalizedError)을 추가하여 안정적으로 에러를 전달할 수 있습니다.
 
-Swift.Error를 NSError로 변환할 때 우리는 CustomNSError 프로토콜을 채택하여 에러의 타입을 변환합니다.
-Swift.Error를 NSError로 변환할 때 CustomNSError 프로토콜을 사용하지 않으면 에러가 NSError에 적합한 code와 domain 정보가 없을 수 있습니다.
+objective-c의 전통적인 에러 처리인 'NSError'를 사용하기 위해서는 CustomNSError 프로토콜을 채택해야 합니다.
+
+Swift.Error를 NSError로 변환할 때 우리는 CustomNSError 프로토콜을 채택하여 에러의 타입을 NSError로 변환합니다.
+Swift.Error를 NSError로 변환할 때 CustomNSError 프로토콜을 사용하지 않으면 NSError에 적합한 code와 domain 정보가 없을 수 있습니다.
 
 아래 코드와 같이 CustomNSError 프로토콜을 채택하여 NSError가 필요한 경우 대응합시다.
 
@@ -365,10 +367,14 @@ extension ParseRecipeError: CustomNSError {
 let nsError: NSError = ParseRecipeError.parseError(line: 3, symbol: "#") as NSError
 ```
 
+지금부터는 에러가 발생했을 때 이를 처리할 위치에 대해 살펴봅시다.
 에러를 처리하는 위치는 어디가 바람직할까요?
-저차원 함수에서 에러를 핸들링하기보다 고차원 함수로 에러를 전달하여 고차원 함수에서 에러를 핸들링하는 방식이 바람직합니다.
-에러 핸들링을 중앙 집중화하는 것이 중요합니다. 그렇다면 중앙 집중화된 에러 핸들링은 어떤 형태일까요?
 
+에러 핸들링을 중앙 집중화하는 것이 중요합니다.
+저차원 함수에서 에러를 핸들링하기보다 고차원 함수로 에러를 전달하여 에러를 핸들링하는 방식이 바람직합니다.
+저차원 함수 여기저기에 에러 핸들링이 나뉘어 있는 방식보다 고차원 함수에서 중앙 집중화된 에러 핸들링을 사용하는 방식입니다.
+
+그렇다면 중앙 집중화된 에러 핸들링은 어떤 형태일까요?
 아래 코드를 살펴봅시다.
 
 ```swift
@@ -381,6 +387,7 @@ struct ErrorHandler {
     presentToUser(massage: genericMessgae)
   }
 
+  // func override
   func handleError(_ error: LocalizedError) {
     if let errorDescription = error.errorDescription {
       presentToUser(message: errorDescription)
@@ -395,8 +402,11 @@ struct ErrorHandler {
 }
 ```
 
-위 코드의 ErrorHandler에서 에러 핸들링의 모든 책임을 집니다. 중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 에러 핸들링 코드가 여러 곳에 흩어져 있다면 변경 사항에 대응하기 어려워집니다.
-ErrorHandler에서는 함수 오버라이드를 통해 여러 유형의 에러를 핸들링하고 있습니다. ErrorHandler 구조체에서는 static 변수로 싱글턴 패턴을 구현하여 에러 핸들링이 필요한 상황에 어디서든 접근할 수 있도록 만들었습니다.
+위 코드에서 ErrorHandler 구조체가 에러 핸들링의 모든 책임을 집니다. 
+중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 
+에러 핸들링 코드가 여러 곳에 흩어져 있다면 변경 사항에 대응하기 어려워집니다.
+ErrorHandler 구조체에서는 함수 오버라이드를 통해 여러 유형의 에러를 핸들링하고 있습니다.
+ErrorHandler 구조체에서는 static 변수로 싱글턴 패턴을 구현하여 에러 핸들링이 필요한 상황에 어디서든 접근할 수 있도록 만들었습니다.
 
 ```swift
 struct RecipeExtractor {
