@@ -124,15 +124,84 @@ lowest 함수 안에서 비교 연산(<)을 수행하기 때문에 비교 연산
 그렇다면 비교 연산과 관련있는 프로토콜은 어떤게 있을까요?
 Equatable 프로토콜과 Comparable 프로토콜을 살펴봅시다.
 
+먼저 Equatable 프로토콜은 두 값이 같은지 확인하는데 쓰입니다.
+동일한 타입간의 == 비교연산자를 제공합니다.
+따라서 Equatable 프로토콜을 채택했을 때 static == 함수를 필수로 구현해야 합니다.
 
+아래 코드는 Equatable 프로토콜 코드입니다.
 
+```swift
+public protocol Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool
+}
+```
 
+Equatable 프로토콜의 static == 함수를 통해 동일한 타입간의 '같다'는 기준을 만들 수 있습니다.
 
+그렇다면 Comparable 프로토콜은 어떨까요?
 
+Comparable 프로토콜은 Equatable 프로토콜과 마찬가지로 static 함수가 있지만 구현을 필수로 요구하지 않습니다.
+아래 Comparable 프로토콜 코드를 확인하면 Equatable을 채택한다는걸 알 수 있습니다.
 
+```swift
+public protocol Comparable: Equatable {
+  static func < (lhs: Self, rhs: Self) -> Bool
+  static func <= (lhs: Self, rhs: Self) -> Bool
+  static func >= (lhs: Self, rhs: Self) -> Bool
+  static func > (lhs: Self, rhs: Self) -> Bool
+}
+```
 
+Comparable 프로토콜을 채택할 경우 static 함수 중 하나를 구현하면 나머지 static 함수들은 스위프트가 유추하기 때문에 추가적으로 구현할 필요가 없습니다.
+Int, float, string은 기본적으로 Comparable을 따르는 타입입니다.
 
+위에서 lowest 함수의 제네릭을 Comparable 프로토콜로 제약을 걸어 함수 안의 비교 연산에 문제가 없도록 고쳐봅시다.
+아래 코드는 lowest 함수의 제네릭을 Comparable 프로토콜로 제약한 코드입니다.
+이제 lowest 함수의 입력은 Comparable 프로토콜을 따르는 타입이어야 합니다.
 
+```swift
+func lowest<T: Comparable>(_ array: [T]) -> T? {
+  let sortedArray = array.sorted { (lhs, rhs) -> Bool in
+    return lhs < rhs  // Comparable을 따르는 타입만 입력으로 들어오기 때문에 비교 연산이 가능합니다.
+  }
+  return sortedArray.first
+}
+
+// lowest 간략한 버전
+func lowest<T: Comparable>(_ array: [T]) -> T? {
+  return array.sorted().first  // 입력이 항상 Comparable 프로토콜을 따르기 때문에 내장 함수인 sorted()도 사용 가능합니다.
+}
+```
+
+그렇다면 lowest 함수에 입력으로 들어올 커스텀 타입은 어떤게 있을까요?
+물론 Int, float, string도 가능하겠지만 Comparable 프로토콜을 따르는 커스텀 타입도 입력으로 들어갈 수 있습니다.
+
+아래 코드는  Comparable 프로토콜을 따르는 커스텀 타입인 RoyalRank 타입 코드입니다.
+위에서 말했듯이 Comparable 프로토콜이 지원하는 static 함수 중 하나를 구현하여 나머지 static 함수를 컴파일러가 유추 가능하도록 만들었습니다.
+
+```swift
+enum RoyalRank: Comparable {
+  case emperor
+  case king
+  case duke
+
+  static func <(lhs: RoyalRank, rhs: RoyalRank) -> Bool {
+    switch (lhs, rhs) {
+      case (king, emperor): return true
+      case (duke, emperor): return true
+      case (duke, king): return true
+      default: return false
+    }
+  }
+ }
+
+let king = RoyalRank.king
+let duke = RoyalRank.duke
+
+duke < king // true
+duke > king // false
+duke == king // false
+```
 
 
 
