@@ -177,7 +177,7 @@ func lowest<T: Comparable>(_ array: [T]) -> T? {
 물론 Int, float, string도 가능하겠지만 Comparable 프로토콜을 따르는 커스텀 타입도 입력으로 들어갈 수 있습니다.
 
 아래 코드는  Comparable 프로토콜을 따르는 커스텀 타입인 RoyalRank 타입 코드입니다.
-위에서 말했듯이 Comparable 프로토콜이 지원하는 static 함수 중 하나를 구현하여 나머지 static 함수를 컴파일러가 유추 가능하도록 만들었습니다.
+위에서 말했듯이 Comparable 프로토콜이 지원하는 static 함수 중 하나를 구현하여 나머지 static 함수를 컴파일러가 유추 가능하여 구현하지 않은 static 함수도 사용할 수 있습니다.
 
 ```swift
 enum RoyalRank: Comparable {
@@ -201,9 +201,45 @@ let duke = RoyalRank.duke
 duke < king // true
 duke > king // false
 duke == king // false
+
+let ranks: [RoyalRank] = [.emperor, .king, .duke]
+lowest(ranks)  // .duke
 ```
 
+제네릭의 장점 중 하나는 아직 존재하지 않은 타입에도 대응할 수 있다는 점입니다.
 
+모든 타입이 Comparable 프로토콜을 따르진 않습니다.
+예를 들어 Bool 타입은 Comparable 프로토콜을 따르지 않습니다. 따라서 lowest 함수에 Bool 타입이 입력으로 들어갈 수 없습니다.
+
+Comstraining a generic means trading flexibility for functionality. A constrained generic becomes more specialized but is less flexible.
+
+## Multipule constraints
+
+제네릭을 제약해 사용할 때 하나의 프로토콜 만으로는 부족한 경우가 있습니다. 
+예를 들어 값을 비교하고 해당 값을 딕셔너리에 저장한다면, 이를 위해 Comparable 프로토콜과 Hashable 프로토콜을 모두 따르는 타입이어야 합니다.
+
+먼저 Hashable 프로토콜을 살펴 봅시다.
+아래 코드는 Hashable 프로토콜 코드입니다.
+
+```swift
+public protocol Hashable: Equatable {
+  func hash(into hasher: inout Hasher) {
+    // ...생략
+  }
+}
+```
+
+Hashable 프로토콜은 Equatable 프로토콜을 채택하고 있습니다.
+Hashable 프로토콜을 채택한다면 Equatable 프로토콜의 static == 함수와 Hashable 프로토콜의 hash 함수를 모두 필수로 구현해야 합니다.
+
+Hashable 프로토콜의 hash 함수를 통해 hashvalue로 불리는 값을 생성합니다.
+예를 들어 "Hedgehog"을 hash 함수에 입력하면 43092483과 같은 hashvalue가 리턴됩니다.
+Hashable 프로토콜을 따르는 타입은 주로 딕셔너리의 키 값이나 Set의 일부 등에 사용됩니다.
+
+같은 타입의 인스턴스 a와 b가 있을 경우 a == b이면 a.hashValue == b.hashValue 입니다.
+하지만 hashValue가 같다고 해서 동일한 인스턴스는 아닐 수 있습니다.
+또한 hashValue는 프로그램의 실행에 따라 달라질 수 있습니다.
+따라서 이후 실행에 사용할 hashValue 값을 저장하지 않는게 좋습니다.
 
 
 
