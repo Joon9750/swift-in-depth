@@ -231,6 +231,8 @@ public protocol Hashable: Equatable {
 
 Hashable 프로토콜은 Equatable 프로토콜을 채택하고 있습니다.
 Hashable 프로토콜을 채택한다면 Equatable 프로토콜의 static == 함수와 Hashable 프로토콜의 hash 함수를 모두 필수로 구현해야 합니다.
+구조체와 열거형에서는 Equatable과 Hashable 프로토콜의 필수 구현 함수 중 하나를 구현하면 나머지 함수들을 컴파일러가 유추하지만 클래스에서는
+유추하지 못하기 때문에 클래스의 경우 모든 함수를 구현해야 합니다.
 
 Hashable 프로토콜의 hash 함수를 통해 hashvalue로 불리는 값을 생성합니다.
 예를 들어 "Hedgehog"을 hash 함수에 입력하면 43092483과 같은 hashvalue가 리턴됩니다.
@@ -238,15 +240,31 @@ Hashable 프로토콜을 따르는 타입은 주로 딕셔너리의 키 값이�
 
 같은 타입의 인스턴스 a와 b가 있을 경우 a == b이면 a.hashValue == b.hashValue 입니다.
 하지만 hashValue가 같다고 해서 동일한 인스턴스는 아닐 수 있습니다.
+
 또한 hashValue는 프로그램의 실행에 따라 달라질 수 있습니다.
 따라서 이후 실행에 사용할 hashValue 값을 저장하지 않는게 좋습니다.
 
+대부분의 스위프트 내장 타입들은 Equatable과 Hashable을 채택하고 있습니다.
 
+아래 코드와 같이 제네릭 타입을 하나 이상의 프로토콜로 제약할 수 있습니다.
 
+```swift
+func lowestOccurrences<T: Comparable & Hashable>(values: [T]) -> [T: Int] {
+  //...생략
+}
+```
 
+제네릭 제약을 여러 프로토콜로 할 때 where 구문을 사용하면 더 간략히 표현 가능합니다.
+아래 코드로 확인해 봅시다.
 
+```swift
+func lowestOccurrences<T>(values: [T]) -> [T: Int] {
+  where T: Comparable & Hashable {
+  // ...생략
+}
+```
 
-
+## Creating a generic type
 
 
 
