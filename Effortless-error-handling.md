@@ -103,12 +103,12 @@ func parseLocation(_ latitude: String, _ longitude: String) throws -> Location {
 
 에러가 발생한 상황에서 애플리케이션 상태를 유지하는 세 가지 방법을 살펴보겠습니다.
 
-1. "Make func immutable". 첫번째 방법은 함수가 외부의 상태를 조작하지 못하도록 만드는 것입니다.
+"Make func immutable". 첫번째 방법은 함수가 외부의 상태를 조작하지 못하도록 만드는 것입니다.
 
 함수의 인자로 들어온 값만 함수가 조작해 리턴한다면 외부의 상태를 조작하지 않는 함수입니다.
 외부의 값을 변경하지 않으면 에러를 던지더라도 애플리케이션 상태을 유지할 수 있습니다.
 
-2. "use temporary value". 두번째 방법은 작업이 에러 없이 끝났다면! 작업의 결과(새로운 상태)를 저장하는 것입니다.
+"use temporary value". 두번째 방법은 작업이 에러 없이 끝났다면! 작업의 결과(새로운 상태)를 저장하는 것입니다.
 
 작업이 에러 없이 끝나기 전까지 작업의 결과는 temporary value(임시 변수)에 저장하고 작업이 에러 없이 끝난 이후 임시 변수의 결과를 실제 변수에 저장하는 방법입니다.
 아래 코드는 temporary value를 사용하지 않은 코드와 사용한 코드를 모두 살펴 봅시다.
@@ -170,7 +170,7 @@ struct TodoList {
 임시 변수인 tempValues를 선언해 모든 for 루프에서 에러를 던지지 않을 때 작업의 결과를 실제 변수인 values에 저장하여 에러가 발생했을 때 애플리케이션 상태를 유지하게 됩니다.
 for 루프 중간에 에러가 발생하면 임시 변수를 실제 값에 대입하지 않으며 애플리케이션 상태를 예측 가능한 상태로 유지합니다.
 
-3. "Recovery code with defer". 마지막 방법은 defer 클로저를 사용하는 방법입니다.
+"Recovery code with defer". 마지막 방법은 defer 클로저를 사용하는 방법입니다.
 
 에러가 발생했을 때 에러 발생 이전의 변경사항을 되돌려 애플리케이션 상태를 예측 가능한 상태로 유지하는 방식입니다. defer 클로저는 함수가 끝나면 실행됩니다. 
 함수에서 에러가 발생되었는지 유무와 관계없이 defer 클로저는 함수 끝에 항상 실행됩니다.
@@ -404,9 +404,16 @@ struct ErrorHandler {
 
 위 코드에서 ErrorHandler 구조체가 에러 핸들링의 모든 책임을 집니다. 
 중앙 집중화된 에러 핸들링이라 볼 수 있습니다. 
+
 에러 핸들링 코드가 여러 곳에 흩어져 있다면 변경 사항에 대응하기 어려워집니다.
 ErrorHandler 구조체에서는 함수 오버라이드를 통해 여러 유형의 에러를 핸들링하고 있습니다.
 ErrorHandler 구조체에서는 static 변수로 싱글턴 패턴을 구현하여 에러 핸들링이 필요한 상황에 어디서든 접근할 수 있도록 만들었습니다.
+
+위에서 살펴봤던 extractRecipe 구조체의 extractRecipe 함수는 Recipe?를 리턴하고 있었습니다.
+하지만 extractRecipe 함수가 nil을 만났을 때 에러를 던지도록 구현한다면 Recipe을 옵셔널로 감싸지 않고 리턴할 수 있습니다.
+nil의 경우 함수에서 에러를 리턴하기 때문입니다.
+
+아래 코드로 살펴봅시다.
 
 ```swift
 struct RecipeExtractor {
@@ -435,13 +442,9 @@ do {
 }
 ```
 
-위에서 RecipeExtractor 구조체의 extractRecipe 함수는 Recipe?를 리턴하고 있었습니다.
-하지만 extractRecipe 함수가 nil을 만났을 때 에러를 던지도록 구현했다면 Recipe을 옵셔널로 감싸지 않고 리턴할 수 있습니다.
-nil의 경우 함수에서 에러를 리턴하기 때문입니다.
-
-do catch 구문을 살펴보면 함수 호출부에서 에러를 catch하고 해당 에러를 ErrorHandler로 넘기고 있습니다.
-함수 호출부에서 에러 대응 방식들이 중앙 집중화 되어있는 에러 핸들러로 에러를 넘겼습니다.
-이는 에러 대응에 변경 사항이 생길 경우 대응하기 쉽고 에러 핸들링을 중앙 집중화할 수 있습니다.
+위 코드의 do catch 구문을 살펴보면 함수 호출부에서 에러를 catch하고 해당 에러를 ErrorHandler로 넘기고 있습니다.
+함수 호출부에서 에러 대응 방식들이 중앙 집중화 되어있는 에러 핸들러(ErrorHandler)로 에러를 넘겼습니다.
+이는 에러 대응에 변경 사항이 생길 경우 대응하기 쉽게 에러 핸들링을 중앙 집중화할 수 있습니다.
 
 물론 에러 핸들링을 한 곳으로 모으면 에러 핸들링 객체가 너무 커질 수 있습니다.
 이때는 더 작은 단위로 핸들러를 나누도록 합시다.
@@ -449,17 +452,17 @@ do catch 구문을 살펴보면 함수 호출부에서 에러를 catch하고 해
 ## Delivering pleasant APIs
 
 에러를 전달하고 핸들링하는 행위는 바람직합니다.
-하지만 에러들은 개발자에게 핸들링 책임을 지게 합니다. 이는 부담으로 여겨질 수 있습니다.
-또한 에러를 던지지 않도록 APIs를 구현하면 더욱 빠르고 쉬운 APIs를 만들 수 있습니다.
+하지만 에러는 필연적으로 개발자에게 핸들링 책임을 지게 합니다. 이는 부담으로 여겨질 수 있습니다.
+또한 에러 전달을 최소화한 APIs는 더욱 빠르고 쉽습니다.
 
 에러 전달을 최소화하는 네 가지 방법을 살펴봅시다.
 
 첫 번째 방법은 객체 생성 시점에 객체의 유효성을 평가하는 방법입니다.
 
 객체 생성 시점에 객체의 유효성을 평가하여 유효하지 않은 객체가 코드상에 돌아다니지 않도록 만듭니다.
-유효하지 않은 객체가 코드상에 없기 때문에 반복되는 유효성 평가를 하지 않아도 됩니다.
+유효하지 않은 객체가 코드상에 없기 때문에 반복되는 유효성 평가를 피할 수 있습니다.
 
-아래 코드를 확인해 봅시다.
+아래 코드는 객체 생성 시점에 유효성 평가를 하지 않은 코드입니다.
 
 ```swift
 enum ValidationError: Error {
@@ -495,6 +498,7 @@ do {
 struct PhoneNumber {
   let contents: String
 
+  // 객체 생성과 동시에 객체 유효성 평가를 진행합니다.
   init(_ text: String) throws {
       guard !text.isEmpty else {
         throw ValidationError.noEmptyValueAllowed
@@ -516,16 +520,17 @@ do {
 }
 ```
 
-PhoneNumber 객체 생성과 동시에 에러를 던지거나 올바른 객체를 생성하여 이후 반복적인 검증을 할 필요가 없어집니다.
+PhoneNumber 객체 생성과 동시에 에러를 던지거나 올바른 객체를 생성하여 이후 반복적인 유효성 평가를 할 필요가 없어집니다.
 이제는 전화번호가 유효한 객체만 코드상에 존재합니다. 이는 에러 전달을 최소화합니다.
 
 에러 전달을 최소화하는 두 번째 방법은 try?를 사용하는 방법입니다.
 
-try?는 에러의 발생 이유에는 관심이 없습니다. 값이 생성되었느냐 nil이냐만 관심이 있습니다.
+try?의 특징은 에러의 발생 이유에는 관심이 없다는 것입니다. 값이 생성되었느냐 아니냐(nil)에만 관심이 있습니다.
 try?를 사용한다면 에러가 발생할 경우 nil을 리턴하고 발생하지 않을 경우 옵셔널로 감싼 결과를 리턴합니다.
 
-함수에서 에러를 던지지만, 호출부에서는 에러의 발생 이유에는 관심이 없을 때 try?를 사용해 함수의 리턴을 옵셔널로 받을 수 있습니다.
+함수에서 에러를 던지지만, 호출부에서는 에러의 발생 이유에는 관심이 없을 때 try?를 사용해 함수의 리턴을 옵셔널 또는 nil로 받을 수 있습니다.
 어떤 종류의 에러가 발생하더라도 try?는 nil을 리턴합니다.
+에러의 이유가 중요하지 않은 상황에서는 try?를 사용해 모든 에러를 nil로 리턴 받아 에러 전달을 최소화할 수 있습니다.
 
 아래 코드로 확인해 봅시다.
 
@@ -535,11 +540,11 @@ print(phoneNumber) // Optional(PhoneNumber(contents: "(123) 123-1234"))
 ```
 
 세 번째 방법은 try!를 사용하는 방법입니다.
-try?와 비슷한 성격이지만 에러가 발생하면 크래쉬를 발생시키기 때문에 사용하지 맙시다.
+try?와 비슷한 성격이지만 에러가 발생하면 크래쉬를 발생시키기 때문에 사용하지 맙시다!
 
 에러 전달을 최소화하는 네 번째 방법은 옵셔널을 리턴하는것 입니다.
 
-옵셔널은 에러 핸들링 방법입니다. 에러를 던지는 방법보다 더 좋은 대안이 될 수도 있습니다.
+옵셔널은 에러 핸들링 방법 중 하나입니다. 에러를 던지는 방법보다 더 좋은 대안이 될 수 있습니다.
 에러가 아닌 옵셔널을 리턴하면 호출부에서는 에러를 핸들링할 부담이 줄어듭니다.
 
 아래 코드로 확인합시다.
@@ -567,18 +572,3 @@ func loadFile(name: String) -> Data? {
 - If you're certain that an error won't occur, you can turn to retrieve a value from a throwing function with the try! keyword, with the risk of a crashing application.
 - If there is a single reason for failure, consider returning an optional instead of creating a throwing function.
 - A good practice is to capture validity in a type. Instead of having a throwing function you repeatedly use, create a type with a throwing initializer and pass this type around with the confidence of knowing that the type is validated.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
