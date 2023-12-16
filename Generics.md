@@ -473,20 +473,38 @@ refreshCache(Cache<SwiftOnTheServer>)  // 에러가 발생합니다.
 하지만 제네릭 타입인 Cache<OnlineCourse>이기 때문에 Cache<SwiftOnTheServer>는 Cache<OnlineCourse와 상속 관계를 가지지 않기 때문에 전달 될 수 없습니다.
 
 제네릭 타입으로 클래스를 받을 경우 해당 클래스의 상속 관계를 깨트립니다.
-하지만 이 제한 사항은 커스텀 타입에만 해당됩니다.
+하지만 상속 관계가 깨지는 제한 사항은 커스텀 타입에만 해당됩니다.
+Swift Standard Library의 Array와 Optional의 경우에는 상속 관계가 깨지지 않습니다.
+Array와 Optional 모두 제네릭 타입이지만 제네릭에 들어가는 클래스의 상속 관계는 유지됩니다.
 
+아래 코드로 확인해 봅시다.
 
+```swift
+func readOptionalCourse(_ value: Optional<OnlineCourse>) {
+  //... 생략
+}
 
+readOptionalCourse(OnlineCourse())
+readOptionalCourse(SwiftOnTheServer())
+```
 
+위의 readOptionalCourse 함수의 매개변수 Optional<OnlineCourse>는 Optional이기 때문에 제네릭의 상속 관계가 유지됩니다.
+따라서 OnlineCourse()를 비롯해 OnlineCourse의 자식 클래스인 SwiftOnTheServer 타입도 전달할 수 있습니다.
 
+다른 예로 Int?를 매개변수 타입으로 받는 함수에서 Int 값도 전달 가능한 이유도 옵셔널 타입이기 때문입니다.
+(Int 타입은 옵셔널 Int의 자식 클래스입니다.)
 
+옵셔널과 제네릭은 함께 주로 등장합니다.
 
+제네릭을 통한 추상화는 더 복잡해지고 해석하기 어렵다는 비용이 들지만 굉장한 유연성을 얻을 수 있습니다.
+어디든 trade-off는 존재합니다.
 
-
-
-
-
-
-
-
-
+## Summary
+- Adding an unconstrained generic to a function allows a function to work with all types.
+- Generics can't be specialized from inside the scope of a function or type.
+- Generic code is converted to specialized code that works on multipule types.
+- Generics can be constrained for more specialized behavior, which may exclude some types.
+- A type can be constrained to multiple generics to unlock more functionality on a generic type.
+- Swift can synthesize implementations for the Equatable and Hashable protocols on structs and enums.
+- Synthesizing that you write are invariant, and therefore you cannot use them as subtypes.
+- Generic types in the standard library are covariant, and you can use them as subtypes. 
