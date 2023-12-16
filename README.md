@@ -1,4 +1,4 @@
-# Swift-in-depth
+# SwiftInDepth
 
 : swift in depth을 읽고 정리합니다.
 
