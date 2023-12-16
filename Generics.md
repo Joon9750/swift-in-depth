@@ -297,6 +297,99 @@ Pair 커스텀 타입을 만들어 해결할 수 있습니다.
 Pair 타입에 Hashable 타입 두 개를 묶어 Hashable 타입으로 딕셔너리의 키에 사용될 수 있습니다.
 아래 코드로 Pair 타입 구현을 살펴봅시다.
 
+```swift
+struct Pair<T: Hashable> {
+  let left: T
+  let right: T
+
+  init(_ left: T, _ right: T) {
+    self.left = left
+    self.right = right
+  }
+}  
+```
+
+위와 같이 Pair 타입을 구현한다면 Pair의 left와 right는 항상 같은 타입이어야 합니다.
+left와 right가 다른 타입이어도 되도록 코드를 개선해 봅시다.
+
+```swift
+struct Pair<T: Hashable, U: Hashable> {
+  let left: T
+  let right: U
+
+  init(_ left: T, _ right: U) {
+    self.left = left
+    self.right = right
+  }
+}
+
+let pair = Pair("Tom", 20)
+let pair2 = Pair("Tom", "Jerry")
+```
+
+이제는 Pair 타입의 left와 right가 Hashable을 따르는 서로 다른 타입이어도 좋습니다.
+
+하지만 아직 Pair 타입은 Hashable 타입이 아닙니다.
+
+Pair 타입이 hash value를 가지는 Hashable 타입이 되기 위해서는 추가적인 조치가 필요합니다.
+첫 번째 방법은 Swift에게 맡기는 것입니다. Swift 버전 4.1부터 Pair와 같은 객체의 두 프로퍼티(left, right)가 모두 Hashable일 경우 Pair 타입을 Hashable로 만들어 줍니다.
+두 번째 방법은 직접 Pair 타입을 Hashable 타입으로 만드는 것입니다.
+아래 코드로 직접 Hashable 타입으로 만드는 방법을 살펴 봅시다.
+
+```swift
+struct Pair<T: Hashable, U: Hashable>: Hashable {
+  let left: T
+  let right: U
+
+  init(_ left: T, _ right: U) {
+    self.left = left
+    self.right = right
+  }
+}
+
+let pair = Pair<Int, Int>(10, 20)
+print(pair.hashValue) // 52893198438921
+
+let set: Set = [
+  Pair("Laurel", "Hardy"),
+  Pair("Harry", "Llody")
+]
+```
+
+Pair 구조체에 Hashable 프로토콜을 명시적으로 채택하여 hash value를 가진 Hashable 타입으로 Pair 타입을 만들 수 있습니다.
+이제 Pair 타입은 Hashable 타입이기 때문에 hasher를 넘길 수 있습니다.
+아래 코드로 확인해 봅시다.
+
+```swift
+let pair = Pair("Madonna", "Cher")
+
+var hasher = Hasher()
+hasher.combine(pair) // pair.hash(into: &hasher)와 동일한 의미입니다.
+let hash = hasher.finalize()
+print(hash)  // 491240970192719
+```
+
+(hash value의 쓰임을 더 찾아보고 정리하겠습니다.)
+
+## Generics and subtypes
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
