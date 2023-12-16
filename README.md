@@ -5,6 +5,7 @@
 ## Tools
 
 - :books: [Swift In Depth](https://www.manning.com/books/swift-in-depth)
+- [Swift In Depth codes](https://github.com/tjeerdintveen/manning-swift-in-depth)
 
 ### brief contents
 
