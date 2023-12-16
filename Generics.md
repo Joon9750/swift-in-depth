@@ -266,16 +266,36 @@ func lowestOccurrences<T>(values: [T]) -> [T: Int] {
 
 ## Creating a generic type
 
+지금까지는 제네릭 함수만 살펴보았지만 제네릭 타입도 만들 수 있습니다.
+옵셔널 또한 제네릭 타입으로 구현되어 있습니다.
+아래 코드를 살펴봅시다.
 
+```swift
+public enum Optional<Wrapped> {
+  case none
+  case some(Wrapped)
+}
+```
 
+옵셔널과 배열 등은 모두 제네릭 타입으로 구현되어 있습니다.
+우린 커스텀 타입을 제네릭 타입으로 만드는 방법도 이해하고 있어야 합니다.
 
+딕셔너리의 키로 두 개의 Hashable 타입을 함께 사용하는건 불가능합니다.
 
+물론 튜플로 두 개의 Hashable 타입인 String 타입을 묶고 딕셔너리의 키로 사용하는 방법도 스위프트에서 허용하지 않습니다.
+아래 코드로 살펴봅시다.
 
+```swift
+let stringsTuple = ("I want to be part of a key", "Me too!")
+let anotherDictionary = [stringsTuple: "I am a value"]  // error: type of expression is ambiguous without more context
+```
 
+두 개의 Hashable 타입을 튜플에 넣으면 더 이상 해당 튜플은 Hashable 타입이 아닙니다.
+이런 경우 딕셔너리의 키로 두 개의 Hashable 타입을 사용하려면 어떻게 할까요?
 
-
-
-
+Pair 커스텀 타입을 만들어 해결할 수 있습니다.
+Pair 타입에 Hashable 타입 두 개를 묶어 Hashable 타입으로 딕셔너리의 키에 사용될 수 있습니다.
+아래 코드로 Pair 타입 구현을 살펴봅시다.
 
 
 
