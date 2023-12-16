@@ -15,7 +15,7 @@
 | 3    | [Making optionals second nature](Making-optionals-second-nature.md) | 2023.11.19 |
 | 4    | [Demystifying initializers](https://github.com/hongjunehuke/swift-in-depth/blob/master/Demystifying-initializers.md) | 2023.11.28 |
 | 5    | [Effortless error handling](Effortless-error-handling.md) | 2023.12.10 |
-| 6    | [Generics](Generics.md) | 2023.12.13 |
+| 6    | [Generics](Generics.md) | 2023.12.16 |
 | 7    | [Putting the pro in protocol-oriented programming]() |  |
 | 8    | [Iterators, sequences, and collections]() |  |
 | 9    | [Understanding map, flatMap, and compactMap]() |  |
