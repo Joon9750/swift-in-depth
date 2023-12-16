@@ -414,15 +414,66 @@ cache.read(key:99)  // Optional("Jeff")
 ## Generics and subtypes
 
 서브 클래싱과 제네릭을 같이 쓸 때 다소 복잡한 경우가 발생할 수 있습니다.
-지금부터 서브 클래싱 상황에서 제네릭이 어떻게 동작하는지 알아 봅시다.
 
+서브 클래싱 상황에서 제네릭이 어떻게 동작하는지 알아 봅시다.
+온라인 교육 서비스의 데이터를 모델링을 예로 살펴봅시다.
+아래는 간단한 온라인 교육 모델입니다.
 
+```swift
+class OnlineCourse {
+  func start() {
+    print("Starting online course")
+  }
+}
 
+class SwiftOnTheServer: OnlineCourse {
+  override func start() {
+    print("Starting Swift course.")
+  }
+}
 
+var swiftCourse: SwiftOnTheServer = SwiftOnTheServer()
+var course: OnlineCourse = swiftCourse // 가능합니다.
+course.start  // "Starting Swift course."
+```
 
+위와 같은 경우 제네릭을 사용하지 않은 상태에서 평범한 서브 클래싱입니다.
+하지만 만약 Container<OnlineCourse>와 Container<SwiftOnTheServer> 같이 상속 관계의 클래스를 제네릭 타입안으로 넣을 경우
+Container<OnlineCourse>와 Container<SwiftOnTheServer>는 상속 관계를 유지하지 않습니다.
 
+다시 말해, 제네릭 안에서는 클래스끼리의 상속 관계를 잃습니다.
+따라서 아래 코드를 보면 부모 클래스로 자식 클래스를 참조하려 할 때 제네릭으로 인해 상속 관계가 깨져 참조할 수 없습니다.
 
+```swift
+struct Container<T> {}
 
+var containerSwiftCourse: Container<SwiftOnTheServer> = Container<SwiftOnTheServer>()
+var containerOnlineCourse: Container<OnlineCourse> = containerSwiftCourse  // error: cannot convert value of type 'Container<SwiftOnTheServer>' to specified type 'Container<OnlineCourse>'
+```
+
+만약 데이터를 저장하는 제네릭 타입 Cache가 있을 경우를 생각해 봅시다.
+아래 코드는 Cache를 간략히 구현한 코드입니다.
+
+```swift
+struct Cache<T> {
+  // ...생략
+}
+
+func refreshCache(_ cache: Cache<OnlineCourse>) {
+  // ...생략
+}
+
+refreshCache(Cache<OnlineCourse>)  // 가능합니다.
+refreshCache(Cache<SwiftOnTheServer>)  // 에러가 발생합니다. 
+```
+
+위에서 refreshCache 함수는 입력으로 Cache<OnlineCourse> 타입을 받고 있습니다.
+
+물론 제네릭 타입이 아니고 일반적인 상속관계를 가진 OnlineCourse라면 refreshCache 함수에 SwiftOnTheServer 타입을 전달할 수 있습니다.
+하지만 제네릭 타입인 Cache<OnlineCourse>이기 때문에 Cache<SwiftOnTheServer>는 Cache<OnlineCourse와 상속 관계를 가지지 않기 때문에 전달 될 수 없습니다.
+
+제네릭 타입으로 클래스를 받을 경우 해당 클래스의 상속 관계를 깨트립니다.
+하지만 이 제한 사항은 커스텀 타입에만 해당됩니다.
 
 
 
