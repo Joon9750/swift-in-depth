@@ -330,9 +330,13 @@ let pair2 = Pair("Tom", "Jerry")
 이제는 Pair 타입의 left와 right가 Hashable을 따르는 서로 다른 타입이어도 좋습니다.
 
 하지만 아직 Pair 타입은 Hashable 타입이 아닙니다.
-
 Pair 타입이 hash value를 가지는 Hashable 타입이 되기 위해서는 추가적인 조치가 필요합니다.
+
 첫 번째 방법은 Swift에게 맡기는 것입니다. Swift 버전 4.1부터 Pair와 같은 객체의 두 프로퍼티(left, right)가 모두 Hashable일 경우 Pair 타입을 Hashable로 만들어 줍니다.
+하지만 해당 방법은 열거형과 구조체에만 적용됩니다. 
+클래스의 경우 두 번째 방법을 사용하여 Hashable 타입을 명시해야 합니다. 
+또한 클래스가 Hashable 프로토콜을 채택하면 hash 함수와 static == 함수를 모두 구현해야 합니다.
+
 두 번째 방법은 직접 Pair 타입을 Hashable 타입으로 만드는 것입니다.
 아래 코드로 직접 Hashable 타입으로 만드는 방법을 살펴 봅시다.
 
@@ -344,6 +348,17 @@ struct Pair<T: Hashable, U: Hashable>: Hashable {
   init(_ left: T, _ right: U) {
     self.left = left
     self.right = right
+  }
+
+  // Hashable 프로토콜을 직접 따르도록 구현했기 때문에 Hashable 프로토콜의 hash 함수를 구현해야 합니다.
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(left)
+    hasher.combine(right)
+  }
+
+  // Hashable 프로토콜을 직접 따르도록 구현했기 때문에 Hasahable 프로토콜이 따르는 Equatable 프로토콜의 static == 함수를 구현해야 합니다.
+  static func ==(lhs: Pair<T, U>, rhs: Pair<T, U>) -> Bool {
+    return lhs.left == rhs.left && lhs.right == rhs.right
   }
 }
 
@@ -371,8 +386,35 @@ print(hash)  // 491240970192719
 
 (hash value의 쓰임을 더 찾아보고 정리하겠습니다.)
 
+그렇다면 제네릭을 활용해 Hashable 키를 통해 값을 저장하는 캐시를 만들어 봅시다.
+아래 코드로 확인해 봅시다.
+
+```swift
+class MiniCache<T: Hashable: U> {
+  var cache = [T: U]()
+
+  init() {}
+
+  func insert(key: T, value: U) {
+    cache[key] = value
+  }
+
+  func read(key: T) -> U> {
+    return cache[key]
+  }
+}
+
+let cache = MiniCache<Int, String>()
+cache.insert(key: 100, value: "Jeff")
+cache.insert(key: 200, value: "Miriam")
+cache.read(key: 200)  // Optional("Miriam")
+cache.read(key:99)  // Optional("Jeff")
+```
+
 ## Generics and subtypes
 
+서브 클래싱과 제네릭을 같이 쓸 때 다소 복잡한 경우가 발생할 수 있습니다.
+지금부터 서브 클래싱 상황에서 제네릭이 어떻게 동작하는지 알아 봅시다.
 
 
 
