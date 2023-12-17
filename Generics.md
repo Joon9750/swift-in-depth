@@ -236,7 +236,7 @@ Comstraining a generic means trading flexibility for functionality. A constraine
 
 제네릭을 제약해 사용할 때 하나의 프로토콜 만으로는 부족한 경우가 있습니다. 
 
-예를 들어 값을 비교하고 해당 값을 딕셔너리에 저장해야 한다면, 우리는 비교의 기능(Comparable)과 딕셔너리에 저장하는 기능(Hashable) 모두가 필요합니다.
+예를 들어 값을 비교하고 해당 값을 딕셔너리에 저장해야 한다면, 우리는 비교 기능(Comparable)과 딕셔너리에 저장하는 기능(Hashable) 모두 필요합니다.
 이를 위해 함수의 입력은 Comparable 프로토콜과 Hashable 프로토콜을 모두 따르는 타입이어야 합니다.
 
 먼저 Hashable 프로토콜을 살펴 봅시다. 아래 코드는 Hashable 프로토콜 코드입니다.
@@ -249,22 +249,40 @@ public protocol Hashable: Equatable {
 }
 ```
 
-Hashable 프로토콜은 Equatable 프로토콜을 채택하고 있습니다.
-Hashable 프로토콜을 채택한다면 Equatable 프로토콜의 static == 함수와 Hashable 프로토콜의 hash 함수를 모두 필수로 구현해야 합니다.
+Hashable 프로토콜도 Equatable 프로토콜을 채택하고 있습니다.
+따라서 Hashable 프로토콜을 채택한다면 Equatable 프로토콜의 static == 함수와 Hashable 프로토콜의 hash 함수를 모두 필수로 구현해야 합니다.
+
 구조체와 열거형에서는 Equatable과 Hashable 프로토콜의 필수 구현 함수 중 하나를 구현하면 나머지 함수들을 컴파일러가 유추하지만 클래스에서는
 유추하지 못하기 때문에 클래스의 경우 모든 함수를 구현해야 합니다.
 
-Hashable 프로토콜의 hash 함수를 통해 hashvalue로 불리는 값을 생성합니다.
-예를 들어 "Hedgehog"을 hash 함수에 입력하면 43092483과 같은 hashvalue가 리턴됩니다.
-Hashable 프로토콜을 따르는 타입은 주로 딕셔너리의 키 값이나 Set의 일부 등에 사용됩니다.
+Hashable 프로토콜의 hash 함수를 통해 정수 타입인 hash value로 불리는 값을 제공합니다.
+Hashable 프로토콜은 어떤 경우 채택해야 할까요?
 
+Set 또는 Dictionary의 Key로 Hashable을 준수하는 모든 타입을 사용 할 수 있습니다. 
+스위프트 Dictionary 선언부를 보면 Dictionary<KeyType, ValueType> 형태입니다.
+여기서 KeyType은 반드시 Hashable 프로토콜을 따르는 Hashable 타입이어야 합니다.
+Hashable 프로토콜이 제공하는 hash value는 그 자체로 유일하게 표현이 가능한 방법을 제공합니다.
+
+물론 스위프트의 기본 타입(Int, Double, String, Bool, enum, sets 등)들은 Hashable 프로토콜을 채택하기 때문에 Dictionary의 KeyType으로 사용 가능합니다.
+하지만 커스텀 타입의 경우 Hashable 프로토콜을 채택해야 Dictionary의 KeyType으로 사용 가능합니다.
+
+심지어 Set은 Hashable 프로토콜을 채택한 타입만 들어갈 수 있습니다.
+
+그렇다면 Hashable 프로토콜이 제공하는 hash value는 어떤 값일까요?
+
+예를 들어 "Hedgehog"을 hash 함수에 입력하면 43092483과 같은 Int 타입의 hash value가 리턴됩니다.
 같은 타입의 인스턴스 a와 b가 있을 경우 a == b이면 a.hashValue == b.hashValue 입니다.
-하지만 hashValue가 같다고 해서 동일한 인스턴스는 아닐 수 있습니다.
+Hash 함수는 동일한 입력에 동일한 출력을 보장합니다.
+하지만 hash value가 같다고 해서 동일한 인스턴스는 아닐 수 있습니다.
 
-또한 hashValue는 프로그램의 실행에 따라 달라질 수 있습니다.
-따라서 이후 실행에 사용할 hashValue 값을 저장하지 않는게 좋습니다.
+또한 hash value는 프로그램의 실행에 따라 달라질 수 있습니다.
+따라서 이후 실행에 사용할 hash value 값을 저장하지 않는게 좋습니다.
+과거 실행에 저장했던 hash value와 방금 실행한 코드의 hash value는 달라질 수 있기 때문입니다.
 
-대부분의 스위프트 내장 타입들은 Equatable과 Hashable을 채택하고 있습니다.
+Array와 달리 Set과 Dictionary는 "순서"가 없습니다.
+따라서 특정 원소를 찾으려할 때 Hashable 프로토콜이 제공하는 정수 Hash(=hashValue)가 있기 때문에 우리가 찾으려는 원소를 빠르게 찾을 수 있습니다.
+여기서 우리는 Set과 Dictionary가 중복을 허용하지 않는 이유도 추측해볼 수 있습니다.
+Hash 함수를 통해 원소에 접근하기 때문에 중복을 허용하지 않는것 입니다.
 
 아래 코드와 같이 제네릭 타입을 하나 이상의 프로토콜로 제약할 수 있습니다.
 
