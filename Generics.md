@@ -316,11 +316,12 @@ public enum Optional<Wrapped> {
 ```
 
 옵셔널과 배열 등은 모두 제네릭 타입으로 구현되어 있습니다.
-우린 커스텀 타입을 제네릭 타입으로 만드는 방법도 이해하고 있어야 합니다.
+커스텀 타입 또한 제네릭 타입으로 만들 수 있습니다.
 
-딕셔너리의 키로 두 개의 Hashable 타입을 함께 사용하는건 불가능합니다.
+딕셔너리의 KeyType은 Hashable 타입을 요구합니다.
+하지만 딕셔너리의 KeyType으로 두 개의 Hashable 타입을 함께 사용하는건 불가능합니다.
+튜플로 두 개의 Hashable 타입인 String 타입을 묶고 딕셔너리의 키로 사용하는 방법 또한 스위프트에서 허용하지 않습니다.
 
-물론 튜플로 두 개의 Hashable 타입인 String 타입을 묶고 딕셔너리의 키로 사용하는 방법도 스위프트에서 허용하지 않습니다.
 아래 코드로 살펴봅시다.
 
 ```swift
@@ -370,12 +371,14 @@ let pair2 = Pair("Tom", "Jerry")
 하지만 아직 Pair 타입은 Hashable 타입이 아닙니다.
 Pair 타입이 hash value를 가지는 Hashable 타입이 되기 위해서는 추가적인 조치가 필요합니다.
 
-첫 번째 방법은 Swift에게 맡기는 것입니다. Swift 버전 4.1부터 Pair와 같은 객체의 두 프로퍼티(left, right)가 모두 Hashable일 경우 Pair 타입을 Hashable로 만들어 줍니다.
-하지만 해당 방법은 열거형과 구조체에만 적용됩니다. 
+첫 번째 방법은 Swift에게 맡기는 것입니다. 
+Swift 버전 4.1부터 Pair와 같은 객체의 두 프로퍼티(left, right)가 모두 Hashable일 경우 Pair 타입을 Hashable로 자동으로 만듭니다.
+하지만 해당 방법은 열거형과 구조체에만 적용됩니다.
+
 클래스의 경우 두 번째 방법을 사용하여 Hashable 타입을 명시해야 합니다. 
 또한 클래스가 Hashable 프로토콜을 채택하면 hash 함수와 static == 함수를 모두 구현해야 합니다.
 
-두 번째 방법은 직접 Pair 타입을 Hashable 타입으로 만드는 것입니다.
+두 번째 방법은 직접 Pair 타입을 Hashable 프로토콜을 채택하여 Hashable 타입으로 만드는 것입니다.
 아래 코드로 직접 Hashable 타입으로 만드는 방법을 살펴 봅시다.
 
 ```swift
@@ -411,6 +414,7 @@ let set: Set = [
 
 Pair 구조체에 Hashable 프로토콜을 명시적으로 채택하여 hash value를 가진 Hashable 타입으로 Pair 타입을 만들 수 있습니다.
 이제 Pair 타입은 Hashable 타입이기 때문에 hasher를 넘길 수 있습니다.
+
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -451,9 +455,9 @@ cache.read(key:99)  // Optional("Jeff")
 
 ## Generics and subtypes
 
-서브 클래싱과 제네릭을 같이 쓸 때 다소 복잡한 경우가 발생할 수 있습니다.
-
+서브 클래싱과 제네릭을 같이 쓸 때 다소 복잡한 상황이 발생할 수 있습니다.
 서브 클래싱 상황에서 제네릭이 어떻게 동작하는지 알아 봅시다.
+
 온라인 교육 서비스의 데이터를 모델링을 예로 살펴봅시다.
 아래는 간단한 온라인 교육 모델입니다.
 
@@ -476,17 +480,19 @@ course.start  // "Starting Swift course."
 ```
 
 위와 같은 경우 제네릭을 사용하지 않은 상태에서 평범한 서브 클래싱입니다.
+
 하지만 만약 Container<OnlineCourse>와 Container<SwiftOnTheServer> 같이 상속 관계의 클래스를 제네릭 타입안으로 넣을 경우
-Container<OnlineCourse>와 Container<SwiftOnTheServer>는 상속 관계를 유지하지 않습니다.
+Container<OnlineCourse>와 Container<SwiftOnTheServer>는 더이상 상속 관계를 유지하지 않습니다.
 
 다시 말해, 제네릭 안에서는 클래스끼리의 상속 관계를 잃습니다.
-따라서 아래 코드를 보면 부모 클래스로 자식 클래스를 참조하려 할 때 제네릭으로 인해 상속 관계가 깨져 참조할 수 없습니다.
+따라서 아래 코드를 보면 부모 클래스로 자식 클래스를 참조하려 할 때 제네릭으로 인해 상속 관계가 깨지며 부모 타입으로 자식 타입을 참조할 수 없습니다.
 
 ```swift
 struct Container<T> {}
 
 var containerSwiftCourse: Container<SwiftOnTheServer> = Container<SwiftOnTheServer>()
-var containerOnlineCourse: Container<OnlineCourse> = containerSwiftCourse  // error: cannot convert value of type 'Container<SwiftOnTheServer>' to specified type 'Container<OnlineCourse>'
+// error: cannot convert value of type 'Container<SwiftOnTheServer>' to specified type 'Container<OnlineCourse>'
+var containerOnlineCourse: Container<OnlineCourse> = containerSwiftCourse
 ```
 
 만약 데이터를 저장하는 제네릭 타입 Cache가 있을 경우를 생각해 봅시다.
@@ -508,7 +514,7 @@ refreshCache(Cache<SwiftOnTheServer>)  // 에러가 발생합니다.
 위에서 refreshCache 함수는 입력으로 Cache<OnlineCourse> 타입을 받고 있습니다.
 
 물론 제네릭 타입이 아니고 일반적인 상속관계를 가진 OnlineCourse라면 refreshCache 함수에 SwiftOnTheServer 타입을 전달할 수 있습니다.
-하지만 제네릭 타입인 Cache<OnlineCourse>이기 때문에 Cache<SwiftOnTheServer>는 Cache<OnlineCourse와 상속 관계를 가지지 않기 때문에 전달 될 수 없습니다.
+하지만 제네릭 타입인 Cache<OnlineCourse>이기 때문에 Cache<SwiftOnTheServer>는 Cache<OnlineCourse>와 상속 관계를 가지지 않기 때문에 전달 될 수 없습니다.
 
 제네릭 타입으로 클래스를 받을 경우 해당 클래스의 상속 관계를 깨트립니다.
 하지만 상속 관계가 깨지는 제한 사항은 커스텀 타입에만 해당됩니다.
