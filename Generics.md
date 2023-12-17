@@ -155,8 +155,11 @@ public protocol Equatable {
 
 그렇다면 Comparable 프로토콜은 어떨까요?
 
-아래 Comparable 프로토콜 코드를 확인하면 Equatable을 채택한다는걸 알 수 있습니다.
-Comparable 프로토콜은 Equatable 프로토콜과 마찬가지로 static 함수가 있지만 구현을 필수로 요구하지 않습니다.
+Comparable 프로토콜은 Equatabel을 채택하고 있습니다.
+클래스가 Comparable 프로토콜을 채택할 경우 Equatable 프로토콜의 static == 함수의 구현 의무도 가지게 됩니다.
+Comparable 프로토콜은 Equatable 프로토콜과 마찬가지로 static 함수가 있지만 모든 static 함수 구현을 필수로 요구하지 않습니다.
+
+하지만 적어도 하나의 static 함수는 구현해야 합니다.
 
 ```swift
 public protocol Comparable: Equatable {
@@ -168,31 +171,32 @@ public protocol Comparable: Equatable {
 ```
 
 Comparable 프로토콜을 채택할 경우 static 함수 중 하나를 구현하면 나머지 static 함수들은 스위프트가 유추하기 때문에 추가적으로 구현할 필요가 없습니다.
-Int, float, string은 기본적으로 Comparable을 따르는 타입입니다.
+Int, float, string은 기본적으로 Comparable을 따르는 타입이기 때문에 우리가 자연스럽게 값을 비교할 수 있는것 입니다.
 
-위에서 lowest 함수의 제네릭을 Comparable 프로토콜로 제약을 걸어 함수 안의 비교 연산에 문제가 없도록 고쳐봅시다.
+위에서 lowest 함수의 제네릭을 Comparable 프로토콜로 제약을 거는 방식으로 함수 안의 비교 연산에서 발생하는 에러를 고쳐봅시다.
+
 아래 코드는 lowest 함수의 제네릭을 Comparable 프로토콜로 제약한 코드입니다.
 이제 lowest 함수의 입력은 Comparable 프로토콜을 따르는 타입이어야 합니다.
 
 ```swift
 func lowest<T: Comparable>(_ array: [T]) -> T? {
   let sortedArray = array.sorted { (lhs, rhs) -> Bool in
-    return lhs < rhs  // Comparable을 따르는 타입만 입력으로 들어오기 때문에 비교 연산이 가능합니다.
+    return lhs < rhs  // array 입력으로 Comparable을 따르는 타입만 입력으로 들어오기 때문에 비교 연산이 가능합니다.
   }
   return sortedArray.first
 }
 
 // lowest 간략한 버전
 func lowest<T: Comparable>(_ array: [T]) -> T? {
-  return array.sorted().first  // 입력이 항상 Comparable 프로토콜을 따르기 때문에 내장 함수인 sorted()도 사용 가능합니다.
+  return array.sorted().first  // array 입력이 항상 Comparable 프로토콜을 따르기 때문에 내장 함수인 sorted()도 사용 가능합니다.
 }
 ```
 
 그렇다면 lowest 함수에 입력으로 들어올 커스텀 타입은 어떤게 있을까요?
-물론 Int, float, string도 가능하겠지만 Comparable 프로토콜을 따르는 커스텀 타입도 입력으로 들어갈 수 있습니다.
+물론 Comparable 프로토콜을 따르도록 구현된 Int, float, string도 가능하겠지만 Comparable 프로토콜을 따르는 커스텀 타입도 입력으로 들어올 수 있습니다.
 
-아래 코드는  Comparable 프로토콜을 따르는 커스텀 타입인 RoyalRank 타입 코드입니다.
-위에서 말했듯이 Comparable 프로토콜이 지원하는 static 함수 중 하나를 구현하여 나머지 static 함수를 컴파일러가 유추 가능하여 구현하지 않은 static 함수도 사용할 수 있습니다.
+아래 코드는 Comparable 프로토콜을 따르는 커스텀 타입인 RoyalRank 타입의 코드입니다.
+위에서 말했듯이 Comparable 프로토콜이 지원하는 static 함수 중 하나를 구현하여 나머지 static 함수를 컴파일러가 유추 가능하기 때문에 직접 구현하지 않은 static 함수도 사용할 수 있습니다.
 
 ```swift
 enum RoyalRank: Comparable {
@@ -224,17 +228,18 @@ lowest(ranks)  // .duke
 제네릭의 장점 중 하나는 아직 존재하지 않은 타입에도 대응할 수 있다는 점입니다.
 
 모든 타입이 Comparable 프로토콜을 따르진 않습니다.
-예를 들어 Bool 타입은 Comparable 프로토콜을 따르지 않습니다. 따라서 lowest 함수에 Bool 타입이 입력으로 들어갈 수 없습니다.
+예를 들어 Bool 타입은 Comparable 프로토콜을 따르지 않습니다. 따라서 lowest 함수에 Bool 타입은 입력으로 들어갈 수 없습니다.
 
 Comstraining a generic means trading flexibility for functionality. A constrained generic becomes more specialized but is less flexible.
 
 ## Multipule constraints
 
 제네릭을 제약해 사용할 때 하나의 프로토콜 만으로는 부족한 경우가 있습니다. 
-예를 들어 값을 비교하고 해당 값을 딕셔너리에 저장한다면, 이를 위해 Comparable 프로토콜과 Hashable 프로토콜을 모두 따르는 타입이어야 합니다.
 
-먼저 Hashable 프로토콜을 살펴 봅시다.
-아래 코드는 Hashable 프로토콜 코드입니다.
+예를 들어 값을 비교하고 해당 값을 딕셔너리에 저장해야 한다면, 우리는 비교의 기능(Comparable)과 딕셔너리에 저장하는 기능(Hashable) 모두가 필요합니다.
+이를 위해 함수의 입력은 Comparable 프로토콜과 Hashable 프로토콜을 모두 따르는 타입이어야 합니다.
+
+먼저 Hashable 프로토콜을 살펴 봅시다. 아래 코드는 Hashable 프로토콜 코드입니다.
 
 ```swift
 public protocol Hashable: Equatable {
