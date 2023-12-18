@@ -19,3 +19,15 @@
 하지만 모든 코인에 대응해야하기 때문에 너무 많은 case들이 나오기 때문에 좋은 선택지는 아닙니다.
 
 이때 우리는 프로토콜을 통해 구현하여 코인 포토폴리오를 추상화 할 수 있습니다.
+아래 코드는 프로토콜 코드입니다.
+
+```swift
+import Foundation
+
+protocol CryptoCurrency {
+  var name: String { get }
+  var symbol: String { get }
+  var holdings: Double { get set }
+  var price: NSDecimalNumber? { get set }
+} 
+```
