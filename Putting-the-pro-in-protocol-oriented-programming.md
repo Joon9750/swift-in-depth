@@ -148,9 +148,37 @@ print(type(of: rerievedCoins))  // Array<CryptoCurrency>
 만약 portfolio.coin에 추가 되는 Bitcoin 타입 객체가 CryptoCurrency protocol에서 제공하는 함수 외에 추가적인 함수가 있을 때, 
 Array<CryptoCurrency>로 추상화 된 상태에서는 Bitcoin 타입의 추가적인 함수에 접근할 수 없습니다.
 해당 함수에 접근하기 위해서는 CryptoCurrency 타입을 Bitcoin 타입으로 형 변환해야 합니다.
+하지만 이는 안티패턴으로 이어질 수 있고 CryptoCurrency 타입을 따르는 코인의 종류가 많아지면 대응하기 어려워질 수 있으니 주의해야 합니다.
 
-하지만 이는 안티패턴으로 여겨질 수 있고 CryptoCurrency 타입을 따르는 코인의 종류가 많아지면 대응하기 어려워집니다.
+앞에서 보았듯이 '제네릭 타입 제약에 쓰이는 프로토콜'은 컴파일 타임에 타입이 결정되며 결정된 타입이 외에 어떤 타입도 허용하지 않습니다.
+그렇다면 '제네릭 타입 제약에 쓰이는 프로토콜'은 어떤 경우 더 좋은 선택지가 될까요?
 
+비트 코인을 함수에 넘기면 동일한 코인 타입을 리턴 받지만 가장 최신 가격으로 갱신된 코인을 리턴 받아야 하는 상황을 아래 코드로 살펴봅시다.
+
+```swift
+func retrievePriceRunTime(coin: CryptoCurrency, completion: ((CryptoCurrency) -> Void)) {
+  // ...생략
+  var copy = coin
+  copy.price = 6000
+  completion(copy)
+}
+
+func retrievePriceCompileTime<Coin: CryptoCurrency>(coin: Coin, completion:((Coin) -> Void) {
+  // ...생략
+  var copy = coin
+  copy.price = 6000
+  completion(copy)
+}
+
+let btc = Bitcoin(holdings: 3, price: nil)
+retrievePriceRunTime(coin: btc) { (updatedCoin: CryptoCurrency) in  // 런타임 전까지 정확한 타입을 모릅니다.
+  print("Updated value runtime is \(updatedCoin.price?.doubleValue ?? 0)")
+}
+
+retrievePriceCompileTime(coin: btc) { (updatedCoin: Bitcoin) in  // 컴파일 타임에 이미 Bitcoin으로 타입이 결정되었다. 
+  print("Updated value runtime is \(updatedCoin.price?.doubleValue ?? 0)")
+}
+```
 
 
 
