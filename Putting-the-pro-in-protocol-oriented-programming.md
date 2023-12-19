@@ -354,11 +354,81 @@ public protocol Equatable {
 - A SearchQuery protocol - It resembles database queries, where the result is different for each implementation.
 - A Paginator protocol - It can be given a page and offset to browse through a database. Each page could represent some data. Perhaps it has some users in a user table in a database, or perhaps a list of files, or a list of products inside a view.
 
+그렇다면 서브 클래싱 방식의 아래 코드를 프로토콜 방식으로 고쳐봅시다.
+
+```swift
+class AbstractDamage {}
+
+class AbstractEnemy {
+  func attack() -> AbstractDamage {
+    fatalError("This method must be implemented by subclass.")
+  }
+}
+
+class Fire: AbstractDamage {}
+class Imp: AbstractEnemy {
+  override func attack() -> Fire {
+    return Fire()
+  }
+}
+
+class BluntDamage: AbstractDamage {}
+class Centaur: AbstractEnemy {
+  override func attack() -> BluntDamge {
+    return BluntDamage()
+  }
+}
+```
+
+위의 서브 클래싱 기반 코드를 아래 프로토콜 기반 코드로 수정했습니다. 
+
+```swift
+protocol AbstractEnemy {
+  associatedtype damage
+
+  func attack() -> damage
+}
+
+struct Fire {}
+class Imp: AbstractEnemy {
+  func attack() -> Fire {
+    return Fire()
+  }
+}
+
+struct BluntDamage {}
+class Centaur: AbstractEnemy {
+  func attack() -> BluntDamage {
+    return BluntDamage()
+  }
+}
+```
+
 ## Passing protocols with associated types
 
+지금부터는 연관 값을 가진 프로토콜을 넘기는 방법을 살펴봅시다.
+
+연관 값을 가진 프로토콜을 함수에 넘길 때 프로토콜의 연관 값에 직접 접근할 수 있습니다.
+또한 제네릭 제약처럼 프로토콜의 연관 값의 타입도 제약을 걸 수 있습니다.
+
+먼저 함수로 연관 값을 가진 프로토콜을 넘기는 코드를 살펴봅시다.
+
+```swift
+func runWorker<W: Worker>(worker: W, input: [W.Input]) {
+  input.forEach { (value: W.Input) in
+    worker.start(input: value)
+  }
+}
+
+let mailJob = MailJob()
+runWorker(worker: mailJob, input: ["grover@sesamestreetcom", "bigbird@sesamestreet.com"])
+
+let fileRemover = FileRemover()
 
 
+```
 
+위 코드에서 input이 W 제네릭의 Input 타입으로 제한되어 있기 때문에 worker.start(input: value)로 값을 전달할 수 있습니다.
 
 
 
