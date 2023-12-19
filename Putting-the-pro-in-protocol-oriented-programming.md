@@ -301,9 +301,48 @@ class MailJob: Worker {
 }
 ```
 
-associatedtype은 제네릭과 비슷한 성격을 가지지만 프로토콜 내부에 정의됩니다.
+associatedtype은 제네릭과 비슷한 성격을 가지지만 제네릭과 달리 프로토콜 내부에 정의됩니다.
+Worker 프로토콜의 associatedtype을 통해  MailJob은 Input을 string, Output을 Bool로 구현할 수 있고 FileRemover는 Input을 URL, Output을 [string]으로 설정할 수 있습니다.
 
+프로토콜의 연관 값을 통해 하나의 타입이 특정 프로토콜에 대한 하나의 구현을 가지면서 여러 타입에 대응하도록 만듭니다.
 
+위 코드의 MailJob 클래스는 typealias로 프로토콜의 연관 값의 타입을 확정하고 있지만 컴파일러가 구현한 함수를 통해 타입이 추론 가능하다면 typealias 구문을 생략할 수 있습니다.
+아래 코드는 typealies 구문을 생략한 코드입니다. FileRemover 클래스의 start 함수에서 입력과 출력 데이터 타입을 모두 명시하고 있기 때문에 typealias 구문 없이도 컴파일러가 associatedtype 타입을 추론할 수 있습니다.
+
+```swift
+class FileRemover: Worker {
+  // typealias Input = String 
+  // typealias Output = Bool 
+
+  func start(input: URL) -> [String] {
+    do {
+      var results = [String]()
+      let fileManager = FileManager.default
+      let fileURLs = try fileManager.contentsOfDirectory(a: input, includingPropertiesForKeys: nil)
+
+      for fileURL in fileURLs {
+        tryfileManager.removeItem(at: fileURL)
+        results.append(filedURL.absoluteString)
+      }
+      return results
+    } catch {
+      print("Clearing direcory failed.")
+      return []
+    }
+  }
+}
+```
+
+스위프트에서는 프로토콜과 연관 값이 함께 자주 사용됩니다.
+IteratorProtocol, Sequence, Collection 프로토콜들이 대표적으로 Element 연관 값 가지고 있습니다.
+또한 여러 프로토콜에서 Self를 볼 수 있는데 Self도 연관 값입니다.
+아래 코드는 Self 연관 값을 가진 Equatable 프로토콜 코드입니다.
+
+```swift
+public protocol Equatable {
+  static func == (lhs: Self, rhs: Self) -> Bool
+}
+```
 
 
 
