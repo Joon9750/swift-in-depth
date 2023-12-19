@@ -196,13 +196,51 @@ retrievePriceCompileTime(coin: btc) { (updatedCoin: Bitcoin) in  // 컴파일 �
 우린 연관 값을 가진 프로토콜을 PATs로 줄여 부를 수 있습니다.
 
 지금부터 프로토콜 만으로 데이터 모델링을 해보고 발생하는 문제점을 프로토콜 연관 값으로 해결해 봅시다.
+먼저 프로토콜 만으로 데이터 모델링을 했을 때 생기는 단점을 살펴봅시다.
 
+아래 예시는 이메일을 손님에게 보내거나 데이터 베이스를 다루거나 이미지 사이즈를 조절하는 등 성격들이 다른 '일'을 프로토콜로 만들었습니다.
 
+```swift
+protocol Worker {
+  @discardableResult  // 함수의 리턴 값을 무시할 수 있도록 만드는 키워드입니다. 리턴 값을 사용하지 않아도 경우를 띄우지 않습니다.
+  func start(input: String) -> Bool
+}
 
+class MailJob: Worker {
+  func start(input: String) -> Bool {
+    // send mail to email address
+  }
+}
+```
 
+Worker 프로토콜의 start 함수는 입력과 출력 데이터 타입이 고정되었기 때문에 여러 성격을 가지는 '일'들에 대응하지 못합니다.
+만약 FileRemover 객체가 URL을 입력 받아 [String]을 리턴하는 start 함수가 필요하다면 위와 같은 Worker 프로토콜로는 구현이 불가능합니다.
 
+단순한 프로토콜은 적용되는 범위가 넓지 못합니다.
 
+이와 같이 함수 동작의 과정은 동일하지만, 동작에 사용되는 타입이 다를 경우 프로토콜에 연관 값을 추가해서 구현할 수 있습니다.
+프로토콜과 연관 값을 함께 사용하는 방법을 살펴보기 전에 불완전한 두 가지 방법을 먼저 살펴봅시다.
+불완전한 방법이지만 생각해볼 의미가 있는 접근 방법입니다.
 
+첫 번째 방법은 Worker 프로토콜 start 함수의 입력과 출력 데이터 타입을 모두 프로토콜로 만드는 방법입니다.  
+Input, Output 프로토콜을 만들고 start 함수의 모든 입력과 출력 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 합니다.
+
+동작은 할 것입니다. 아래 코드를 확인해봅시다.
+
+```swift
+protocol Input {}
+protocol Output {}
+
+protocol Worker {
+  @discardableResult
+  func start(input: Input) -> Output
+}
+```
+
+하지만 start 함수에 쓰이는 모든 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 하는 방법는 boilerplate 코드를 유발합니다.
+심지어 Input, Output 프로토콜에 새로운 프로퍼티나 함수가 추가된다면 이를 따르는 모든 타입에서 추가적인 구현이 필요합니다.
+
+두 번째 방법은 
 
 
 
