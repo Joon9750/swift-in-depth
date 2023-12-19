@@ -240,17 +240,68 @@ protocol Worker {
 하지만 start 함수에 쓰이는 모든 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 하는 방법는 boilerplate 코드를 유발합니다.
 심지어 Input, Output 프로토콜에 새로운 프로퍼티나 함수가 추가된다면 이를 따르는 모든 타입에서 추가적인 구현이 필요합니다.
 
-두 번째 방법은 
+두 번째는 프로토콜에 제네릭을 추가하는 방법입니다.
+아래 코드로 바로 살펴봅시다.
 
+```swift
+protocol Worker<Input, Output> {
+  @discardableResult
+  func start(input: Input) -> Output
+}
+```
 
+Worker 프로토콜을 채택한 구현부에서 Input과 Output이 어떤 타입이 될지 결정합니다.
+하지만 아쉽게도 스위프트에서 프로토콜과 제네릭의 사용을 허락하지 않습니다.
 
+error: protocols do not allow generic parameters; use assciated types instead
 
+위와 같은 컴파일 에러가 발생합니다.
 
+스위프트에서 프로토콜과 제네릭의 사용을 허락하지 않는 이유는 하나의 타입에 한 번의 프로토콜 채택과 구현만을 허용하기 때문입니다.
+만약 프로토콜과 제네릭이 함께 사용된다면 아래와 같은 코드가 작성될 것입니다.
 
+```swift
+// Not supported: Implementing a generic Worker.
+class MailJob: Worker<String, Bool> {
+  // ...생략
+}
 
+class MailJob: Worker<Int, [String]> {
+  // ...생략
+}
+```
 
+스위프트에서 같은 타입(MailJob)이 Worker 프로토콜을 단일 채택하고 구현해야 합니다.
+위와 같이 같은 타입이 Worker 프로토콜에 대해 여러 구현부를 가진다면 컴파일 에러가 발생합니다.
 
+컴파일 되지는 않는 코드지만 좋은 접근입니다.
+결과적으로 프로토콜과 제네릭스러운(?) 요소가 함께 사용되어야 Worker 프로토콜이 여러 '일'에 대응할 수 있습니다.
+여기서 프로토콜과 함께 쓰일 제네릭스러운 요소가 바로 연관 값(associatedtype)입니다. 
 
+그렇다면 우리의 결론이었던 프로토콜과 연관 값을 사용해 Worker 프로토콜을 만들어 봅시다.
+start 함수의 입력과 출력을 연관 값으로 만들어 Worker 프로토콜이 여러 '일'에 대응하도록 만듭니다.
+프로토콜에서 연관 값 선언은 associated 키워드로 구현부에서 특정 타입 명시는 typealias 키워드를 사용합니다.
+
+```swift
+protocol Worker {
+  associatedtype Input  // just like generics
+  associatedtype Output  // just like generics
+  
+  @discardableResult
+  func start(input: Input) -> Output
+}
+
+class MailJob: Worker {
+  typealias Input = String  // the Input associated type is defined as String
+  typealias Output = Bool  // the Output associated type is defined as Bool
+
+  func start(input: String) -> Bool {
+    // send mail to email address
+  }
+}
+```
+
+associatedtype은 제네릭과 비슷한 성격을 가지지만 프로토콜 내부에 정의됩니다.
 
 
 
