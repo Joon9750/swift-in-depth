@@ -346,11 +346,15 @@ public protocol Equatable {
 
 스위프트 내부적으로 프로토콜과 연관 값을 사용한 경우 외에도 다양한 용도에 사용됩니다.
 프로토콜을 따르는 타입에서 서로 다른 타입에 대응되어야 할 때 프로토콜과 연관 값이 함께 사용됩니다.
-아래는 사용될 예시 상황들 입니다.
+아래는 사용될 예시 상황들 입니다. 자세히 살펴봅시다!
 
-- 
+- A Recording protocol - Each recording has a duration, and it could also suport scrubbing through time via a seek() method, but the actual data could be different for each implementation, such as an audio file, video file, or YouTube stream.
+- A Service protocol - It loads data; one type could return JSON data from an API, and another could locally search and return raw string data.
+- A Message protocol - It's on a social media tool that tracks posts. In one implementation, a message represents a Tweet; in another, a message represents a Facebook direct message; and in another, it could be a message on WhatsApp.
+- A SearchQuery protocol - It resembles database queries, where the result is different for each implementation.
+- A Paginator protocol - It can be given a page and offset to browse through a database. Each page could represent some data. Perhaps it has some users in a user table in a database, or perhaps a list of files, or a list of products inside a view.
 
-
+## Passing protocols with associated types
 
 
 
