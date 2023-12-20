@@ -528,21 +528,43 @@ let imageProcessor = ImageProcessor(worker: cropper)
 ImageProcessor 클래스에 제네릭을 Worker 프로토콜로 제약하여 Worker 프로토콜을 따르는 image crppers, resizers 등에도 대응하는 클래스를 만들었습니다.
 물론 W.Input과 W.Output의 타입은 연관 값 제약에 맞춰 UIImage 타입과 Bool 타입으로 들어와야 합니다.
 
+이미지와 관련된 작업을 할 경우 Worker 프로토콜의 연관 값인 Input, Output의 타입은 UIImage와 Bool이어야 합니다.
+따라서 이미지와 관련된 작업을 하는 클래스마다 where 절로 연관 값 제약 구문을 써야 합니다.
+다시 말해 프로토콜의 연관 값을 제약을 각 클래스마다 해야합니다.
 
+우리는 프로토콜 수준에서 연관 값 제약을 걸어 해당 프로토콜을 따르는 타입의 연관 값에 제약 구문 없이 제약을 줄 수 있습니다.
+아래 코드로 확인해 봅시다.
 
+```swift
+protocol ImageWorker: Worker where Input == UIImage, Output == Bool {
+  // extra methods can go here if you want
+}
+```
 
+위와 같이 Worker 프로토콜을 따르는 타입 중 Worker 프로토콜의 연관 값을 UIImage, Bool로 제약해야 하는, 
+즉 이미지를 다루는 객체가 여러 개라면 Worker 프로토콜을 채택한 ImageWorker 프로토콜을 만들어 ImageWorker 프로토콜에 연관 값 제약 구문을 추가해 중복되는 코드를 줄일 수 있습니다.
 
+ImageWorker 프로토콜에서 연관 값 제약을 추가한 덕분에 아래와 같이 깨끗한 코드가 나옵니다.
 
+```swift
+// Before :
+final class ImageProcessor<W: Worker>
+where W.Input == UIImage, W.Output == Bool { ... }
 
+// After
+final class ImageProcessor<W: ImageWorker> { ... }
+```
 
+연관 값을 가진 프로토콜과 제네릭은 추상적인 코드를 만들어 줍니다.
+하지만 연관 값을 가진 프로토콜은 훌륭한 방법이지만 코드를 다소 어렵게 만듭니다. 
 
+You don't always have to make things difficult, however. Sometimes a single generic or concrete code is enough to give you what you want.
 
-
-
-
-
-
-
-
-
-
+## Summary
+- You can use protocols as generic constraints. But protocols can also be used as a type at runtime (dynamic dispatch) when you step away from generics.
+- Using protocols as a generic constraint is usually the way to go, until you need dynamic dispatch.
+- Associated types are generics that are tied to a protocol.
+- Protocols with associated types allow a concrete type to define the associated type. Each concrete type can specialize an associated type to a different type.
+- Protocols with Self requirements are a unique flavor of associated types referencing the current type.
+- Protocols with associate types or Self requirements force you to reason about types at compile time.
+- You can make a protocol inherit another protocol to further constrain its associated types.
