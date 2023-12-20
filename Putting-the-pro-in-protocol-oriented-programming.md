@@ -448,11 +448,11 @@ final class User {
 }
 
 func runWorker<W>(worker: W, input: [W.Input])
-where W: Worker, W.Input == User {  // associatedtype에 제약을 걸어 User Input에 특수화된 함수를 구현할 수 있었습니다.
-  input.forEach { (user: W.Input) in
-    worker.start(input: user)
-    print("Finished processing user \(user.firstName) \(user.lastName)")
-  }
+  where W: Worker, W.Input == User {  // associatedtype에 제약을 걸어 User Input에 특수화된 함수를 구현할 수 있었습니다.
+    input.forEach { (user: W.Input) in
+      worker.start(input: user)
+      print("Finished processing user \(user.firstName) \(user.lastName)")
+    }
 }
 ```
 
@@ -460,8 +460,73 @@ By constraining an associated type, the function is specialized to work only wit
 
 지금까지는 연관 값을 가진 프로토콜을 함수에 넘기는 방법을 살펴봤고 이제 구조체, 클래스, 열거형과 같은 타입들과 프로토콜의 연관 값을 함께 사용하는 방법을 살펴봅시다.
 
+지금부터 이미지를 다루는 ImageProcesser 클래스를 만들려 합니다.
+아래의 예시는 Worker 프로토콜을 따르는 ImageCropper 클래스를 프로퍼티로 가진 ImageProcessor 클래스를 만들것 입니다.
+ImageProcessor 클래스가 하는 일은 Worker 프로토콜에 의해 결정됩니다.
 
+아래 코드로 확인해 봅시다.
 
+```swift
+protocol Worker {
+  associatedtype Input  // just like generics
+  associatedtype Output  // just like generics
+  
+  @discardableResult
+  func start(input: Input) -> Output
+}
+
+final class ImageCropper: Worker {
+  let size: CGSize
+  init(size: CGSize) {
+    self.size = size
+  }
+
+  func start(input: UIImage) -> Bool {
+    // 이미지 조작 이후 성공 시 true 리턴
+    return true
+  }
+}
+
+final class ImageProcessor<W: Worker>
+  where W.Input == UIImage, W.Output == Bool {  // where 절을 사용해 프로토콜의 연관 값(Input, Output)에 제약을 걸어 ImageProcessor에 필요한 타입을 확정했습니다. 
+    let worker: W
+
+    init(worker: W) {
+      self.worker = worker
+    }
+
+    private func process() {
+      // start batches
+      var results = [Bool]()
+
+      let amount = 50
+      var offset = 0
+      var images = fetchImages(amount: amount, offset: offset)
+      var failedCount = 0
+      while !images.isEmpty {
+        for image in images {
+          if !worker.start(input: image) {
+            failedCount += 1
+          }
+        }
+        offset += amount
+        images = fetchImages(amount: amount, offset: offset)
+      }
+      print("\(failedCount) images failed.")
+    }
+
+    private func fetchImages(amount: Int, offset: Int) -> [UIImages] {
+      // return images from database
+      return [UIImage(), UIImage()]
+    }
+}
+
+let cropper = ImageCropper(size: CGSize(width: 200, height: 200))
+let imageProcessor = ImageProcessor(worker: cropper)
+```
+
+ImageProcessor 클래스에 제네릭을 Worker 프로토콜로 제약하여 Worker 프로토콜을 따르는 image crppers, resizers 등에도 대응하는 클래스를 만들었습니다.
+물론 W.Input과 W.Output의 타입은 연관 값 제약에 맞춰 UIImage 타입과 Bool 타입으로 들어와야 합니다.
 
 
 
