@@ -424,14 +424,41 @@ let mailJob = MailJob()
 runWorker(worker: mailJob, input: ["grover@sesamestreetcom", "bigbird@sesamestreet.com"])
 
 let fileRemover = FileRemover()
-
-
+runWorker(worker: fileRemover, input: [
+  URL(fileURLWithPath: "./cache", isDirectory: true),
+  URL(fileURLWithPath: "./tmp", isDirectory: true)
+])
 ```
 
 위 코드에서 input이 W 제네릭의 Input 타입으로 제한되어 있기 때문에 worker.start(input: value)로 값을 전달할 수 있습니다.
+프로토콜의 연관 값은 컴파일 타임에 타입이 결정됩니다.
 
+제네릭에서 where 절을 사용했듯이 프로토콜의 연관 값도 where 절로 입력 받을 수 있습니다.
+또한 where 절에서 연관 값의 타입에 제약을 걸 수 있습니다. 이는 제네릭 제약과 비슷한 느낌입니다.
+하지만 문법적으로 차이가 있으니 아래 코드를 살펴봅시다.
 
+```swift
+final class User {
+  let firstName: String
+  let secondName: String
+  init(firstName: String, lastName: String) {
+    self.firstName = firstName
+    self.secondName = secondName
+  }
+}
 
+func runWorker<W>(worker: W, input: [W.Input])
+where W: Worker, W.Input == User {  // associatedtype에 제약을 걸어 User Input에 특수화된 함수를 구현할 수 있었습니다.
+  input.forEach { (user: W.Input) in
+    worker.start(input: user)
+    print("Finished processing user \(user.firstName) \(user.lastName)")
+  }
+}
+```
+
+By constraining an associated type, the function is specialized to work only with users as input!!
+
+지금까지는 연관 값을 가진 프로토콜을 함수에 넘기는 방법을 살펴봤고 이제 구조체, 클래스, 열거형과 같은 타입들과 프로토콜의 연관 값을 함께 사용하는 방법을 살펴봅시다.
 
 
 
