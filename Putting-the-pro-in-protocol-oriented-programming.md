@@ -108,25 +108,18 @@ print(type(of: portfolio.coins))  // Array<Ethereum>, 프로토콜을 제네릭 
 아래 코드는 제네릭의 제약으로 쓰이던 프로토콜을 하나의 타입으로 쓰이는 프로토콜로 변경한 코드입니다.
 
 ```swift
-// Before
+// Before : 제네릭 제약으로 쓰인 프로토콜
 final class Portfolio<Coin: CryptoCurrency> {
   var coins: [Coin]
   // ...생략
 }
 
-// After
+// After : 타입으로 쓰인 프로토콜
 final class Portfolio {
   var coins: [CryptoCurrency]
   // ...생략
 }
-```
 
-제네릭 없이 타입으로 쓰이는 프로토콜은 런타임에 동작하며 서브 타입까지 모두 대응할 수 있습니다.
-보다 유연한 코드로 생각됩니다.
-
-아래 코드는 서브 타입까지 대응 가능한 '타입으로 쓰이는 프로토콜'의 코드입니다.
-
-```swift
 let portfolio = Portfolio(coins: [])
 let coins: [CryptoCurrency] = [
   Ethereum(holdings: 4, price: NSDecimalNumber(value: 500)),
@@ -140,6 +133,9 @@ let retrievedCoins = porfolio.coins
 print(type(of: rerievedCoins))  // Array<CryptoCurrency>
 ```
 
+제네릭 없이 타입으로 쓰이는 프로토콜은 런타임에 동작하며 서브 타입까지 모두 대응할 수 있습니다.
+보다 유연한 코드로 생각됩니다.
+
 앞서 '제네릭을 제약하는 프로토콜'은 coins의 타입이 고정되었지만 '타입으로 쓰이는 프로토콜'의 경우 Array<CryptoCurrency>로 추상화 되어있습니다. 
 만약 런타임에 동작하는 프로토콜을 원하다면 프로토콜을 타입이나 인터페이스로 사용하면 됩니다.
 
@@ -151,9 +147,9 @@ Array<CryptoCurrency>로 추상화 된 상태에서는 Bitcoin 타입의 추가�
 하지만 이는 안티패턴으로 이어질 수 있고 CryptoCurrency 타입을 따르는 코인의 종류가 많아지면 대응하기 어려워질 수 있으니 주의해야 합니다.
 
 앞에서 보았듯이 '제네릭 타입 제약에 쓰이는 프로토콜'은 컴파일 타임에 타입이 결정되며 결정된 타입이 외에 어떤 타입도 허용하지 않습니다.
-그렇다면 '제네릭 타입 제약에 쓰이는 프로토콜'은 어떤 경우 더 좋은 선택지가 될까요?
+그렇다면 '제네릭 타입 제약에 쓰이는 프로토콜'은 어떤 경우에 더 좋은 선택지가 될까요?
 
-비트 코인을 함수에 넘기면 동일한 코인 타입을 리턴 받지만 가장 최신 가격으로 갱신된 코인을 리턴 받아야 하는 상황을 아래 코드로 살펴봅시다.
+비트 코인을 함수에 넘기면 동일한 코인 타입을 리턴 받지만 가장 최신 가격으로 갱신된 코인을 리턴 받는 상황을 아래 코드로 살펴봅시다.
 
 ```swift
 func retrievePriceRunTime(coin: CryptoCurrency, completion: ((CryptoCurrency) -> Void)) {
