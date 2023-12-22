@@ -421,7 +421,7 @@ class Centaur: AbstractEnemy {
 위에서는 프로토콜의 연관 값을 살펴보았다면, 지금부터는 연관 값을 가진 프로토콜을 함수의 인자로 넘기는 방법을 살펴봅시다.
 
 연관 값을 가진 프로토콜을 함수에 넘길 때 프로토콜의 연관 값에 직접 접근할 수 있습니다.
-또한 제네릭 제약처럼 프로토콜 연관 값의 타입에 제약을 걸 수도 있습니다.
+또한 함수에서 제네릭 제약처럼 프로토콜 연관 값의 타입에 제약을 걸 수도 있습니다.
 
 먼저 함수로 연관 값을 가진 프로토콜을 넘기는 코드를 살펴봅시다.
 
@@ -442,10 +442,11 @@ runWorker(worker: fileRemover, input: [
 ])
 ```
 
-위 코드에서 input이 W 제네릭의 Input 타입으로 제한되어 있기 때문에 worker.start(input: value)로 값을 전달할 수 있습니다.
+위 코드에서 input이 W.Input 타입으로 지정하듯이 프로토콜의 연관 값에 직접 접근할 수 있습니다. 
+input이 W.Input 타입으로 선언했기 때문에 worker.start(input: value)로 값을 전달할 수 있습니다.
 프로토콜의 연관 값은 컴파일 타임에 타입이 결정됩니다.
 
-제네릭에서 where 절을 사용했듯이 프로토콜의 연관 값도 where 절로 입력 받을 수 있습니다.
+제네릭 함수에서 where 절을 사용했듯이 프로토콜의 연관 값을 입력 받는 함수도 where 절로 입력을 받을 수 있습니다.
 또한 where 절에서 연관 값의 타입에 제약을 걸 수 있습니다. 이는 제네릭 제약과 비슷한 느낌입니다.
 하지만 문법적으로 차이가 있으니 아래 코드를 살펴봅시다.
 
@@ -460,7 +461,8 @@ final class User {
 }
 
 func runWorker<W>(worker: W, input: [W.Input])
-  where W: Worker, W.Input == User {  // associatedtype에 제약을 걸어 User Input에 특수화된 함수를 구현할 수 있었습니다.
+  where W: Worker, W.Input == User {
+    // associatedtype에 제약을 걸어 User Input에 특수화된 함수를 구현할 수 있었습니다.
     input.forEach { (user: W.Input) in
       worker.start(input: user)
       print("Finished processing user \(user.firstName) \(user.lastName)")
@@ -472,8 +474,8 @@ By constraining an associated type, the function is specialized to work only wit
 
 지금까지는 연관 값을 가진 프로토콜을 함수에 넘기는 방법을 살펴봤고 이제 구조체, 클래스, 열거형과 같은 타입들과 프로토콜의 연관 값을 함께 사용하는 방법을 살펴봅시다.
 
-지금부터 이미지를 다루는 ImageProcesser 클래스를 만들려 합니다.
-아래의 예시는 Worker 프로토콜을 따르는 ImageCropper 클래스를 프로퍼티로 가진 ImageProcessor 클래스를 만들것 입니다.
+이미지를 다루는 ImageProcesser 클래스를 만들며 다양한 타입들과 프로토콜 연관 값이 함께 사용되는 상황을 살펴 봅시다.
+아래의 예시에서는 Worker 프로토콜을 따르는 ImageCropper 클래스를 프로퍼티로 가진 ImageProcessor 클래스를 만들고 있습니다.
 ImageProcessor 클래스가 하는 일은 Worker 프로토콜에 의해 결정됩니다.
 
 아래 코드로 확인해 봅시다.
@@ -489,6 +491,7 @@ protocol Worker {
 
 final class ImageCropper: Worker {
   let size: CGSize
+
   init(size: CGSize) {
     self.size = size
   }
@@ -500,7 +503,8 @@ final class ImageCropper: Worker {
 }
 
 final class ImageProcessor<W: Worker>
-  where W.Input == UIImage, W.Output == Bool {  // where 절을 사용해 프로토콜의 연관 값(Input, Output)에 제약을 걸어 ImageProcessor에 필요한 타입을 확정했습니다. 
+  where W.Input == UIImage, W.Output == Bool {
+    // where 절을 사용해 프로토콜의 연관 값(Input, Output)에 제약을 걸어 ImageProcessor에 필요한 타입을 확정했습니다. 
     let worker: W
 
     init(worker: W) {
@@ -537,26 +541,39 @@ let cropper = ImageCropper(size: CGSize(width: 200, height: 200))
 let imageProcessor = ImageProcessor(worker: cropper)
 ```
 
-ImageProcessor 클래스에 제네릭을 Worker 프로토콜로 제약하여 Worker 프로토콜을 따르는 image crppers, resizers 등에도 대응하는 클래스를 만들었습니다.
+ImageProcessor 클래스에 제네릭을 Worker 프로토콜로 제약하여 Worker 프로토콜을 따르는 image croppers, resizers 등에도 대응하는 클래스를 만들었습니다.
 물론 W.Input과 W.Output의 타입은 연관 값 제약에 맞춰 UIImage 타입과 Bool 타입으로 들어와야 합니다.
 
-이미지와 관련된 작업을 할 경우 Worker 프로토콜의 연관 값인 Input, Output의 타입은 UIImage와 Bool이어야 합니다.
-따라서 이미지와 관련된 작업을 하는 클래스마다 where 절로 연관 값 제약 구문을 써야 합니다.
-다시 말해 프로토콜의 연관 값을 제약을 각 클래스마다 해야합니다.
+만약 이미지를 다루는 '일'이 아니라 URL을 다루는 '일'이라면 Worker 프로토콜의 연관 값을 수정해 UrlCropper 클래스를 만들고,
+UrlProcessor 클래스의 연관 값 타입 제약을 URL에 어울리도록 구현해주면 됩니다.
 
-우리는 프로토콜 수준에서 연관 값 제약을 걸어 해당 프로토콜을 따르는 타입의 연관 값에 제약 구문 없이 제약을 줄 수 있습니다.
+이미지와 관련된 작업일 경우 Worker 프로토콜의 연관 값인 Input, Output의 타입은 UIImage와 Bool이어야 합니다.
+따라서 이미지와 관련된 작업을 하는 클래스마다 where 절로 연관 값 제약 구문을 반복해서 작성해야 합니다.
+다시 말해 프로토콜의 연관 값을 제약하는 코드가 각 클래스마다 중복됩니다.
+
+우리는 프로토콜을 채택한 구현부가 아니라 프로토콜 수준에서 연관 값 제약을 걸어 해당 프로토콜을 따르는 타입의 연관 값에 제약을 줄 수 있습니다.
+이 방법은 프로토콜 연관 값 중복을 줄여줍니다.
 아래 코드로 확인해 봅시다.
 
 ```swift
+protocol Worker {
+  associatedtype Input  // just like generics
+  associatedtype Output  // just like generics
+  
+  @discardableResult
+  func start(input: Input) -> Output
+}
+
 protocol ImageWorker: Worker where Input == UIImage, Output == Bool {
   // extra methods can go here if you want
 }
 ```
 
 위와 같이 Worker 프로토콜을 따르는 타입 중 Worker 프로토콜의 연관 값을 UIImage, Bool로 제약해야 하는, 
-즉 이미지를 다루는 객체가 여러 개라면 Worker 프로토콜을 채택한 ImageWorker 프로토콜을 만들어 ImageWorker 프로토콜에 연관 값 제약 구문을 추가해 중복되는 코드를 줄일 수 있습니다.
+즉 이미지를 다루는 객체가 여러 개라면 Worker 프로토콜을 채택한 ImageWorker 프로토콜을 만들고 연관 값 제약 구문을 추가해 중복되는 코드를 줄일 수 있습니다.
 
-ImageWorker 프로토콜에서 연관 값 제약을 추가한 덕분에 아래와 같이 깨끗한 코드가 나옵니다.
+ImageWorker 프로토콜에 연관 값 제약 코드를 추가한 덕분에 아래와 같이 깨끗한 코드가 나옵니다.
+이미지를 다루는 클래스는 ImageWorker 프로토콜을 채택할 수 있습니다.
 
 ```swift
 // Before :
