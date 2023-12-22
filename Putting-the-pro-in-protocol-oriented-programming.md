@@ -573,7 +573,7 @@ protocol ImageWorker: Worker where Input == UIImage, Output == Bool {
 즉 이미지를 다루는 객체가 여러 개라면 Worker 프로토콜을 채택한 ImageWorker 프로토콜을 만들고 연관 값 제약 구문을 추가해 중복되는 코드를 줄일 수 있습니다.
 
 ImageWorker 프로토콜에 연관 값 제약 코드를 추가한 덕분에 아래와 같이 깨끗한 코드가 나옵니다.
-이미지를 다루는 클래스는 ImageWorker 프로토콜을 채택할 수 있습니다.
+이미지를 다루는 클래스는 ImageWorker 프로토콜을 채택하여 반복적인 프로토콜 연관 값 제약 코드를 방지할 수 있습니다.
 
 ```swift
 // Before :
@@ -586,6 +586,7 @@ final class ImageProcessor<W: ImageWorker> { ... }
 
 연관 값을 가진 프로토콜과 제네릭은 추상적인 코드를 만들어 줍니다.
 하지만 연관 값을 가진 프로토콜은 훌륭한 방법이지만 코드를 다소 어렵게 만듭니다. 
+항상 trade-off는 존재합니다.
 
 You don't always have to make things difficult, however. Sometimes a single generic or concrete code is enough to give you what you want.
 
