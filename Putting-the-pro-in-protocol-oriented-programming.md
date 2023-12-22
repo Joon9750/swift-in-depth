@@ -149,9 +149,10 @@ Array<CryptoCurrency>로 추상화 된 상태에서는 Bitcoin 타입의 추가�
 앞에서 보았듯이 '제네릭 타입 제약에 쓰이는 프로토콜'은 컴파일 타임에 타입이 결정되며 결정된 타입이 외에 어떤 타입도 허용하지 않습니다.
 그렇다면 '제네릭 타입 제약에 쓰이는 프로토콜'은 어떤 경우에 더 좋은 선택지가 될까요?
 
-비트 코인을 함수에 넘기면 동일한 코인 타입을 리턴 받지만 가장 최신 가격으로 갱신된 코인을 리턴 받는 상황을 아래 코드로 살펴봅시다.
+비트 코인을 함수에 넘겨 가장 최신 가격 동일한 타입의 코인을 리턴 받는 상황에 '제네릭 타입 제약에 쓰이는 프로토콜'의 사용해 유리한 점을 살펴봅시다.
 
 ```swift
+// 타입으로 쓰이는 프로토콜
 func retrievePriceRunTime(coin: CryptoCurrency, completion: ((CryptoCurrency) -> Void)) {
   // ...생략
   var copy = coin
@@ -159,6 +160,7 @@ func retrievePriceRunTime(coin: CryptoCurrency, completion: ((CryptoCurrency) ->
   completion(copy)
 }
 
+// 제네릭 타입 제약으로 쓰이는 프로토콜
 func retrievePriceCompileTime<Coin: CryptoCurrency>(coin: Coin, completion:((Coin) -> Void) {
   // ...생략
   var copy = coin
@@ -167,32 +169,34 @@ func retrievePriceCompileTime<Coin: CryptoCurrency>(coin: Coin, completion:((Coi
 }
 
 let btc = Bitcoin(holdings: 3, price: nil)
-retrievePriceRunTime(coin: btc) { (updatedCoin: CryptoCurrency) in  // 런타임 전까지 정확한 타입을 모릅니다.
+retrievePriceRunTime(coin: btc) { (updatedCoin: CryptoCurrency) in  // 런타임 전까지 updatedCoin의 정확한 타입을 모릅니다.
   print("Updated value runtime is \(updatedCoin.price?.doubleValue ?? 0)")
 }
 
-retrievePriceCompileTime(coin: btc) { (updatedCoin: Bitcoin) in  // 컴파일 타임에 이미 Bitcoin으로 타입이 결정되었다. 
+retrievePriceCompileTime(coin: btc) { (updatedCoin: Bitcoin) in  // 컴파일 타임에 updatedCoin의 타입이 Bitcoin으로 결정되었다. 
   print("Updated value runtime is \(updatedCoin.price?.doubleValue ?? 0)")
 }
 ```
 
 '제네릭 제약으로 사용된 프로토콜'은 컴파일 타임에 타입이 결정되어 클로저로 들어올 타입을 이미 알고 있습니다.
 '타입으로 사용된 프로토콜'은 런타임에서야 타입이 결정되기 때문에 Bitcoin 타입에 새로 추가된 프로퍼티나 함수에 접근하기 위해서는 CryptoCurrency 타입에서 Bitcoin 타입으로 형 변환을 해야 합니다.
-하지만 '제네릭 제약으로 사용된 프로토콜'의 경우 이미 컴파일 타임에 Bitcoin 타입으로 확정되기 때문에 Bitcoin 타입의 새로운 프로퍼티나 함수에 형 변환 없이 접근 가능합니다.
+하지만 '제네릭 제약으로 사용된 프로토콜'의 경우 이미 컴파일 타임에 Bitcoin 타입으로 확정되기 때문에 Bitcoin 타입의 새로운 프로퍼티나 함수에 추가적인 형 변환 없이 접근 가능합니다.
 
 결과적으로 '제네릭 제약으로 사용된 프로토콜'과 '타입으로 사용된 프로토콜' 모두 trade-off가 존재합니다.
-'제네릭 제약으로 사용된 프로토콜'은 여러 타입에 대응하지만 런타임에 타입이 결정되어 추가적인 형 변환을 필요로 할 수 있습니다.
-그에 반해 '타입으로 사용된 프로토콜'은 컴파일 타임에 타입이 결정되어 상속 관계를 잃으며 여러 타입에 대응하기는 어렵지만 성능적 이점과 추가적인 형 변환을 필요로 하지 않습니다.
+'타입으로 사용된 프로토콜'은 여러 타입에 대응할 수 있지만 런타임에 타입이 결정되어 특정 자식 타입에 추가된 함수나 프로퍼티에 접근하기 위해서는 형 변환을 필요로 합니다.
+그에 반해 '제네릭 제약으로 사용된 프로토콜'은 컴파일 타임에 타입이 결정되어 상속 관계를 잃으며 여러 타입에 대응하기는 어렵지만 컴파일 타임에 타입이 결정되어 성능적 이점과 추가적인 형 변환을 필요로 하지 않습니다.
 
 '제네릭 제약으로 사용된 프로토콜'이 생각하기 어렵지만, 더 좋은 선택입니다.
 
 ## The why of associated types
 
-프로토콜은 추상화에 쓰입니다. 하지만 프로토콜과 함께 연관 값을 사용하면 더 추상적인 코드를 구현할 수 있습니다.
-우린 연관 값을 가진 프로토콜을 PATs로 줄여 부를 수 있습니다.
+프로토콜은 추상화에 자주 쓰입니다. 
+하지만 프로토콜과 함께 연관 값(associated types)을 사용하면 더 추상적인 코드를 구현할 수 있습니다.
+우린 연관 값(associated types)을 가진 프로토콜을 PATs로 줄여 부릅니다.
 
-지금부터 프로토콜 만으로 데이터 모델링을 해보고 발생하는 문제점을 프로토콜 연관 값으로 해결해 봅시다.
-먼저 프로토콜 만으로 데이터 모델링을 했을 때 생기는 단점을 살펴봅시다.
+연관 값 없이 프로토콜 만으로 데이터 모델링을 할 수 있습니다.
+하지만 한계가 있습니다.
+프로토콜 만으로 데이터 모델링을 했을 때 발생하는 문제를 먼저 살펴봅시다. (해당 문제를 프로토콜의 연관 값을 통해 해결할 것입니다.)
 
 아래 예시는 이메일을 손님에게 보내거나 데이터 베이스를 다루거나 이미지 사이즈를 조절하는 등 성격들이 다른 '일'을 프로토콜로 만들었습니다.
 
