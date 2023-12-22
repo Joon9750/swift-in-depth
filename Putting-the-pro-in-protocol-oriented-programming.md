@@ -231,7 +231,7 @@ Worker 프로토콜의 start 함수는 입력과 출력 데이터 타입이 Stri
 Input, Output 프로토콜을 만들고 start 함수의 모든 입력과 출력 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 합니다.
 그리고 Worker 프로토콜의 start 함수 입력에 쓰이는 데이터 타입은 Input 프로토콜을 따르고 출력에 쓰이는 데이터 타입은 Output 프로토콜을 따르도록 만듭니다.
 
-동작은 할 것입니다. 아래 코드를 확인해봅시다.
+물론 동작은 할 것입니다. 아래 코드를 확인해봅시다.
 
 ```swift
 protocol Input {}
@@ -243,7 +243,7 @@ protocol Worker {
 }
 ```
 
-하지만 start 함수에 쓰이는 모든 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 하는 방법는 boilerplate 코드를 유발합니다.
+하지만 start 함수에 쓰이는 모든 데이터 타입이 Input 또는 Output 프로토콜을 따르도록 하는 방법은 boilerplate 코드를 유발합니다.
 심지어 Input, Output 프로토콜에 새로운 프로퍼티나 함수가 추가된다면 이를 따르는 모든 타입에서 추가적인 구현이 필요합니다.
 
 두 번째 방법은 프로토콜에 제네릭을 추가하는 방법입니다.
@@ -262,8 +262,10 @@ protocol Worker<Input, Output> {
 
 error: protocols do not allow generic parameters; use assciated types instead
 
-스위프트에서는 하나의 타입에 특정 프로토콜을 채택하고 프로토콜의 요구사항을 구현하는 행위를 단일하게 유지합니다.
-스위프트에서 프로토콜과 제네릭의 사용을 허락하지 않는 이유는 하나의 타입에 한 번의 프로토콜 채택과 구현만을 허용하기 때문입니다.
+스위프트에서는 하나의 타입에 특정 프로토콜을 채택하고 요구사항을 구현하는 행위의 중복을 허용하지 않습니다.
+다시 말해 MailJob 클래스가 Worker 프로토콜을 채택할 때 한 가지의 구현만 허용합니다.
+
+스위프트에서 프로토콜과 제네릭의 사용을 허락하지 않는 이유도 하나의 타입에 한 번의 프로토콜 채택과 구현만을 허용하기 때문입니다.
 만약 프로토콜과 제네릭이 함께 사용된다면 아래와 같은 코드가 작성될 것입니다.
 
 ```swift
@@ -280,15 +282,16 @@ class MailJob: Worker<Int, [String]> {
 스위프트에서 같은 타입(MailJob)이 Worker 프로토콜을 단일 채택하고 구현해야 합니다.
 위와 같이 같은 타입이 Worker 프로토콜에 대해 여러 구현부를 가진다면 컴파일 에러가 발생합니다.
 
-컴파일 되지는 않는 코드지만 좋은 접근입니다.
-결과적으로 프로토콜과 제네릭스러운(?) 요소가 함께 사용되어야 Worker 프로토콜이 여러 '일'에 대응할 수 있습니다.
+컴파일 되지는 않는 코드지만 프로토콜과 제네릭을 함께 사용하는 방법은 좋은 접근입니다.
+결과적으로 프로토콜과 제네릭스러운 요소(연관 값)가 함께 사용되어야 Worker 프로토콜이 여러 타입의 '일'에 대응할 수 있습니다.
 여기서 프로토콜과 함께 쓰일 제네릭스러운 요소가 바로 연관 값(associatedtype)입니다. 
 
 그렇다면 우리의 결론이었던 프로토콜과 연관 값을 사용해 Worker 프로토콜을 만들어 봅시다.
 start 함수의 입력과 출력을 연관 값으로 만들어 Worker 프로토콜이 여러 '일'에 대응하도록 만듭니다.
-프로토콜에서 연관 값 선언은 associated 키워드로 구현부에서 특정 타입 명시는 typealias 키워드를 사용합니다.
+프로토콜에서 associatedtype 키워드로 연관 값을 선언하고 구현부에서는 typealias 키워드를 사용해 연관 값의 타입을 지정합니다.
 
 ```swift
+// 연관 값을 사용한 프로토콜
 protocol Worker {
   associatedtype Input  // just like generics
   associatedtype Output  // just like generics
@@ -308,12 +311,13 @@ class MailJob: Worker {
 ```
 
 associatedtype은 제네릭과 비슷한 성격을 가지지만 제네릭과 달리 프로토콜 내부에 정의됩니다.
-Worker 프로토콜의 associatedtype을 통해  MailJob은 Input을 string, Output을 Bool로 구현할 수 있고 FileRemover는 Input을 URL, Output을 [string]으로 설정할 수 있습니다.
+Worker 프로토콜의 associatedtype을 통해 MailJob은 Input을 string 타입, Output을 Bool 타입으로 구현할 수 있고 FileRemover는 Input을 URL 타입, Output을 [string] 타입으로 구현할 수 있습니다.
 
-프로토콜의 연관 값을 통해 하나의 타입이 특정 프로토콜에 대한 하나의 구현을 가지면서 여러 타입에 대응하도록 만듭니다.
+프로토콜의 연관 값을 통해 프로토콜을 따르는 타입이 특정 프로토콜에 대한 유일한 구현을 가지는 동시에 여러 타입에 대응하도록 만들 수 있습니다.
 
-위 코드의 MailJob 클래스는 typealias로 프로토콜의 연관 값의 타입을 확정하고 있지만 컴파일러가 구현한 함수를 통해 타입이 추론 가능하다면 typealias 구문을 생략할 수 있습니다.
-아래 코드는 typealies 구문을 생략한 코드입니다. FileRemover 클래스의 start 함수에서 입력과 출력 데이터 타입을 모두 명시하고 있기 때문에 typealias 구문 없이도 컴파일러가 associatedtype 타입을 추론할 수 있습니다.
+위 코드의 MailJob 클래스는 typealias 키워드로 프로토콜 연관 값의 타입을 확정하고 있지만, 컴파일러가 MailJob 클래스의 구현부를 통해 타입이 추론 가능하다면 typealias 구문을 생략할 수 있습니다.
+아래 코드는 typealies 키워드룰 생략한 코드입니다. 
+FileRemover 클래스의 start 함수에서 입력과 출력 데이터 타입을 모두 명시하고 있기 때문에 typealias 키워드 없이도 컴파일러가 Worker 프로토콜의 연관 값을 추론할 수 있습니다.
 
 ```swift
 class FileRemover: Worker {
@@ -339,9 +343,10 @@ class FileRemover: Worker {
 }
 ```
 
-스위프트에서는 프로토콜과 연관 값이 함께 자주 사용됩니다.
-IteratorProtocol, Sequence, Collection 프로토콜들이 대표적으로 Element 연관 값 가지고 있습니다.
-또한 여러 프로토콜에서 Self를 볼 수 있는데 Self도 연관 값입니다.
+스위프트에서는 프로토콜과 연관 값은 함께 자주 사용됩니다.
+IteratorProtocol, Sequence, Collection 프로토콜들이 대표적으로 Element 연관 값을 가지고 있습니다.
+
+또한 여러 프로토콜에서 Self를 볼 수 있는데 Self도 마찬가지로 연관 값입니다.
 아래 코드는 Self 연관 값을 가진 Equatable 프로토콜 코드입니다.
 
 ```swift
@@ -350,9 +355,9 @@ public protocol Equatable {
 }
 ```
 
-스위프트 내부적으로 프로토콜과 연관 값을 사용한 경우 외에도 다양한 용도에 사용됩니다.
-프로토콜을 따르는 타입에서 서로 다른 타입에 대응되어야 할 때 프로토콜과 연관 값이 함께 사용됩니다.
-아래는 사용될 예시 상황들 입니다. 자세히 살펴봅시다!
+스위프트 내부적으로 프로토콜과 연관 값을 함께 사용한 경우 외에도 다양한 용도에 사용됩니다.
+프로토콜을 따르는 타입에서 여러 타입에 대응해야 할 때 프로토콜과 연관 값이 함께 사용됩니다.
+프로토콜과 연관 값이 함께 사용되는 상황들을 살펴봅시다.
 
 - A Recording protocol - Each recording has a duration, and it could also suport scrubbing through time via a seek() method, but the actual data could be different for each implementation, such as an audio file, video file, or YouTube stream.
 - A Service protocol - It loads data; one type could return JSON data from an API, and another could locally search and return raw string data.
@@ -360,7 +365,8 @@ public protocol Equatable {
 - A SearchQuery protocol - It resembles database queries, where the result is different for each implementation.
 - A Paginator protocol - It can be given a page and offset to browse through a database. Each page could represent some data. Perhaps it has some users in a user table in a database, or perhaps a list of files, or a list of products inside a view.
 
-그렇다면 서브 클래싱 방식의 아래 코드를 프로토콜 방식으로 고쳐봅시다.
+서브 클래싱 방식의 코드를 프로토콜 방식으로 코드로 고쳐 봅시다.
+아래 코드로 확인해 봅시다.
 
 ```swift
 class AbstractDamage {}
@@ -412,10 +418,10 @@ class Centaur: AbstractEnemy {
 
 ## Passing protocols with associated types
 
-지금부터는 연관 값을 가진 프로토콜을 넘기는 방법을 살펴봅시다.
+위에서는 프로토콜의 연관 값을 살펴보았다면, 지금부터는 연관 값을 가진 프로토콜을 함수의 인자로 넘기는 방법을 살펴봅시다.
 
 연관 값을 가진 프로토콜을 함수에 넘길 때 프로토콜의 연관 값에 직접 접근할 수 있습니다.
-또한 제네릭 제약처럼 프로토콜의 연관 값의 타입도 제약을 걸 수 있습니다.
+또한 제네릭 제약처럼 프로토콜 연관 값의 타입에 제약을 걸 수도 있습니다.
 
 먼저 함수로 연관 값을 가진 프로토콜을 넘기는 코드를 살펴봅시다.
 
