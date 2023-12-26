@@ -177,6 +177,71 @@ In fact, if the function only accepts an argument and returns nothing, you can d
 
 **enumerated**
 
+loop를 도는 횟수를 추적하고 싶을 때 enumerated 함수를 사용할 수 있습니다.
+enumerated 함수는 EnumeratedSequence라 불리는 Sequence를 리턴하는데 EnumeratedSequence로 iterations를 카운트합니다.
+
+enumerated 함수가 리턴하는 EnumeratedSequence는 sequence of pairs (n, x)입니다.
+여기서 n은 0에서 시작하는 연속 Int값이고 x는 기본 시퀀스의 요소입니다.
+따라서 enumerated 함수의 리턴은 sequence of pairs입니다.
+
+아래 코드로 확인해 봅시다.
+
+```swift
+["First line", "Second line", "Third line"]
+  .enumerated()
+  .forEach { (index: Int, element: String) in  // enumerated return sequence of pairs
+    print("\(index+1): \(element)")
+}  
+
+// Output:
+1: First line
+2: Second line
+3: Third line 
+```
+
+**Lazy iteration**
+
+iterator를 통해 데이터를 순회할 때 sequence 안의 요소들에 즉시 접근하게 됩니다.
+보통의 상황에서는 sequence의 요소들에 즉시 접근하는 것이 바람직합니다.
+하지만 방대한 데이터 중 모든 데이터를 순회하지 않고 일부만 순회하고 싶을 때 lazy iteration을 사용하게 됩니다.
+
+예를 들어 0부터 massive Int.max까지의 데이터 중에 짝수와 마지막 숫자 3개만 얻고 싶은 상황을 살펴봅시다.
+lazy를 사용하여 전체 데이터를 순회하지 않을 수 있습니다.
+lazy는 모든 Element가 아닌 일부의 Element만 계산하기 때문에 iteration에 사용되는 비용을 줄일 수 있습니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+let bigRange = 0..<Int.max
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
