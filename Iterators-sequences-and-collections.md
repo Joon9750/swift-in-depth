@@ -282,9 +282,16 @@ reduce 함수는 sequence의 element를 순회하며 특정 값을 누적하고,
 func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) throws -> Result) rethrows -> Result
 ```
 
+먼저 제네릭 함수임을 알 수 있습니다.
+
 reduce 함수의 매개변수로 initialResult과 nextPartialResult를 받고 있습니다.
 initialResult은 초기값으로 사용할 값을 넣으면 클로저가 처음 실행될 때, nextPartialResult 에 전달됩니다.
 그리고 nextPartialResult은 컨테이너의 요소를 새로운 누적값으로 결합하는 클로저입니다.
+
+두 번째 파라미터로 전달된 클로저를 좀 더 자세히 보겠습니다.
+클로저의 첫번째 파라미터는 initialResult로 전달받은 초기값 또는 이전 클로저가 반환하는 return값이 전달됩니다.
+클로저의 두 번째 파라미터는 reduce(_:_:)를 호출한 컨테이너의 요소가 전달됩니다.
+클로저가 반환하는 값은 파라미터로 받은 두 값을 적절하게 처리하여 첫 번째 파라미터로 받은 값과 같은 타입의 값을 리턴해줍니다.
 
 reduce 함수의 리턴으로는 최종 누적 값이 반환되며, 컨테이너의 요소가 없다면 initialResult 의 값이 반환됩니다.
 
@@ -305,11 +312,73 @@ let numberOfLineBreaks = text.reduce(startValue) { (accumulation: Int, char: Cha
 
 아래 링크로 더 많은 예시 코드를 확인해봅시다.
 
-https://dejavuqa.tistory.com/181
-
+https://dejavuqa.tistory.com/181, 
 https://beepeach.tistory.com/606
 
 
+**reduce into**
+
+먼저 reduce 함수와 reduce(into:) 함수의 정의부를 모두 확인해봅시다.
+
+```swift
+func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) throws -> Result) rethrows -> Result
+func reduce<Result>(into initialResult: Result, _ updateAccumulatingResult: (inout Result, Element) throws -> ()) rethrows -> Result
+```
+
+reduce 함수는 두 가지 형태로 사용됩니다.
+위에서 보았듯이 기본적인 reduce 함수 그리고 reduce(into:) 함수가 있습니다.
+reduce 함수의 초기 값으로 값 타입이 들어온다면 reduce(into:) 함수를 사용합시다.
+
+reduce 함수의 두번째 매개변수인 클로저의 Result는 immutable합니다.
+따라서 reduce 함수에서는 Array, Dictionary 등 값 타입을 직접 수정할 수 없기 때문에 새로운 변수로 copy 한 다음에 
+그 값을 변경하고 사용해야 하는 번거로움이 있습니다.
+
+reduce 함수로 값 타입 변수를 초기 값으로 받았을 때 immutable한 reduce의 두 번째 Result을 mutable한 변수로 복사해야합니다.
+아래 코드로 살펴봅시다.
+
+```swift
+let grades = [3.2, 4.2, 2.6, 4.1]
+let results = grades.reduce([:]) { (results: [Character: Int], grade: Double) in
+  var copy = results
+  switch grade {
+  case 1..<2: copy["D", default: 0] += 1
+  case 2..<3: copy["C", default: 0] += 1
+  case 3..<4: copy["B", default: 0] += 1
+  case 4...: copy["A", default: 0] += 1
+  default: break
+  }
+  return copy
+}
+```
+
+위와 같이 반복적인 복사는 성능 저하로 이어집니다.
+
+그에 반해 reduce(into:) 함수는 reduce 함수와 첫 번째 초기 값을 받는 매개변수는 동일하지만, 두 번째 매개변수에 inout 키워드가 
+추가되었고 리턴 값이 사라졌습니다.
+리턴 값 없이 inout 키워드가 붙은 Result 값을 변경하며 최종 값에 도달합니다.
+
+reduce(into:_:)의 가장 큰 차이는 클로저의 첫 번째 파라미터가 inout 파라미터라는 점입니다.
+즉, initialResult로 전달받은 값을 클로저안에서 직접 변경 가능하고 두 번째 클로저의 Result 또한 변경 가능합니다.
+reduce(_:_:)은 initialResult로 전달 받은 값을 클로저에서 변경할 수 없습니다.(let 변수)
+
+위에서 reduce 함수를 사용한 방식을 reduce(into:) 함수로 고친 코드입니다.
+
+```swift
+let grades = [3.2, 4.2, 2.6, 4.1]
+let results = grades.reduce([:]) { (results: inout [Character: Int], grade: Double) in
+  switch grade {
+  case 1..<2: results["D", default: 0] += 1
+  case 2..<3: results["C", default: 0] += 1
+  case 3..<4: results["B", default: 0] += 1
+  case 4...: results["A", default: 0] += 1
+  default: break
+  }
+}
+```
+
+배열이나 딕셔너리와 같은 값 타입과 reduce 함수를 사용할 때는 into 키워드를 함께 사용해 성능을 높입시다.
+
+reduce 함수의 사용을 추천하는 이유는 명백합니다.
 
 
 
