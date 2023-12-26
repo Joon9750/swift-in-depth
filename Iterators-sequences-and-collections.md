@@ -203,35 +203,109 @@ enumerated 함수가 리턴하는 EnumeratedSequence는 sequence of pairs (n, x)
 
 iterator를 통해 데이터를 순회할 때 sequence 안의 요소들에 즉시 접근하게 됩니다.
 보통의 상황에서는 sequence의 요소들에 즉시 접근하는 것이 바람직합니다.
+
 하지만 방대한 데이터 중 모든 데이터를 순회하지 않고 일부만 순회하고 싶을 때 lazy iteration을 사용하게 됩니다.
+또한 lazy iteration은 해당 lazy 변수에 접근할 때 계산이 이루어집니다.
 
-예를 들어 0부터 massive Int.max까지의 데이터 중에 짝수와 마지막 숫자 3개만 얻고 싶은 상황을 살펴봅시다.
-lazy를 사용하여 전체 데이터를 순회하지 않을 수 있습니다.
-lazy는 모든 Element가 아닌 일부의 Element만 계산하기 때문에 iteration에 사용되는 비용을 줄일 수 있습니다.
-
-아래 코드로 살펴봅시다.
+아래 코드로 lazy iteration을 사용하는 상황을 살펴봅시다.
 
 ```swift
-let bigRange = 0..<Int.max
+func increment(x: Int) -> Int {
+  print("Cumputing next value of \(x)")
+  return x+1
+}
+
+let array = Array(0..<10)
+let incArray = array.map(increment)
+print("Result: ")
+print(incArray[0], incArray[4])
+
+// Output:
+Computing next value of 0
+Computing next value of 1
+Computing next value of 2
+Computing next value of 3
+Computing next value of 4
+Computing next value of 5
+Computing next value of 6
+Computing next value of 7
+Computing next value of 8
+Computing next value of 9
+Result:
+1 5
 ```
 
+위 코드를 사용하면 incArray 값에 접근하기 전에 모든 출력 값이 계산됩니다.
+만약 increment가 10이 아니라 더 큰 값을 가진다면 interation에 큰 비용이 들게 됩니다.
 
+이런 상황에서 lazy 키워드를 사용해 성능을 향상시킬 수 있습니다.
 
+```swift
+func increment(x: Int) -> Int {
+  print("Cumputing next value of \(x)")
+  return x+1
+}
 
+let array = Array(0..<10000)
+let incArray = array.lazy.map(increment)
+print("Result: ")
+print(incArray[0], incArray[4])
 
+// Output:
+Result: 
+Computing next value of 0
+Computing next value of 4
+1 5
+```
 
+lazy 키워드를 사용하면 아래 코드를 만나도 계산하지 않습니다.
 
+```swift
+let incArray = array.lazy.map(increment)
+```
 
+lazy 키워드 성격 그대로 incArray에 접근할 때 계산을 시작합니다.
+또한 앞서 말했듯이 sequence의 모든 element에 접근하지 않고 일부 element에만 접근하여 성능을 향상시킬 수 있습니다.
 
+아래 링크에서 추가적인 설명을 볼 수 있습니다.
 
+https://zeddios.tistory.com/387
 
+**reduce**
 
+reduce 함수는 sequence의 element를 순회하며 특정 값을 누적하고, reduce 함수가 끝날 때 누적된 값을 리턴합니다.
+다시 말해 reduce 함수로 여러 elements를 새로운 값으로 변형할 수 있습니다.
 
+아래는 reduce 함수의 정의부입니다.
 
+```swift
+func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) throws -> Result) rethrows -> Result
+```
 
+reduce 함수의 매개변수로 initialResult과 nextPartialResult를 받고 있습니다.
+initialResult은 초기값으로 사용할 값을 넣으면 클로저가 처음 실행될 때, nextPartialResult 에 전달됩니다.
+그리고 nextPartialResult은 컨테이너의 요소를 새로운 누적값으로 결합하는 클로저입니다.
 
+reduce 함수의 리턴으로는 최종 누적 값이 반환되며, 컨테이너의 요소가 없다면 initialResult 의 값이 반환됩니다.
 
+아래 코드는 reduce 함수를 사용하여 '\n'의 개수를 계산한 예시입니다.
 
+```swift
+let text = "This is some text. \nAnother line. \nYet, another line again."
+let startValue = 0
+
+let numberOfLineBreaks = text.reduce(startValue) { (accumulation: Int, char: Character) in
+  if char == '\n' {
+    return accumulation + 1
+  } else {
+    return accumulation
+  }
+}
+```
+
+아래 링크로 더 많은 예시 코드를 확인해봅시다.
+
+https://dejavuqa.tistory.com/181
 
 
 
