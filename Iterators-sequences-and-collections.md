@@ -307,7 +307,7 @@ let numberOfLineBreaks = text.reduce(startValue) { (accumulation: Int, char: Cha
 
 https://dejavuqa.tistory.com/181
 
-
+https://beepeach.tistory.com/606
 
 
 
