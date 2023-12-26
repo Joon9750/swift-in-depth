@@ -26,4 +26,3 @@
 | 11   | [Protocol extensions]() |  |
 | 12   | [Swift patterns]() |  |
 | 13   | [Delivering quality Swift code]() |  |
-| 14   | [Where to Swift from here]() |  |
