@@ -77,7 +77,40 @@ Sequence 프로토콜은 굉장히 자주 쓰입니다.
 Sequence 프로토콜이 Iterate의 기반이라고 생각 될 정도입니다.
 또한 나중에 살펴볼 Collection 프로토콜의 부모 프로토콜입니다.
 
-Array, Set, String, Dictionary 등이 Collection 프로토콜을 따르기 때문에 부모 프로토콜인 Sequence 프로토콜도 따르게 됩니다.
+Array, Set, String, Dictionary 등이 Collection 프로토콜을 따르기 때문에 Collection 프로토콜의 부모 프로토콜인 Sequence 프로토콜도 따르게 됩니다.
+
+Sequence는 iterator를 생성할 수 있습니다.
+반면, iterator에 의해 순회하며 elements들이 소모되며 iterator가 비워지게 됩니다.
+하지만 Sequence에서 새로운 iterator를 새로운 loop를 위해 만들 수 있습니다.
+Sequence에서 새로운 iterator를 만들 수 있기 때문에 순회를 반복할 수 있습니다.
+
+결과적으로 Sequence에서 Iterator들을 생성하고, 생성된 Iterator들이 각각의 Element들을 생성하는 방식으로 Sequence의 iteratioin이 동작하게 됩니다.
+
+아래 코드로 Sequence 프로토콜을 살펴봅시다.
+
+```swift
+public protocol Sequence {
+  associatedtype Element
+  associatedtype Iterator: IteratorProtocol where Iterator.Element == Element
+
+  func makeIterator() -> Iterator
+
+  func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> [Element]
+
+  func forEach(_ body: (Element) throws -> Void) rethrows
+
+  //...생략
+}
+```
+
+
+
+
+
+
+
+
+
 
 
 
