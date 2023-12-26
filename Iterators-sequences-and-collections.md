@@ -310,12 +310,6 @@ let numberOfLineBreaks = text.reduce(startValue) { (accumulation: Int, char: Cha
 }
 ```
 
-아래 링크로 더 많은 예시 코드를 확인해봅시다.
-
-https://dejavuqa.tistory.com/181, 
-https://beepeach.tistory.com/606
-
-
 **reduce into**
 
 먼저 reduce 함수와 reduce(into:) 함수의 정의부를 모두 확인해봅시다.
@@ -383,6 +377,12 @@ for loop을 사용할 경우 for 구문 안의 코드를 읽어야 for 구문의
 하지만 reduce 함수를 사용하면 그 자체로 sequence를 순회하며 새로운 누적 값을 생성한다는 사실을 알 수 있습니다.
 또한 간결한 코드를 구현할 수 있습니다.
 
+아래 링크로 reduce와 reduce(into:) 함수의 더 많은 예시 코드를 확인해봅시다.
+
+https://dejavuqa.tistory.com/181, 
+https://beepeach.tistory.com/606,
+http://yoonbumtae.com/?p=4390
+
 **zip**
 
 마지막으로 살펴볼 함수는 zip입니다. 
@@ -397,7 +397,7 @@ for (integer, string) in zip(0..<10, ["a", "b", "c"]) {
 }
 ```
 
+## Creating a generic data structure with Sequence
 
-
-
+이제는 Sequence 프로토콜을 따르는 커스텀 타입을 만들어 봅시다.
 
