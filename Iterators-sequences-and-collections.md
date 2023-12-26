@@ -378,27 +378,24 @@ let results = grades.reduce([:]) { (results: inout [Character: Int], grade: Doub
 
 배열이나 딕셔너리와 같은 값 타입과 reduce 함수를 사용할 때는 into 키워드를 함께 사용해 성능을 높입시다.
 
-reduce 함수의 사용을 추천하는 이유는 명백합니다.
+reduce 함수 사용을 추천하는 이유는 명백합니다.
+for loop을 사용할 경우 for 구문 안의 코드를 읽어야 for 구문의 목적을 알 수 있습니다.
+하지만 reduce 함수를 사용하면 그 자체로 sequence를 순회하며 새로운 누적 값을 생성한다는 사실을 알 수 있습니다.
+또한 간결한 코드를 구현할 수 있습니다.
 
+**zip**
 
+마지막으로 살펴볼 함수는 zip입니다. 
+zip으로 두 iterator를 합칠 수 있습니다.
+둘 중 하나라도 iterator가 고갈되면 zip에서의 interation은 종료됩니다.
 
+아래 코드를 살펴봅시다.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+```swift
+for (integer, string) in zip(0..<10, ["a", "b", "c"]) {
+  print("\(integer): \(string)")
+}
+```
 
 
 
