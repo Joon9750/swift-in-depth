@@ -42,8 +42,42 @@ makeIterator() 함수는 데이터 순회에 사용되는 iterator를 생성하�
 Sequence 프로토콜을 살펴보기 전에 Sequence 프로토콜과 관련된 IteratorProtocol을 먼저 살펴봅시다.
 
 IteratorProtocol은 Element라고 명명한 연관 값을 갖고 Optional(Element) 데이터 타입을 리턴하는 next() 함수를 가지고 있습니다.
-IteratorProtocol의 이름만 봐도 알 수 있듯이 데이터 순회에 사용되는 Iterator는 
+IteratorProtocol의 이름만 봐도 알 수 있듯이 Iterator의 형태를 정의해둔 프로토콜입니다.
+Sequence 프로토콜이 가진 Iterator도 IteratorProtocol을 따르도록 구현해두었습니다.
 
+Iterator는 데이터를 순회하며 Element를 하나씩 생성합니다.
+
+아래 코드는 IteratorProtocol 코드입니다.
+IteratorProtocl을 채틱하는 타입이라면 next() 함수를 필수로 구현해야 합니다.
+
+```swift
+public protocol IteratorProtocol {
+  /// The type of element traversed by the iterator.
+  associatedtype Element
+
+  mutating func next() -> Element?
+}
+
+let groceries = ["Flour", "Eggs", "Sugar"]
+// IndexingIterator를 리턴하지만 타입마다 달라질 수 있습니다.
+var groceriesIterator: IndexingIterator<[String]> = groceries.makeIterator()
+print(groceriesIterator.next())  // Optional("Flour")
+print(groceriesIterator.next())  // Optional("Eggs")
+print(groceriesIterator.next())  // Optional("Sugar")
+print(groceriesIterator.next())  // nil
+print(groceriesIterator.next())  // nil
+```
+
+next() 함수가 Element? 를 리턴하고 있습니다. 
+옵셔널로 감싼 Element를 리턴하는 이유는 iterator가 모든 Element를 순회했을 때 iterator가 비었을 때 nil을 리턴하기 위함입니다.
+
+위에서 살펴본 IteratorProtocol과 관련이 깊은 Sequence 프로토콜을 살펴봅시다.
+
+Sequence 프로토콜은 굉장히 자주 쓰입니다.
+Sequence 프로토콜이 Iterate의 기반이라고 생각 될 정도입니다.
+또한 나중에 살펴볼 Collection 프로토콜의 부모 프로토콜입니다.
+
+Array, Set, String, Dictionary 등이 Collection 프로토콜을 따르기 때문에 부모 프로토콜인 Sequence 프로토콜도 따르게 됩니다.
 
 
 
