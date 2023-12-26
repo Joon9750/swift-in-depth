@@ -84,7 +84,7 @@ Sequence는 iterator를 생성할 수 있습니다.
 하지만 Sequence에서 새로운 iterator를 새로운 loop를 위해 만들 수 있습니다.
 Sequence에서 새로운 iterator를 만들 수 있기 때문에 순회를 반복할 수 있습니다.
 
-결과적으로 Sequence에서 Iterator들을 생성하고, 생성된 Iterator들이 각각의 Element들을 생성하는 방식으로 Sequence의 iteratioin이 동작하게 됩니다.
+결과적으로 Sequence에서 Iterator들을 생성하고, 생성된 Iterator들이 각각의 Element들을 생성하는 방식으로 Sequence가 iteration 됩니다.
 
 아래 코드로 Sequence 프로토콜을 살펴봅시다.
 
@@ -100,6 +100,30 @@ public protocol Sequence {
   func forEach(_ body: (Element) throws -> Void) rethrows
 
   //...생략
+}
+```
+
+Sequence 프로토콜에서 makeIterator() 함수는 필수로 구현되어야 합니다.
+makeIterator() 함수가 IteratorProtocol을 따르는 Iterator 타입을 리턴하기 때문에 Iterator와 Element 연관 값 또한 지정해야 합니다.
+
+Sequence 프로토콜에는 많은 유용한 함수들이 정의되어 있습니다.
+filter, map, reduce, flatMap, forEach, dropFrist, contains 등 Sequence 프로토콜에서 제공하는 함수는 여러가지가 있습니다.
+
+Sequence 프로토콜을 따르는 스위프트 내장 데이터 타입 외에도 커스텀 타입에 Sequence 프로토콜을 채택하여 Sequence 프로토콜이 제공하는 
+함수들을 커스텀 타입에도 적용할 수 있습니다.
+물론 커스텀 타입이 Sequence 프로토콜의 연관 값과 makeIterator() 함수를 모두 구현해야 합니다.
+이 과정에서 Sequence 프로토콜의 연관 값 Iterator를 위해 IteratorProtocol을 따르는 커스텀 타입 Iterator를 필요로 합니다.
+
+## The powers of Sequence
+
+Sequence 프로토콜은 유용한 함수들을 제공합니다.
+이 함수들 중 필수적으로 알아야 할 함수들을 살펴 봅시다.
+
+**filter**
+
+```swift
+let result = [1, 2, 3].filter { (value) -> Bool in
+  return value > 1
 }
 ```
 
