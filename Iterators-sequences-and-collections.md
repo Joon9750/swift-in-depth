@@ -121,15 +121,61 @@ Sequence 프로토콜은 유용한 함수들을 제공합니다.
 
 **filter**
 
+filter 함수는 기존 컨테이너의 요소 중 조건에 만족하는 값에 대해서 새로운 컨테이너로 반환합니다.
+filter 함수는 기존의 컨테이너의 요소에서 조건에 만족하는 값에 대해서 새로운 컨테이너로 반환하기 때문에, 
+원하는 데이터를 추출할 때 편리하게 사용할 수 있습니다.
+
+아래 코드는 filter 함수의 정의부입니다.
+
+```swift
+func filter(_ isIncluded: (Self.Element) throws -> Bool) rethrows -> [Self.Element]
+```
+
+데이터를 순회하며 각 Element들이 filter 함수의 클로저로 넘어가고 클로저에서 특정 조건을 통해 해당 Element를 새로운 컨테이너에 포함할지 결정합니다. 
+
 ```swift
 let result = [1, 2, 3].filter { (value) -> Bool in
   return value > 1
 }
+print(result)  // [2, 3]
+
+let numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+let evenNumbers = numbers.filter { $0 % 2 == 0 }
+
+print(evenNumbers)
+// [2, 4, 6, 8]
 ```
 
+**forEach**
 
+for문과 동일한 순서로 컨테이너의 각 요소에 대해 주어진 클로저를 호출합니다.
+아래 코드는 forEach의 정의부입니다.
 
+```swift
+func forEach(_ body: (Self.Element) throws -> Void) rethrows
+```
 
+for loop을 사용하다 보면 for loop과 함께 side effect이 발생하는 상황이 있습니다.
+예를 들어 아래 코드와 같이 for loop을 돌며 Element를 지울 상황이 있을 때 forEach 구문을 사용할 수 있습니다.
+아래 코드를 확인해 봅시다.
+
+```swift
+["file_one.txt", "file_two.txt"].forEach { path in
+  deleteFile(path: path)
+}
+
+func deleteFile(path: path) {}
+```
+
+위의 코드를 아래 코드와 같이 고칠 수 있습니다.
+
+```swift
+["file_one.txt", "file_two.txt"].forEach(deleteFile)
+```
+
+In fact, if the function only accepts an argument and returns nothing, you can directly pass it to 'forEach' instead.
+
+**enumerated**
 
 
 
