@@ -519,6 +519,7 @@ public protocol IteratorProtocol {
   mutating func next() -> Element?
 }
 
+// BagIterator 구현부입니다.
 struct BagIterator<Element: Hashable>: IteratorProtocol {
   var store = [Element: Int]()
 
@@ -526,14 +527,47 @@ struct BagIterator<Element: Hashable>: IteratorProtocol {
     guard let (key, value) = store.first else {
       return nil
     }
-    
+    if value > 1 {
+      store[key]? -= 1
+    } else {
+      store[key] = nil
+    }
+    return key
+  }
+}  
 ```
 
+위의 BagIterator 구조체의 next() 함수에서 iteration에서의 요소 순회하는 기준을 설정할 수 있습니다.
+BagIterator의 store 딕셔너리에 Bag의 store 딕셔너리의 복사본을 넣게 됩니다.
 
+BagIterator를 구현했다면, 이제 Bag 타입에 Sequence 프로토콜을 채택할 준비가 되었습니다.
+Sequence 프로토콜을 채택하면 makeIterator() 함수를 필수로 구현해야 합니다.
+아래 코드로 확인해 봅시다.
 
+```swift
+extension Bag: Sequence {
+  func makeIterator() -> BagIterator<Element> {
+    return BagIterator(store: store)
+  }
+}
+```
 
+위의 makeIterator() 함수의 구현부에서 BagIterator(store: store)를 리턴하는데 Bag 타입이 가진 store 프로퍼티의 복사본을 BagIterator로 전달하는 것입니다.
+값 타입 store의 복사본을 전달하기 때문에 BagIterator에서 store 값을 변경하더라도 Bag 타입의 store 프로퍼티에는 영향을 미치지 않습니다.
 
+이제 Bag 타입이 Sequence 프로토콜을 채택했기 때문에 Sequence 프로토콜이 제공하는 filter, lazy, reduce, contains 함수들을 Bag 타입 객체에 적용할 수 있습니다.
+아래 코드는 Bag 타입에 Sequence 프로토콜에서 제공하는 함수를 적용한 코드입니다.
 
+```swift
+bag.filter { $0.count > 2 }
+bag.lazy.filter { $0.count > 2 }
+bag.contains("Huey")  // true
+bag.contains("Mickey")  // false
+```
+
+지금까지는 Bag 타입이 Sequence 프로토콜을 채택하기 위해 BagIterator를 구현했습니다.
+하지만 BagIterator를 따로 구현하지 않고 Bag 타입이 Sequence 프로토콜을 채택하고 makeIterator() 함수를 구현하도록 할 수 있습니다.
+그 방법은 AnyIterator에 있습니다.
 
 
 
