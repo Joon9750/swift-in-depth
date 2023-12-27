@@ -569,6 +569,62 @@ bag.contains("Mickey")  // false
 하지만 BagIterator를 따로 구현하지 않고 Bag 타입이 Sequence 프로토콜을 채택하고 makeIterator() 함수를 구현하도록 할 수 있습니다.
 그 방법은 AnyIterator에 있습니다.
 
+AnyIterator를 사용하면 Bag 타입에 Sequence 프로토콜을 채택하기 위해서 추가적으로 구현했던 BagIterator를 만들 필요가 없습니다.
+Sequence 프로포콜을 채택하면 구현해야할 makeIterator() 함수에서 AnyIterator<Element>를 리턴하면 됩니다.
+AnyIterator는 type erased iterator입니다.
+
+아래 코드로 AnyIterator를 사용한 방식을 살펴봅시다.
+
+```swift
+extension Bag: Sequence {
+  func makeIterator() -> AnyIterator<Element> {
+    var exhaustiveStore = store
+
+    return AnyIterator<Element> {
+      guard let (key, value) = exhaustiveStore.first else {
+        return nil
+      }
+      if value > 1 {
+        exhaustiveStore[key]? -= 1
+      } else {
+        exhaustiveStore[key] = nil
+      }
+    }
+  }
+}
+```
+
+BagIterator와 같이 cumstom iterator를 대신해 AnyIterator를 사용하여 custom iterator를 위한 코드를 줄일 수 있습니다.
+
+우리 위에 Bag 객체를 정의할 때 array literal 구문과 비슷하게 정의하는걸 볼 수 있었습니다.
+
+```swift
+let colors: Bag = ["Green", "Green", "Blue", "Yellow", "Yellow", "Yellow"]
+```
+
+위 코드와 같이 Bag 구조체에서 구현한 insert() 함수로 Bag에 요소를 넣는 것이 아닌 배열의 형태로 Bag 객체에 요소를 넣을 수 있습니다.
+하지만 이런 배열의 형태로 Bag 구조체에 요소를 넣기 위해서는 ExpressibleByArrayLiteral 프로토콜을 채택해야 합니다.
+ExpressibleByArrayLiteral 프로토콜을 통해 요소를 배열로 받는 생성자(init)를 제공받게 됩니다.
+
+아래 코드로 확인해 봅시다.
+
+```swift
+extension Bag: ExpressibleByArrayLiteral {
+  typealias ArrayLiteralElement = Element
+  init(arrayLiteral element: Element...) {
+    store
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
