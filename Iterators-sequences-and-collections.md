@@ -419,7 +419,7 @@ bag.insert("Mickey")
 bag.remove("Huey")
 
 bag.count  // 3
-print(bag)
+print(bag) // CustomeStringConvertible 프로토콜을 채택하여 description을 커스텀했습니다.
 // Output:
 // Heuy occurs 2 times
 // Mickey occurs 1 times
@@ -445,11 +445,59 @@ Bag의 element 각각에 counter가 존재하고 counter가 0이 되었을 때 �
 
 아래 코드는 Bag 자료구조를 구현한 코드입니다.
 
+```swift
+struct Bag<Element: Hashable> {
+  private var store = [Element: Int]()
 
+  mutating func insert(_ element: Element) {
+    store[element, default: 0] += 1
+  }
 
+  mutating func remove(_ element: Element) {
+    store[element]? -= 1
+    if store[element] == 0 {
+      store[element] = nil
+    }
+  }
 
+  var count: Int {
+    return store.values.reduce(0, +)
+  }
+}
+```
 
+Bag의 저장되는 요소들을 관리하는 store 변수를 딕셔너리로 만들어 Element에 대응하는 Int가 Element의 개수를 관리는 counter의 역할을 합니다.
+또한 store 변수가 딕셔너리로 값 타입이기 때문에 store 변수의 값을 다루는 함수인 insert와 remove는 mutating 키워드를 붙여야 합니다.
 
+우리 Bag 타입을 출력할 때 출력 형식을 커스텀하고 싶을 때가 있습니다.
+이때 CustomStringConvertible 프로토콜을 Bag 타입에 채택하여 출력(print) 형식을 커스텀할 수 있습니다.
+아래 코드로 확인해 봅시다.
+
+```swift
+extension Bag: CustomeStringConvertible {
+  var description: String {
+    var summary = String()
+    for (key, value) in store {
+      let times = value == 1 ? "time" : "times"
+      summary.append("\(key) occurs \(value) \(times) \n")
+    }
+    return summary
+  }
+}
+
+let anotherBag: Bag = [1.0, 2.0, 2.0, 3.0, 3.0, 3.0]
+print(anotherBag)
+// Output:
+// 2.0 occurs 2 times
+// 1.0 occurs 1 time
+// 3.0 occurs 3 times
+```
+
+CustomeStringConvertible 프로토콜의 description 프로퍼티를 커스텀하면 Bag 타입을 출력(print)할 때 해당 description에 맞춰 출력됩니다.
+
+지금까지 Bag 타입을 구현했습니다.
+하지만 Sequence 프로토콜을 채택하지 않은 상태의 Bag 타입에서 iteration을 진행할 수 없습니다.
+Sequence 프로토콜을 Bag 타입에 채택하기 위해서는 Bag 타입을 위한 iterator가 필요합니다.
 
 
 
