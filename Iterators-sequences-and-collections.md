@@ -498,7 +498,36 @@ CustomeStringConvertible 프로토콜의 description 프로퍼티를 커스텀�
 지금까지 Bag 타입을 구현했습니다.
 하지만 Sequence 프로토콜을 채택하지 않은 상태의 Bag 타입에서 iteration을 진행할 수 없습니다.
 Sequence 프로토콜을 Bag 타입에 채택하기 위해서는 Bag 타입을 위한 iterator가 필요합니다.
+당연히 Bag 타입을 위한 iterator 또한 IteratorProtocol을 따르는 iterator이어야 합니다.
 
+IteratorProtocl을 채택한 iterator가 element를 생성하기 위해서 iterator로 Bag 타입의 store 객체의 복사본을 전달해야 합니다.
+iterator는 store의 복사본을 다루기 때문에 iterator에서 복사본에 변형을 가해도 실제 Bag 객체의 store 변수에는 영향을 미치지 않습니다.
+
+위에서 이야기했듯이 Bag 자료구조는 중복되는 요소를 입력받지만 이를 실제 메모리를 사용하며 저장하지 않고 counter로 요소를 관리합니다.
+따라서 Bag 타입의 iterator에서도 element의 counter를 보고 counter가 관리하는 수 만큼의 요소를 리턴하게 됩니다.
+IteratorProtocol을 채택한 iterator에서 next() 함수를 통해 sequence를 순회하며 요소를 리턴하고 counter를 줄입니다.
+특정 요소의 counter가 0이 된다면 nil을 리턴하게 됩니다.
+
+아래 코드는 BagIterator를 구현한 코드입니다.
+
+```swift
+// IteratorProtocol 구현부입니다.
+public protocol IteratorProtocol {
+  /// The type of element traversed by the iterator.
+  associatedtype Element
+
+  mutating func next() -> Element?
+}
+
+struct BagIterator<Element: Hashable>: IteratorProtocol {
+  var store = [Element: Int]()
+
+  mutating func next() -> Element? {
+    guard let (key, value) = store.first else {
+      return nil
+    }
+    
+```
 
 
 
