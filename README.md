@@ -19,7 +19,7 @@
 | 5    | [Effortless error handling](Effortless-error-handling.md) | 2023.12.10 |
 | 6    | [Generics](Generics.md) | 2023.12.17 |
 | 7    | [Putting the pro in protocol-oriented programming](Putting-the-pro-in-protocol-oriented-programming.md) | 2023.12.23 |
-| 8    | [Iterators, sequences, and collections](Iterators-sequences-and-collections.md) | 2023.12.27 |
+| 8    | [Iterators, sequences, and collections](Iterators-sequences-and-collections.md) | 2023.12.28 |
 | 9    | [Understanding map, flatMap, and compactMap]() |  |
 | 10   | [Asynchronous error handling with Result]() |  |
 | 11   | [Protocol extensions]() |  |
