@@ -401,3 +401,70 @@ for (integer, string) in zip(0..<10, ["a", "b", "c"]) {
 
 이제는 Sequence 프로토콜을 따르는 커스텀 타입을 만들어 봅시다.
 
+자료구조 중 'Bag' 자료구조를 직접 구현해볼 생각입니다.
+Bag을 만들 때, Sequence 프로토콜과 IteratorProtocol을 사용해 Bag 자료구조에 iteration을 제공하고 다양한 함수를 제공하려 합니다.
+
+Bag은 Set과 비슷하게 정렬되지 않는 상태로 존재하며 요소를 추가하고 조회할 수 있습니다.
+하지만 Set과 달리 동일한 요소를 중복해서 Bag에 넣을 수 있습니다.
+
+아래 코드로 확인해 봅시다.
+
+```swift
+var bag = Bag<String>()
+bag.insert("Huey")
+bag.insert("Huey")
+bag.insert("Huey")
+
+bag.insert("Mickey")
+bag.remove("Huey")
+
+bag.count  // 3
+print(bag)
+// Output:
+// Heuy occurs 2 times
+// Mickey occurs 1 times
+
+let anotherBag: Bag = [1.0, 2.0, 2.0, 3.0, 3.0, 3.0]
+print(anotherBag)
+// Output:
+// 2.0 occurs 2 times
+// 1.0 occurs 1 time
+// 3.0 occurs 3 times
+```
+
+이처럼 Bag 자료구조에는 동일한 요소를 중복해서 넣을 수 있습니다.
+그렇다면 Bag 자료구조에서 동일한 요소가 중복해서 들어올 경우 어떤 동작이 일어날까요?
+Bag 자료구조에서는 동일한 요소일 경우 실제 객체로 동일한 요소를 중복해서 저장하지 않고 객체의 counter를 갱신하여 최적화합니다.
+Bag의 element 각각에 counter가 존재하고 counter가 0이 되었을 때 해당 element는 삭제됩니다.
+
+중복되는 객체를 Bag에 저장하기보다 객체의 counter를 통해 중복되는 객체를 관리했을 때 메모리 사용량 측면에서 이점이 있습니다.
+
+또한 Bag은 Set과 마찬가지로 제네릭 타입입니다.
+따라서 Hashable 프로토콜을 따르는 모든 타입이 Bag에 들어올 수 있습니다.
+물론 여러 타입을 하나의 Bag에 섞어서 저장 할 수 없습니다.
+
+아래 코드는 Bag 자료구조를 구현한 코드입니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
