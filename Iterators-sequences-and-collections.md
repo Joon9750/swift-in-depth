@@ -737,11 +737,14 @@ Collection 프로토콜을 채택하여 비파괴적인 순회를 보장할 수 
 
 Collection 프로토콜을 따르는 대표적인 타입으로는 String, Array, Dictionary 그리고 Set가 있습니다.
 
+Collection 프로토콜이 Sequence 프로토콜의 자식 프로토콜인것 처럼 Collection 프로토콜도 자식 프로토콜을 가지고 있습니다.
+MutableCollection, RangeReplacableCollection, BidirectionalCollection 그리고 RandomAccessCollection 프로토콜들이 Collection 프로토콜의 자식 프로토콜입니다. (사실 RandomAccessCollection 프로토콜은 BidirectionalCollection 프로토콜의 자식 프로토콜입니다.)
+Collection 프로토콜의 네 가지 자식 프로토콜들을 차례로 살펴 봅시다.
 
-
-
-
-
+**MutableCollection**
+**RangeReplacableCollection**
+**BidirectionalCollection**
+**RandomAccessCollection**
 
 
 
