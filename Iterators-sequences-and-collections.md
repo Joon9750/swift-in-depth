@@ -612,16 +612,89 @@ ExpressibleByArrayLiteral 프로토콜을 통해 요소를 배열로 받는 생�
 extension Bag: ExpressibleByArrayLiteral {
   typealias ArrayLiteralElement = Element
   init(arrayLiteral element: Element...) {
-    store
+    store = element.reduce(into: [Element: Int]()) { (updating, element) in
+      updatingStore[element, default: 0] += 1
+    }
+  }
+}
+
+let colors: Bag = ["Green", "Green", "Blue", "Yellow", "Yellow", "Yellow"]
+print(colors)
+// Output:
+// Green occurs 2 times
+// Blue occurs 1 time
+// Yellow occurs 3 times       
 ```
 
+Sequence 프로토콜은 Collection 프로토콜의 기반이 되는 프로토콜입니다.
+Collection 프로토콜은 Sequence 프로토콜의 서브 프로토콜입니다.
 
+Collection 프로토콜을 살펴보기 전에 Sequence 프로토콜을 사용해 계속해서 반복하는 iteration을 구현해 봅시다.
+infinite(무한한) sequence를 사용한 코드를 먼저 확인해 봅시다.
 
+```swift
+let infiniteSequence = InfiniteSequence(["a", "b", "c"])
+for (index, letter) in zip(0..<100, infiniteSequence) {
+  print("\(index): \(letter)")
+}
 
+// Output
+// 0: a
+// 1: b
+// 2: c
+// 3: d
+// ...
+// 97: b
+// 98: c
+// 99: a
+```
 
+zip 함수 성격상 두 iterator 중 하나라도 모든 element를 소비했을 때 zip 함수가 종료됩니다.
+위 코드는 infiniteSequence의 iteratore가 종료될 일은 없기 때문에 0부터 100까지 반복되고 종료되는 zip 함수입니다.
 
+그렇다면 무한한 sequence는 어떻게 구현할까요?
+next() 함수에서 sequence의 요소가 다음으로 넘어가는 기준을 구현할 수 있기 때문에 IteratorProtocol의 next() 함수에서 조건을 잘 구현해야 합니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+struct infiniteSequence<S: Sequence>: Sequence, IteratorProtocol {
+  let sequence: S
+  var currentIterator: S.Iterator
+  var isFinished: Bool = false
+
+  init(_ sequence: S) {
+    self.sequence = sequence
+    self.currentIterator = sequence.makeIterator()
+  }
+
+  mutating func next() -> S.Element? {
+    guard !isFinished else {
+      return nil
+    }
+
+    if let element = currentIterator.next() {
+      return element
+    } else {
+      self.currentIterator = sequence.makeIterator()
+      let element = currentIterator.next()
+      if element == nil {
+        isFinished = true
+      }
+      return element
+    }
+  }
+}
+
+let infiniteSequence = InfiniteSequence(["a", "b", "c"])
+for (index, letter) in zip(0..<100, infiniteSequence) {
+  print("\(index): \(letter)")
+}
+```
+
+다음으로 Collection 프로토콜에 대해 살펴봅시다.
+
+## The Collection protocol
 
 
 
