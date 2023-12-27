@@ -696,6 +696,70 @@ for (index, letter) in zip(0..<100, infiniteSequence) {
 
 ## The Collection protocol
 
+Collection 프로토콜은 Sequence 프로토콜의 서브 프로토콜입니다.
+따라서 Collection 프로토콜을 채택하면 Sequence 프로토콜의 모든 함수를 제공합니다.
+
+Collection 프로토콜과 Sequence 프로토콜은 몇 가지 차이가 있습니다.
+첫 번째 차이는 Collection 프로토콜은 Sequence 프로토콜과 달리 인덱스를 제공합니다.
+Collection 프로토콜이 인덱스를 제공하기 때문에 myarray[2]와 같이 인덱스를 활용해 요소에 접근할 수 있습니다.
+
+아래 코드로 Collection 프로토콜을 따르는 String 타입에서 인덱스를 활용한 방법을 살펴봅시다.
+
+```swift
+let strayanAnimals = "kangaroo Koala"
+if let middleIndex = strayanAnimals.index(of " ") {
+  strayanAnimals.prefix(upto: middleIndex)  // Kangaroo
+  strayanAnimals.suffix(from: strayanAnimals.index(after: middleIndex))  // Koala
+}
+```
+
+두 번째 차이는 Collection 프로토콜에서 비파괴적인(nondestructive) 순회를 보장합니다. 여기서 비파괴적인 순회란 순회를 돌며 iteration의 요소를 소비하지 않는 것을 말합니다. Collection 프로토콜과 달리 Sequence 프로토콜은 순회를 돌며 iteration의 요소를 소비할 수도 있고 소비하지 않을 수 있습니다. 만약 순회를 요소를 소비하며 파괴적으로 돈다면 동일한 Sequence를 가지고 여러번 순회하게 될 때 매번 결과가 달라지는 문제가 생길 수 있습니다.
+
+아래 코드는 Sequence 프로토콜이 비파괴적인 순회를 보장하지 않아 발생하는 문제 상황입니다.
+
+```swift
+let numbers = // Let's say numbers is a Sequence but not a Collection
+for number in numbers {
+  if number == 10 {
+    break
+  }
+}
+
+for number in numbers {
+  // Will iteration resume, or start from the beginning?
+}
+```
+
+Sequence는 파괴적(요소를 소비)일 수도 있고 아닐수 있어서 iteration이 중단되었다가 다시 동일한 Sequence의 iteration이 시작되면 중단된 지점부터 순회를 돌지 아니면 Sequence의 첫 요소부터 순회를 돌지 알 수 없는 문제가 있습니다.
+
+Collection 프로토콜을 채택하여 비파괴적인 순회를 보장할 수 있습니다.
+비파괴적인 순회는 동일한 iteration을 반복하더라도 동일한 결과를 리턴할 수 있습니다.
+
+Collection 프로토콜을 따르는 대표적인 타입으로는 String, Array, Dictionary 그리고 Set가 있습니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
