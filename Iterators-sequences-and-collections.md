@@ -1033,6 +1033,44 @@ let adrenalineActivities = [
 let adrenalinePlan = [adrenalineTrip: activites]  // You can now create a TravelPlan from a dictionary!!
 ```
 
+그렇다면 아래 Fruits 타입에 Collection 프로토콜을 채택해 봅시다.
+
+```swift
+struct Fruits {
+  let banana = "Banana"
+  let apple = "Apple"
+  let tomato = "Tomato"
+}
+
+extension Fruits: Collection {
+  var startIndex: Int {
+    return 0
+  }
+
+  var endIndex: Int {
+    return 3  // Yep, it's 3, not 2. That's how Collection wants it.
+  }
+
+  func index(after i: Int) -> Int {
+    return i + 1
+  }
+
+  subscript(index: Int) -> String {
+    switch index {
+    case 0: return banana
+    case 1: return apple
+    case 2: return tomato
+    default: fatalError("The fruits end here.")
+    }
+  }
+}
+
+let fruits = Fruits()
+fruits.forEach { (fruit) in
+  print(fruit)
+}
+```
+
 아래 링크는 Sequence, Collection 등 잘 정리된 글이니 한 번 읽어봅시다.
 
 https://itwenty.me/posts/04-swift-collections/
