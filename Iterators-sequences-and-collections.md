@@ -1033,28 +1033,20 @@ let adrenalineActivities = [
 let adrenalinePlan = [adrenalineTrip: activites]  // You can now create a TravelPlan from a dictionary!!
 ```
 
-아래 링크도 한 번 읽어봅시다.
+아래 링크는 Sequence, Collection 등 잘 정리된 글이니 한 번 읽어봅시다.
 
 https://itwenty.me/posts/04-swift-collections/
 
 ## Summary
-- Iterators produce elements
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Iterators produce elements.
+- To iterate, Swift uses a while loop on makeIterator() under the covers.
+- Sequences produce iterators, allowing them to be iterated over repeatedly.
+- Sequences won't guarantee the same values when iterated over multiple times.
+- Seqence is the backbone for methods such as filter, reduce, map, zip, repeat, and many others.
+- Collection inherits from Sequence.
+- Collection is a protocol that adds subscript capabilities and guarantedd nondestructive iteration.
+- Collection has subprotocols, which are more-specialized versions of Collection.
+- MutableCollection is a protocol that restricts collections for easy modification of part of a collection. As a result, the length of a collection may change. It also offers useful methods, such as removeAll(where:).
+- BidirectionalCollection is a protocol that defines a collection that can be traversed both forward and backward.
+- RandomAccessCollection restricts collections to constant-time traversal between indices.
+- You can implement Collection for regular types that you use in day-to-day programming.
