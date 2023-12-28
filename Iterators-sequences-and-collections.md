@@ -745,8 +745,8 @@ Collection 프로토콜의 네 가지 자식 프로토콜들을 차례로 살펴
 
 MutableCollection offers methods that mutate elements in place without changing the length of a collection.
 
-MutableCollection 프로토콜은 길이 변화 없는 조건 하에서 요소들의 변경하도록 만들어줍니다.
-길이 변화가 없음을 보장하기 때문에 성능측면에서도 이점이 있습니다.
+MutableCollection 프로토콜은 컬렉션의 길이 변화 없는 조건 하에서 요소들의 변경하도록 만들어줍니다.
+컬렉션의 길이 변화가 없음을 보장하기 때문에 성능측면에서도 이점이 있습니다.
 대표적으로 Array 타입이 MutableCollection 프로토콜을 채택한 타입입니다.
 
 MutableCollection 프로토콜이 제공하는 유용한 함수들이 있습니다.
@@ -778,13 +778,57 @@ arr[..<index]  // [1, 5, 3]
 arr[index...]  // [4, 2]
 ```
 
-MutableCollection 프로토콜에서는 sort, partiton 함수외에도 reverse, swapAt 등 여러 함수를 제공합니다.
-
 한 가지 주의할 점이 String 타입은 MutableCollection 프로토콜을 따르고 있지 않습니다.
-String
+MutableCollection 프로토콜은 컬렉션의 길이를 변화시키지 않습니다.
+하지만 String 타입은 컬렉션의 길이를 변경시킬 수 있기 때문입니다.
+
+MutableCollection 프로토콜에서는 sort, partiton 함수외에도 reverse, swapAt 등 여러 함수를 제공합니다.
+MutableCollection 프로토콜에서 지원하는 함수들을 적극적으로 사용합시다.
 
 **RangeReplacableCollection**
+
+RangeReplaceableCollection allows you to swap out ranges and change its length.
+
+RangeReplaceableCollection 프로토콜은 컬렉션의 변경을 지원하며 MutableCollection 프로토콜과 달리 컬렉션의 길이 변경을 허용합니다.
+대표적으로  Array 타입과 String 타입이 RangeReplaceableCollection 프로토콜을 채택한 타입입니다.
+
+RangeReplaceableCollection 프로토콜이 제공하는 += 함수를 아래 코드로 살펴 봅시다.
+
+```swift
+var muppets = ["Kermit", "Miss Piggy", "Fozzie bear"]
+
+muppets += ["Statler", "Waldorf"]
+print(muppets)  // ["Kermit", "Miss Piggy", "Fozzie bear", "Statler", "Waldorf"]
+
+muppets.removeFrist()  // "kermit"
+print(muppets)  // ["Miss Piggy", "Fozzie bear", "Statler", "Waldorf"]
+
+muppets.removeSubrange(0..<2)
+print(muppets) // ["Statler", "Waldorf"]
+```
+
+String 타입이 RangeReplaceableCollection 프로토콜을 따르기 때문에 아래와 같이 String의 길이를 변경할 수 있습니다.
+
+```swift
+var matrix = "The Matrix"
+matrix += " Reloaded"
+print(matrix)  // The Matrix Reloaded
+```
+
+또한 RangeReplaceableCollection 프로토콜에서는 removeAll 함수르 제공합니다.
+배열과 같은 컬렉션에서 특정 요소를 삭제할 때 filter를 통해 요소를 삭제하기 보다 removeAll 함수를 사용하는 것이 효과적입니다.
+아래 코드로 removeAll 함수의 사용을 살펴 봅시다.
+
+```swift
+var healthyFood = ["Donut", "Lettuce", "Kiwi", "Grapes"]
+healthyFood.removeAll(where: { $0 == "Donut" })
+print(healthyFood)  // ["Lettuce", "Kiwi", "Grapes"]
+```
+
 **BidirectionalCollection**
+
+With a BidirectioinalCollection you can traverse a collection backwards from an index.
+
 **RandomAccessCollection**
 
 
