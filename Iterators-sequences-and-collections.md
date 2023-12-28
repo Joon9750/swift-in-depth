@@ -780,7 +780,8 @@ arr[index...]  // [4, 2]
 
 MutableCollection 프로토콜에서는 sort, partiton 함수외에도 reverse, swapAt 등 여러 함수를 제공합니다.
 
-
+한 가지 주의할 점이 String 타입은 MutableCollection 프로토콜을 따르고 있지 않습니다.
+String
 
 **RangeReplacableCollection**
 **BidirectionalCollection**
