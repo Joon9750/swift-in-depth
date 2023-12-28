@@ -881,13 +881,87 @@ zip(repeatElement("Mr. Sniffles", count: 3), repeatElement(100, count:3)).forEac
 직접 Collection 프로토콜을 따르는 커스텀 타입을 만들 일은 많지 않습니다.
 하지만 Collection 프로토콜을 따르는 커스텀 타입을 만들어 보며 Collection 프로토콜에 대해 더 살펴 봅시다.
  
+지금부터 TravelPlan이라 불리는 데이터를 구현해볼 것입니다.
+TravelPlan은 여러 활동이 담긴 하루(day) 하루의 Sequence입니다.
+예를 들어 Florida에 방문하는 TravelPlan이라면 밥을 먹고 박물관을 가는 등 여러 활동들이 포함될 수 있습니다.
 
+또한 TravelPlan 데이터로 iteration이 가능하고 idexing도 지원하기 위해 Collection 프로토콜을 채택한 TravelPlan 데이터 타입을 만들려 합니다.
+먼저 Activity 데이터와 Day 데이터를 구현해 봅시다.
 
+```swift
+struct Activity: Equatable {
+  let date: Date
+  let description: String
+}
 
+struct Day: Hashable {
+  let date: Date
 
+  init(date: Date) {
+    let unitFlags: Set<Calendar.Component> = [.day, .month, .year]
+    let components = Calendar.current.dateComponents(unitFlags, from: date)
+    guard let convertedDate = Calendar.current.date(from: components) else {
+      self.date = date
+      return
+    }
+    self.date = convertedDate
+  }
+}
+```
 
+TravelPlan 데이터 타입에서 Day를 딕셔너리의 key로 사용하기 위해 Day 데이터 타입에 Hashable 프로토콜을 채택했습니다.
+TravelPlan에서 Day를 key로 Activity들을 value로 사용할 것입니다.
 
+아래 코드는 TravelPlan을 구현한 코드입니다.
 
+```swift
+struct TravelPlane {
+  typealias DataType = [Day: [Activity]]
+
+  private var trips = DataType()
+
+  init(activities: [Activity]) {
+    self.trips = Dictionary(grouping: activites) { activity -> Day in
+      Day(date: activity.date)
+    }
+  }
+}
+```
+
+이제는 TravelPlane 데이터 타입에 iteration과 indexing을 제공하기 위해 Collection 프로토콜을 채택하려 합니다.
+그전에 Collection 프로토콜의 정의부를 확인해 봅시다.
+
+```swift
+protocol Collection: Sequence {
+    associatedtype Index: Comparable
+
+    var startIndex: Index { get }
+    var endIndex: Index { get }
+    subscript(position: Index) -> Element { get }
+    func index(after i: Index) -> Index
+}
+```
+
+Collection 프로토콜을 커스텀 타입에 채택하기 위해서는 startIndex와 endIndex 변수를 구현해야 하고 index(after:) 함수와 subscript(index:) 함수를 필수로 구현해야 합니다.
+아래 코드는 TravelPlan 타입에 Collection 프로토콜을 채택하고 필수 구현 변수와 함수들을 구현한 코드입니다.
+
+```swift
+extension TravelPlan: Collection {
+  typealias KeysIndex = DataType.Index
+  typealias DataElement = DataType.Element
+
+  var startIndex: KeysIndex { return trips.keys.startIndex }
+  var endIndex: KeysIndex { return trips.keys.endIndex }
+
+  func index(after i: KeysIndex) -> KeysIndex {
+    return trips.index(after: i)
+  }
+
+  subscript(index: KeysIndex) -> DataElement {
+    return trips[index]
+  }
+}
+```
 
 
 
