@@ -742,6 +742,29 @@ MutableCollection, RangeReplacableCollection, BidirectionalCollection 그리고 
 Collection 프로토콜의 네 가지 자식 프로토콜들을 차례로 살펴 봅시다.
 
 **MutableCollection**
+
+MutableCollection offers methods that mutate elements in place without changing the length of a collection.
+
+MutableCollection 프로토콜은 길이 변화 없는 조건 하에서 요소들의 변경하도록 만들어줍니다.
+길이 변화가 없음을 보장하기 때문에 성능측면에서도 이점이 있습니다.
+대표적으로 Array 타입이 MutableCollection 프로토콜을 채택한 타입입니다.
+
+MutableCollection 프로토콜이 제공하는 유용한 함수들이 있습니다.
+물론 프로토콜이 요소의 변경을 목적으로 하기 때문에 MutableCollection 프로토콜을 채택한 객체는 var로 선언되어야 합니다.
+
+MutableCollection 프로토콜은 sort() 함수를 제공합니다.
+아래 코드로 확인해 봅시다.
+
+```swift
+var mutableArray = [4, 3, 1, 2]
+mutableArray.sort()  // [1, 2, 3, 4]
+```
+
+MutableCollection 프로토콜은 partition 함수도 제공합니다.
+partition 함수는 배열을 두 덩어리로 나누고 나누는 기준을 커스텀할 수 있습니다.
+또한 partition 함수의 리턴은 배열이 나뉘는 인덱스 값입니다.
+아래 코드로 
+
 **RangeReplacableCollection**
 **BidirectionalCollection**
 **RandomAccessCollection**
