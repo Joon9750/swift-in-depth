@@ -827,11 +827,60 @@ print(healthyFood)  // ["Lettuce", "Kiwi", "Grapes"]
 
 **BidirectionalCollection**
 
-With a BidirectioinalCollection you can traverse a collection backwards from an index.
+With a BidirectionalCollection you can traverse a collection backwards from an index.
+
+BidirectionalCollection 프로토콜은 컬렉션의 양방향 (forward, backward) 순회를 지원합니다.
+BidirectionalCollection 프로토콜이 제공하는 reversed() 함수를 아래 코드로 확인해 봅시다.
+
+```swift
+var letters = "abcd"
+for value in letters.reversed() {
+  print(value)
+}
+```
 
 **RandomAccessCollection**
 
+The RandomAccessCollection inherits from BidirectionCollection and offers some performance improvements for its methods.
 
+RandomAccessCollection 프로토콜은 컬렉션에 효율적인 random-access index 순회를 지원합니다.
+RandomAccessCollection 프로토콜은 인덱스를 원하는 거리로 이동할 수 있으며 O(1) 시간 내에 인덱스 간의 거리를 측정할 수 있습니다
+위에서 살펴보았던 BidirectionalCollection 프로토콜은 전체 collection을 순회해서 카운팅 해야하므로 O(1)의 시간복잡도를 가질 수 없습니다.
+하지만 RandomAccessCollection 프로토콜은 임의의 인덱스 접근에 O(1)의 시간복잡도를 가집니다.
+
+Array 타입은 RandomAccessCollection 프로토콜을 포함하여 모든 collection 프로토콜을 채택합니다.
+또한 Repeated type도 RandomAccessCollection 프로토콜을 채택하고 있습니다.
+
+Repeated type은 RandomAccessCollection 프로토콜을 따르는 타입으로 값을 여러번 낱낱이 계산할 때 편리합니다.
+repeatElement 함수를 사용해서 Repeated type을 얻을 수 있습니다.
+아래 코드로 확인해 봅시다.
+
+```swift
+for element in repeatElement("Broken record", count: 3) {
+  print(element)
+}
+
+// Output:
+// Broken record
+// Broken record
+// Broken record
+
+zip(repeatElement("Mr. Sniffles", count: 3), repeatElement(100, count:3)).forEach { name, index in
+  print("Generated \(name) \(index)")
+}
+
+// Output
+// Generated Mr. Sniffles 100
+// Generated Mr. Sniffles 100
+// Generated Mr. Sniffles 100
+```
+
+## Creating a collection
+
+보통 개발을 하다보면 Collection 프로토콜을 따르는 Set, Array 등 스위프트에서 제공하는 데이터 타입을 자주 활용합니다.
+직접 Collection 프로토콜을 따르는 커스텀 타입을 만들 일은 많지 않습니다.
+하지만 Collection 프로토콜을 따르는 커스텀 타입을 만들어 보며 Collection 프로토콜에 대해 더 살펴 봅시다.
+ 
 
 
 
