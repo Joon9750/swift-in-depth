@@ -963,7 +963,82 @@ extension TravelPlan: Collection {
 }
 ```
 
+이제 TravelPlan 타입이 Collection 프로토콜까지 채택했기 때문에 iteration과 indexing 모두 가능합니다.
+또한 Collection 프로토콜에서 makeIterator() 함수를 통해 IndexingIterator도 제공하고 있습니다.
+TravelPlan 타입의 커스텀 Iterator 없이 IndexingIterator를 얻을 수 있습니다.
 
+```swift
+// A default Iterator
+let defaultIterator: IndexingIterator<TravelPlan> = travelPlan.makeIterator()
+
+// TravelPlan iteration
+for (day, activities) in travelPlan {
+  print(day)
+  print(activities)
+}
+```
+
+Collection 프로토콜을 따르면 subscript 능력을 갖게 됩니다.
+[] 대괄호 안에 index를 넣어줘서 멤버 요소에 접근하는 것이 subscript입니다.
+배열의 서브스크립트는 parameter로 Int형을 index로 받고, 해당 index에 해당하는 Element를 반환하는 형태입니다.
+또한 딕셔너리의 서브스크립트는 Prameter로 Key를 받고, 해당 Key에 해당하는 Value를 반환하는 형태입니다.
+
+그렇다면 커스텀 서브스크립트를 TravelPlan 타입에 구현해 봅시다.
+아래 코드를 확인해 봅시다.
+
+```swift
+extension TravelPlane {
+  subscript(date: Date) -> [Activity] {
+    return trips[Day(date: date)] ?? []
+  }
+
+  subscript(day: Day) -> [Activity] {
+    return trips[day] ?? []
+  }
+}
+// Now, you can access contents via convenient subscripts.
+
+travelPlan[Date()]
+
+let day = Day(date: Date())
+travelPlan[day]
+```
+
+위 코드와 같이 subscript 함수를 구현하여 서브스크립트 또한 커스텀 가능합니다.
+아래 링크도 참고해 봅시다.
+
+https://babbab2.tistory.com/123
+
+마지막으로 ExpressibleByDictionaryLiteral 프로토콜을 살펴보겠습니다.
+앞에서 보았던 ExpressibleByArrayLiteral 프로토콜과 비슷한 개념의 프로토콜입니다.
+ExpressibleByDictionaryLiteral 프로토콜을 채택하면 생성자에 여러 요소를 넣을 수 있도록 합니다.
+아래 코드로 살펴봅시다.
+
+```swift
+extension TravelPlan: ExpressibleByDictionaryLiteral {
+  init(dictionaryLiteral element: (Day, [Activity])...) {
+    self.trips = Dictionary(elements, uniquingKeysWith: { (first: Day, ) in
+      return true
+    })
+  }
+}
+
+let adrenalineTrip = Day(date: Date())
+let adrenalineActivities = [
+  Activity(date: Date(), description: "Bungee jumping"),
+  Activity(date: Date(), description: "Driving in rush hour LA"),
+  Activity(date: Date(), description: "Sky diving")
+]
+
+let adrenalinePlan = [adrenalineTrip: activites]  // You can now create a TravelPlan from a dictionary!!
+```
+
+아래 링크도 한 번 읽어봅시다.
+
+https://itwenty.me/posts/04-swift-collections/
+
+## Summary
+- Iterators produce elements
 
 
 
