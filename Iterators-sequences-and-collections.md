@@ -763,7 +763,24 @@ mutableArray.sort()  // [1, 2, 3, 4]
 MutableCollection 프로토콜은 partition 함수도 제공합니다.
 partition 함수는 배열을 두 덩어리로 나누고 나누는 기준을 커스텀할 수 있습니다.
 또한 partition 함수의 리턴은 배열이 나뉘는 인덱스 값입니다.
-아래 코드로 
+아래 코드로 확인해 봅시다.
+
+```swift
+var arr = [1, 2, 3, 4, 5]
+let index = arr.partition { (Int) -> Bool in
+  return int & 2 == 0
+}
+
+print(arr)  // [1, 5, 3, 4, 2]
+print(index)  // 3
+
+arr[..<index]  // [1, 5, 3]
+arr[index...]  // [4, 2]
+```
+
+MutableCollection 프로토콜에서는 sort, partiton 함수외에도 reverse, swapAt 등 여러 함수를 제공합니다.
+
+
 
 **RangeReplacableCollection**
 **BidirectionalCollection**
