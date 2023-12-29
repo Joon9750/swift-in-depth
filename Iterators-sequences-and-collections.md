@@ -713,7 +713,7 @@ if let middleIndex = strayanAnimals.index(of " ") {
 }
 ```
 
-두 번째 차이는 Collection 프로토콜에서 비파괴적인(nondestructive) 순회를 보장합니다. 여기서 비파괴적인 순회란 순회를 돌며 iteration의 요소를 소비하지 않는 것을 말합니다. Collection 프로토콜과 달리 Sequence 프로토콜은 순회를 돌며 iteration의 요소를 소비할 수도 있고 소비하지 않을 수 있습니다. 만약 순회를 요소를 소비하며 파괴적으로 돈다면 동일한 Sequence를 가지고 여러번 순회하게 될 때 매번 결과가 달라지는 문제가 생길 수 있습니다.
+두 번째 차이는 Collection 프로토콜에서 비파괴적인(nondestructive) 순회를 보장합니다. 여기서 비파괴적인 순회란 순회를 돌며 iteration의 요소를 소비하지 않는 것을 말합니다. Collection 프로토콜과 달리 Sequence 프로토콜은 순회를 돌며 iteration의 요소를 소비할 수도 있고 소비하지 않을 수 있습니다. 만약 순회를 요소를 소비하며 파괴적으로 돈다면 동일한 Sequence를 가지고 여러 번 순회하게 될 때 매번 결과가 달라지는 문제가 생길 수 있습니다.
 
 아래 코드는 Sequence 프로토콜이 비파괴적인 순회를 보장하지 않아 발생하는 문제 상황입니다.
 
@@ -730,27 +730,27 @@ for number in numbers {
 }
 ```
 
-Sequence는 파괴적(요소를 소비)일 수도 있고 아닐수 있어서 iteration이 중단되었다가 다시 동일한 Sequence의 iteration이 시작되면 중단된 지점부터 순회를 돌지 아니면 Sequence의 첫 요소부터 순회를 돌지 알 수 없는 문제가 있습니다.
+Sequence는 파괴적(요소를 소비)일 수도 있고 아닐 수 있어서 iteration이 중단되었다가 다시 동일한 Sequence의 iteration이 시작되면 중단된 지점부터 순회를 돌지 아니면 Sequence의 첫 요소부터 순회를 돌지 알 수 없는 문제가 있습니다.
 
 Collection 프로토콜을 채택하여 비파괴적인 순회를 보장할 수 있습니다.
 비파괴적인 순회는 동일한 iteration을 반복하더라도 동일한 결과를 리턴할 수 있습니다.
 
-Collection 프로토콜을 따르는 대표적인 타입으로는 String, Array, Dictionary 그리고 Set가 있습니다.
+Collection 프로토콜을 따르는 대표적인 타입으로는 String, Array, Dictionary 그리고 Set이 있습니다.
 
-Collection 프로토콜이 Sequence 프로토콜의 자식 프로토콜인것 처럼 Collection 프로토콜도 자식 프로토콜을 가지고 있습니다.
-MutableCollection, RangeReplacableCollection, BidirectionalCollection 그리고 RandomAccessCollection 프로토콜들이 Collection 프로토콜의 자식 프로토콜입니다. (사실 RandomAccessCollection 프로토콜은 BidirectionalCollection 프로토콜의 자식 프로토콜입니다.)
-Collection 프로토콜의 네 가지 자식 프로토콜들을 차례로 살펴 봅시다.
+Collection 프로토콜이 Sequence 프로토콜의 자식 프로토콜인 것처럼 Collection 프로토콜도 자식 프로토콜을 가지고 있습니다.
+MutableCollection, RangeReplacableCollection, BidirectionalCollection 그리고 RandomAccessCollection 프로토콜들이 Collection 프로토콜의 자식 프로토콜입니다. (사실 RandomAccessCollection 프로토콜은 BidirectionalCollection 프로토콜의 자식 프로토콜입니다)
+Collection 프로토콜의 네 가지 자식 프로토콜들을 차례로 살펴봅시다.
 
 **MutableCollection**
 
 MutableCollection offers methods that mutate elements in place without changing the length of a collection.
 
-MutableCollection 프로토콜은 컬렉션의 길이 변화 없는 조건 하에서 요소들의 변경하도록 만들어줍니다.
-컬렉션의 길이 변화가 없음을 보장하기 때문에 성능측면에서도 이점이 있습니다.
+MutableCollection 프로토콜은 컬렉션의 길이 변화 없는 조건에서 요소들의 변경하도록 만들어줍니다.
+컬렉션의 길이 변화가 없음을 보장하기 때문에 성능 측면에서도 이점이 있습니다.
 대표적으로 Array 타입이 MutableCollection 프로토콜을 채택한 타입입니다.
 
 MutableCollection 프로토콜이 제공하는 유용한 함수들이 있습니다.
-물론 프로토콜이 요소의 변경을 목적으로 하기 때문에 MutableCollection 프로토콜을 채택한 객체는 var로 선언되어야 합니다.
+물론 프로토콜이 요소의 변경을 목적으로 하므로 MutableCollection 프로토콜을 채택한 객체는 var로 선언되어야 합니다.
 
 MutableCollection 프로토콜은 sort() 함수를 제공합니다.
 아래 코드로 확인해 봅시다.
@@ -782,7 +782,7 @@ arr[index...]  // [4, 2]
 MutableCollection 프로토콜은 컬렉션의 길이를 변화시키지 않습니다.
 하지만 String 타입은 컬렉션의 길이를 변경시킬 수 있기 때문입니다.
 
-MutableCollection 프로토콜에서는 sort, partiton 함수외에도 reverse, swapAt 등 여러 함수를 제공합니다.
+MutableCollection 프로토콜에서는 sort, partiton 함수 외에도 reverse, swapAt 등 여러 함수를 제공합니다.
 MutableCollection 프로토콜에서 지원하는 함수들을 적극적으로 사용합시다.
 
 **RangeReplacableCollection**
@@ -792,7 +792,7 @@ RangeReplaceableCollection allows you to swap out ranges and change its length.
 RangeReplaceableCollection 프로토콜은 컬렉션의 변경을 지원하며 MutableCollection 프로토콜과 달리 컬렉션의 길이 변경을 허용합니다.
 대표적으로  Array 타입과 String 타입이 RangeReplaceableCollection 프로토콜을 채택한 타입입니다.
 
-RangeReplaceableCollection 프로토콜이 제공하는 += 함수를 아래 코드로 살펴 봅시다.
+RangeReplaceableCollection 프로토콜이 제공하는 '+=' 함수를 아래 코드로 살펴봅시다.
 
 ```swift
 var muppets = ["Kermit", "Miss Piggy", "Fozzie bear"]
@@ -816,8 +816,8 @@ print(matrix)  // The Matrix Reloaded
 ```
 
 또한 RangeReplaceableCollection 프로토콜에서는 removeAll 함수르 제공합니다.
-배열과 같은 컬렉션에서 특정 요소를 삭제할 때 filter를 통해 요소를 삭제하기 보다 removeAll 함수를 사용하는 것이 효과적입니다.
-아래 코드로 removeAll 함수의 사용을 살펴 봅시다.
+배열과 같은 컬렉션에서 특정 요소를 삭제할 때 filter를 통해 요소를 삭제하기보다 removeAll 함수를 사용하는 것이 효과적입니다.
+아래 코드로 removeAll 함수의 사용을 살펴봅시다.
 
 ```swift
 var healthyFood = ["Donut", "Lettuce", "Kiwi", "Grapes"]
@@ -845,13 +845,13 @@ The RandomAccessCollection inherits from BidirectionCollection and offers some p
 
 RandomAccessCollection 프로토콜은 컬렉션에 효율적인 random-access index 순회를 지원합니다.
 RandomAccessCollection 프로토콜은 인덱스를 원하는 거리로 이동할 수 있으며 O(1) 시간 내에 인덱스 간의 거리를 측정할 수 있습니다
-위에서 살펴보았던 BidirectionalCollection 프로토콜은 전체 collection을 순회해서 카운팅 해야하므로 O(1)의 시간복잡도를 가질 수 없습니다.
+위에서 살펴보았던 BidirectionalCollection 프로토콜은 전체 collection을 순회해서 카운팅 해야 하므로 O(1)의 시간복잡도를 가질 수 없습니다.
 하지만 RandomAccessCollection 프로토콜은 임의의 인덱스 접근에 O(1)의 시간복잡도를 가집니다.
 
 Array 타입은 RandomAccessCollection 프로토콜을 포함하여 모든 collection 프로토콜을 채택합니다.
 또한 Repeated type도 RandomAccessCollection 프로토콜을 채택하고 있습니다.
 
-Repeated type은 RandomAccessCollection 프로토콜을 따르는 타입으로 값을 여러번 낱낱이 계산할 때 편리합니다.
+Repeated type은 RandomAccessCollection 프로토콜을 따르는 타입으로 값을 여러 번 낱낱이 계산할 때 편리합니다.
 repeatElement 함수를 사용해서 Repeated type을 얻을 수 있습니다.
 아래 코드로 확인해 봅시다.
 
@@ -877,13 +877,13 @@ zip(repeatElement("Mr. Sniffles", count: 3), repeatElement(100, count:3)).forEac
 
 ## Creating a collection
 
-보통 개발을 하다보면 Collection 프로토콜을 따르는 Set, Array 등 스위프트에서 제공하는 데이터 타입을 자주 활용합니다.
+보통 개발을 하다 보면 Collection 프로토콜을 따르는 Set, Array 등 스위프트에서 제공하는 데이터 타입을 자주 활용합니다.
 직접 Collection 프로토콜을 따르는 커스텀 타입을 만들 일은 많지 않습니다.
-하지만 Collection 프로토콜을 따르는 커스텀 타입을 만들어 보며 Collection 프로토콜에 대해 더 살펴 봅시다.
+하지만 Collection 프로토콜을 따르는 커스텀 타입을 만들어 보며 Collection 프로토콜에 대해 더 살펴봅시다.
  
-지금부터 TravelPlan이라 불리는 데이터를 구현해볼 것입니다.
-TravelPlan은 여러 활동이 담긴 하루(day) 하루의 Sequence입니다.
-예를 들어 Florida에 방문하는 TravelPlan이라면 밥을 먹고 박물관을 가는 등 여러 활동들이 포함될 수 있습니다.
+지금부터 TravelPlan이라 불리는 데이터를 구현해 볼 것입니다.
+TravelPlan은 여러 활동이 담긴 하루(day)들의 Sequence입니다.
+예를 들어 Florida에 방문하는 TravelPlan이라면 밥을 먹고 박물관에 가는 등 여러 활동이 포함될 수 있습니다.
 
 또한 TravelPlan 데이터로 iteration이 가능하고 idexing도 지원하기 위해 Collection 프로토콜을 채택한 TravelPlan 데이터 타입을 만들려 합니다.
 먼저 Activity 데이터와 Day 데이터를 구현해 봅시다.
@@ -978,7 +978,7 @@ for (day, activities) in travelPlan {
 }
 ```
 
-Collection 프로토콜을 따르면 subscript 능력을 갖게 됩니다.
+Collection 프로토콜을 따르면 subscript 능력을 갖추게 됩니다.
 [] 대괄호 안에 index를 넣어줘서 멤버 요소에 접근하는 것이 subscript입니다.
 배열의 서브스크립트는 parameter로 Int형을 index로 받고, 해당 index에 해당하는 Element를 반환하는 형태입니다.
 또한 딕셔너리의 서브스크립트는 Prameter로 Key를 받고, 해당 Key에 해당하는 Value를 반환하는 형태입니다.
