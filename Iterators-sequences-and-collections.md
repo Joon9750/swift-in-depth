@@ -84,14 +84,14 @@ Sequence 프로토콜이 데이터 순회의 기반이라고 생각될 정도입
 
 Array, Set, String, Dictionary 등이 Collection 프로토콜을 따르기 때문에 Collection 프로토콜의 부모 프로토콜인 Sequence 프로토콜도 따르게 됩니다.
 
-Sequence는 iterator를 생성할 수 있습니다.
+Sequence 프로토콜은 makeIterator() 함수를 통해 iterator를 생성할 수 있습니다.
 반면, iterator에 의해 순회하며 elements들이 소모되며 iterator가 비워지게 됩니다.
-하지만 Sequence에서 새로운 iterator를 새로운 loop을 위해 만들 수 있습니다.
-Sequence에서 새로운 iterator를 만들 수 있기 때문에 순회를 반복할 수 있습니다.
+하지만 Sequence에서 새로운 loop을 위한 새로운 iterator를 만들 수 있습니다.
+Sequence에서 새로운 iterator를 만들 수 있기 때문에 계속해서 순회를 반복할 수 있습니다.
 
-결과적으로 Sequence에서 Iterator들을 생성하고, 생성된 Iterator들이 각각의 Element들을 생성하는 방식으로 Sequence가 iteration 됩니다.
+결과적으로 Sequence에서 Iterator들을 생성하고, 생성된 Iterator들이 Element들을 생성하는 방식으로 Sequence가 iteration 됩니다!
 
-아래 코드로 Sequence 프로토콜을 살펴봅시다.
+아래 코드로 Sequence 프로토콜 정의부를 살펴봅시다.
 
 ```swift
 public protocol Sequence {
@@ -109,7 +109,8 @@ public protocol Sequence {
 ```
 
 Sequence 프로토콜에서 makeIterator() 함수는 필수로 구현되어야 합니다.
-makeIterator() 함수가 IteratorProtocol을 따르는 Iterator 타입을 리턴하기 때문에 Iterator와 Element 연관 값 또한 지정해야 합니다.
+makeIterator() 함수가 IteratorProtocol을 따르는 Iterator 타입을 리턴하기 때문에 Iterator 연관 값을 정의해야 합니다.
+또한 Sequence 프로토콜의 Element 연관 값도 정의해야 하고 Iterator.Element의 타입도 Sequence 프로토콜의 Element 연관 값과 같아야 합니다.
 
 Sequence 프로토콜에는 많은 유용한 함수들이 정의되어 있습니다.
 filter, map, reduce, flatMap, forEach, dropFrist, contains 등 Sequence 프로토콜에서 제공하는 함수는 여러 가지가 있습니다.
