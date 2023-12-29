@@ -594,8 +594,7 @@ bag.contains("Mickey")  // false
 
 지금까지는 Bag 타입이 Sequence 프로토콜을 채택하기 위해 BagIterator를 구현했습니다.
 
-하지만 BagIterator를 따로 구현하지 않고 Bag 타입이 Sequence 프로토콜을 채택하고 makeIterator() 함수를 구현하도록 할 수 있습니다.
-그 방법은 AnyIterator에 있습니다.
+하지만 AnyIterator를 사용하면 BagIterator를 따로 구현하지 않고도 Bag 타입이 Sequence 프로토콜을 채택하고 makeIterator() 함수를 구현하도록 할 수 있습니다.
 
 AnyIterator를 사용하면 Bag 타입에 Sequence 프로토콜을 채택하기 위해서 추가적으로 구현했던 BagIterator를 만들 필요가 없습니다.
 Sequence 프로포콜을 채택하면 구현해야할 makeIterator() 함수에서 AnyIterator<Element>를 리턴하면 됩니다.
@@ -605,7 +604,7 @@ AnyIterator는 type erased iterator입니다.
 
 ```swift
 extension Bag: Sequence {
-  func makeIterator() -> AnyIterator<Element> {
+  func makeIterator() -> AnyIterator<Element> {  // BagIterator 대신 AnyIterator<Element>을 사용합니다.
     var exhaustiveStore = store
 
     return AnyIterator<Element> {
@@ -624,13 +623,16 @@ extension Bag: Sequence {
 
 BagIterator와 같이 cumstom iterator를 대신해 AnyIterator를 사용하여 custom iterator를 위한 코드를 줄일 수 있습니다.
 
-우리 위에 Bag 객체를 정의할 때 array literal 구문과 비슷하게 정의하는걸 볼 수 있었습니다.
+Bag 객체를 정의할 때 array literal 구문과 비슷하게 정의하려 할 때가 있습니다.
+ExpressibleByArrayLiteral 프로토콜을 통해 Bag 객체를 array literal 구문과 비슷하게 정의할 수 있습니다.
 
 ```swift
+// array literal 구문과 비슷하게 Bag 객체 정의
 let colors: Bag = ["Green", "Green", "Blue", "Yellow", "Yellow", "Yellow"]
 ```
 
 위 코드와 같이 Bag 구조체에서 구현한 insert() 함수로 Bag에 요소를 넣는 것이 아닌 배열의 형태로 Bag 객체에 요소를 넣을 수 있습니다.
+
 하지만 이런 배열의 형태로 Bag 구조체에 요소를 넣기 위해서는 ExpressibleByArrayLiteral 프로토콜을 채택해야 합니다.
 ExpressibleByArrayLiteral 프로토콜을 통해 요소를 배열로 받는 생성자(init)를 제공받게 됩니다.
 
@@ -657,8 +659,8 @@ print(colors)
 Sequence 프로토콜은 Collection 프로토콜의 기반이 되는 프로토콜입니다.
 Collection 프로토콜은 Sequence 프로토콜의 서브 프로토콜입니다.
 
-Collection 프로토콜을 살펴보기 전에 Sequence 프로토콜을 사용해 계속해서 반복하는 iteration을 구현해 봅시다.
-infinite(무한한) sequence를 사용한 코드를 먼저 확인해 봅시다.
+Collection 프로토콜을 살펴보기 전에 Sequence 프로토콜을 사용해 무한히 반복하는 iteration을 구현해 봅시다.
+infinite(무한한) Sequence를 사용한 코드를 먼저 확인해 봅시다.
 
 ```swift
 let infiniteSequence = InfiniteSequence(["a", "b", "c"])
@@ -681,7 +683,8 @@ zip 함수 성격상 두 iterator 중 하나라도 모든 element를 소비했�
 위 코드는 infiniteSequence의 iteratore가 종료될 일은 없기 때문에 0부터 100까지 반복되고 종료되는 zip 함수입니다.
 
 그렇다면 무한한 sequence는 어떻게 구현할까요?
-next() 함수에서 sequence의 요소가 다음으로 넘어가는 기준을 구현할 수 있기 때문에 IteratorProtocol의 next() 함수에서 조건을 잘 구현해야 합니다.
+
+next() 함수에서 sequence의 요소가 다음으로 넘어가는 기준을 구현할 수 있기 때문에 IteratorProtocol의 next() 함수에서 무한한 iteration을 위한 조건을 구현해야 합니다.
 
 아래 코드로 살펴봅시다.
 
