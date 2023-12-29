@@ -113,17 +113,16 @@ makeIterator() 함수가 IteratorProtocol을 따르는 Iterator 타입을 리턴
 또한 Sequence 프로토콜의 Element 연관 값도 정의해야 하고 Iterator.Element의 타입도 Sequence 프로토콜의 Element 연관 값과 같아야 합니다.
 
 Sequence 프로토콜에는 많은 유용한 함수들이 정의되어 있습니다.
-filter, map, reduce, flatMap, forEach, dropFrist, contains 등 Sequence 프로토콜에서 제공하는 함수는 여러 가지가 있습니다.
+filter, map, reduce, flatMap, forEach, dropFrist, contains 등 Sequence 프로토콜에서 여러가지 함수를 제공합니다.
 
 Sequence 프로토콜을 따르는 스위프트 내장 데이터 타입 외에도 커스텀 타입에 Sequence 프로토콜을 채택하여 Sequence 프로토콜이 제공하는 
 함수들을 커스텀 타입에도 적용할 수 있습니다.
-물론 커스텀 타입이 Sequence 프로토콜의 연관 값과 makeIterator() 함수를 모두 구현해야 합니다.
+물론 커스텀 타입이 Sequence 프로토콜의 연관 값 Element, Iterator와 makeIterator() 함수를 모두 구현해야 합니다.
 이 과정에서 Sequence 프로토콜의 연관 값 Iterator를 위해 IteratorProtocol을 따르는 커스텀 타입 Iterator가 필요합니다.
 
 ## The powers of Sequence
 
-Sequence 프로토콜은 유용한 함수들을 제공합니다.
-이 함수 중 필수적으로 알아야 할 함수들을 살펴봅시다.
+지금부터 Sequence 프로토콜이 제공하는 몇 가지 함수들을 살펴봅시다.
 
 **filter**
 
