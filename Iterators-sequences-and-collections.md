@@ -362,8 +362,7 @@ let results = grades.reduce([:]) { (results: [Character: Int], grade: Double) in
 위와 같이 반복적인 복사는 성능 저하로 이어집니다.
 
 그에 반해 reduce(into:) 함수는 reduce 함수와 첫 번째 초기값을 받는 매개변수는 동일하지만, 두 번째 매개변수에 inout 키워드가 
-추가되었고 리턴 값이 사라졌습니다.
-리턴 값 없이 inout 키워드가 붙은 Result 값을 변경하며 최종값에 도달합니다.
+추가되었고 클로저의 리턴 값이 없습니다. 리턴 값 없이 inout 키워드가 붙은 Result 값을 변경하며 최종값에 도달합니다.
 
 reduce(into:_:)의 가장 큰 차이는 클로저의 첫 번째 파라미터가 inout 파라미터라는 점입니다.
 즉, initialResult로 전달받은 값을 클로저안에서 직접 변경할 수 있고 두 번째 클로저의 Result 또한 변경할 수 있습니다.
@@ -384,9 +383,11 @@ let results = grades.reduce([:]) { (results: inout [Character: Int], grade: Doub
 }
 ```
 
+iteration 때마다 딕셔너리의 복사본을 만들면 성능 측면에서도 떨어지게 됩니다.
 배열이나 딕셔너리와 같은 값 타입과 reduce 함수를 사용할 때는 into 키워드를 함께 사용해 성능을 높입시다.
 
 reduce 함수 사용을 추천하는 이유는 명백합니다.
+
 for loop을 사용할 경우 for 구문 안의 코드를 읽어야 for 구문의 목적을 알 수 있습니다.
 하지만 reduce 함수를 사용하면 그 자체로 sequence를 순회하며 새로운 누적값을 생성한다는 사실을 알 수 있습니다.
 또한 간결한 코드를 구현할 수 있습니다.
@@ -414,11 +415,11 @@ for (integer, string) in zip(0..<10, ["a", "b", "c"]) {
 ## Creating a generic data structure with Sequence
 
 이제는 Sequence 프로토콜을 따르는 커스텀 타입을 만들어 봅시다.
-
 자료구조 중 'Bag' 자료구조를 직접 구현해볼 생각입니다.
-Bag을 만들 때, Sequence 프로토콜과 IteratorProtocol을 사용해 Bag 자료구조에 iteration을 제공하고 다양한 함수를 제공하려 합니다.
 
-Bag은 Set과 비슷하게 정렬되지 않는 상태로 존재하며 요소를 추가하고 조회할 수 있습니다.
+Bag을 만들 때, Sequence 프로토콜과 IteratorProtocol을 사용해 Bag 자료구조에 iteration을 제공하고 유용한 IteratorProtocol의 함수를 Bag 타입에 제공하려 합니다.
+
+Bag은 Set과 비슷하게 정렬되지 않는 상태로 데이터를 저장하며 요소를 추가하고 조회할 수 있습니다.
 하지만 Set과 달리 동일한 요소를 중복해서 Bag에 넣을 수 있습니다.
 
 아래 코드로 확인해 봅시다.
@@ -448,12 +449,14 @@ print(anotherBag)
 
 이처럼 Bag 자료구조에는 동일한 요소를 중복해서 넣을 수 있습니다.
 그렇다면 Bag 자료구조에서 동일한 요소가 중복해서 들어올 경우 어떤 동작이 일어날까요?
-Bag 자료구조에서는 동일한 요소일 경우 실제 객체로 동일한 요소를 중복해서 저장하지 않고 객체의 counter를 갱신하여 최적화합니다.
-Bag의 element 각각에 counter가 존재하고 counter가 0이 되었을 때 해당 element는 삭제됩니다.
 
-중복되는 객체를 Bag에 저장하기보다 객체의 counter를 통해 중복되는 객체를 관리했을 때 메모리 사용량 측면에서 이점이 있습니다.
+Bag 자료구조에서는 동일한 요소가 저장될 경우 실제 객체로 동일한 요소를 중복해서 저장하지 않고 객체의 counter를 갱신합니다.
+Bag의 element 각각에는 counter가 존재하고 counter가 0이 되었을 때 해당 element는 삭제됩니다.
+
+중복되는 객체를 Bag에 실제로 저장하기보다 객체의 counter를 통해 중복되는 객체를 관리했을 때 메모리 사용량 측면에서 이점이 있습니다.
 
 또한 Bag은 Set과 마찬가지로 제네릭 타입입니다.
+
 따라서 Hashable 프로토콜을 따르는 모든 타입이 Bag에 들어올 수 있습니다.
 물론 여러 타입을 하나의 Bag에 섞어서 저장 할 수 없습니다.
 
@@ -480,11 +483,14 @@ struct Bag<Element: Hashable> {
 }
 ```
 
-Bag의 저장되는 요소들을 관리하는 store 변수를 딕셔너리로 만들어 Element에 대응하는 Int가 Element의 개수를 관리는 counter의 역할을 합니다.
+Bag의 저장되는 요소들을 관리하는 store 변수를 딕셔너리로 만들어 
+Element에 대응하는 Int가 Element의 개수를 관리는 counter의 역할을 합니다.
+
 또한 store 변수가 딕셔너리로 값 타입이기 때문에 store 변수의 값을 다루는 함수인 insert와 remove는 mutating 키워드를 붙여야 합니다.
 
-우리 Bag 타입을 출력할 때 출력 형식을 커스텀하고 싶을 때가 있습니다.
-이때 CustomStringConvertible 프로토콜을 Bag 타입에 채택하여 출력(print) 형식을 커스텀할 수 있습니다.
+만약 Bag 타입을 출력할 때 출력 형식을 커스텀하고 싶다면 CustomStringConvertible 프로토콜을 사용할 수 있습니다.
+CustomStringConvertible 프로토콜을 Bag 타입에 채택하여 출력(print)형식을 커스텀할 수 있습니다.
+
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -507,17 +513,22 @@ print(anotherBag)
 // 3.0 occurs 3 times
 ```
 
-CustomeStringConvertible 프로토콜의 description 프로퍼티를 커스텀하면 Bag 타입을 출력(print)할 때 해당 description에 맞춰 출력됩니다.
+CustomeStringConvertible 프로토콜의 description 프로퍼티를 커스텀하면 
+Bag 타입을 출력(print)할 때 해당 description에 맞춰 출력됩니다.
 
 지금까지 Bag 타입을 구현했습니다.
+
 하지만 Sequence 프로토콜을 채택하지 않은 상태의 Bag 타입에서 iteration을 진행할 수 없습니다.
+
 Sequence 프로토콜을 Bag 타입에 채택하기 위해서는 Bag 타입을 위한 iterator가 필요합니다.
 당연히 Bag 타입을 위한 iterator 또한 IteratorProtocol을 따르는 iterator이어야 합니다.
 
-IteratorProtocl을 채택한 iterator가 element를 생성하기 위해서 iterator로 Bag 타입의 store 객체의 복사본을 전달해야 합니다.
-iterator는 store의 복사본을 다루기 때문에 iterator에서 복사본에 변형을 가해도 실제 Bag 객체의 store 변수에는 영향을 미치지 않습니다.
+IteratorProtocl을 채택한 iterator가 element를 생성하기 위해서는 iterator로 Bag 타입 객체(store)의 복사본을 전달해야 합니다.
+iterator는 Bag 타입 객체(store)의 복사본을 다루기 때문에 iterator에서 복사본 store에 변형을 가해도
+실제 Bag 객체의 store 변수에는 영향을 미치지 않습니다.
 
 위에서 이야기했듯이 Bag 자료구조는 중복되는 요소를 입력받지만 이를 실제 메모리를 사용하며 저장하지 않고 counter로 요소를 관리합니다.
+
 따라서 Bag 타입의 iterator에서도 element의 counter를 보고 counter가 관리하는 수 만큼의 요소를 리턴하게 됩니다.
 IteratorProtocol을 채택한 iterator에서 next() 함수를 통해 sequence를 순회하며 요소를 리턴하고 counter를 줄입니다.
 특정 요소의 counter가 0이 된다면 nil을 리턴하게 됩니다.
@@ -535,6 +546,7 @@ public protocol IteratorProtocol {
 
 // BagIterator 구현부입니다.
 struct BagIterator<Element: Hashable>: IteratorProtocol {
+  // Bag의 복사본을 store 변수에 저장해야 합니다.
   var store = [Element: Int]()
 
   mutating func next() -> Element? {
@@ -556,6 +568,7 @@ BagIterator의 store 딕셔너리에 Bag의 store 딕셔너리의 복사본을 �
 
 BagIterator를 구현했다면, 이제 Bag 타입에 Sequence 프로토콜을 채택할 준비가 되었습니다.
 Sequence 프로토콜을 채택하면 makeIterator() 함수를 필수로 구현해야 합니다.
+
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -567,10 +580,10 @@ extension Bag: Sequence {
 ```
 
 위의 makeIterator() 함수의 구현부에서 BagIterator(store: store)를 리턴하는데 Bag 타입이 가진 store 프로퍼티의 복사본을 BagIterator로 전달하는 것입니다.
+
 값 타입 store의 복사본을 전달하기 때문에 BagIterator에서 store 값을 변경하더라도 Bag 타입의 store 프로퍼티에는 영향을 미치지 않습니다.
 
-이제 Bag 타입이 Sequence 프로토콜을 채택했기 때문에 Sequence 프로토콜이 제공하는 filter, lazy, reduce, contains 함수들을 Bag 타입 객체에 적용할 수 있습니다.
-아래 코드는 Bag 타입에 Sequence 프로토콜에서 제공하는 함수를 적용한 코드입니다.
+이제 Bag 타입이 Sequence 프로토콜을 채택했기 때문에 Sequence 프로토콜이 제공하는 filter, lazy, reduce, contains 함수들을 Bag 타입 객체에 적용할 수 있습니다. 아래 코드는 Bag 타입에 Sequence 프로토콜에서 제공하는 함수를 적용한 코드입니다.
 
 ```swift
 bag.filter { $0.count > 2 }
@@ -580,6 +593,7 @@ bag.contains("Mickey")  // false
 ```
 
 지금까지는 Bag 타입이 Sequence 프로토콜을 채택하기 위해 BagIterator를 구현했습니다.
+
 하지만 BagIterator를 따로 구현하지 않고 Bag 타입이 Sequence 프로토콜을 채택하고 makeIterator() 함수를 구현하도록 할 수 있습니다.
 그 방법은 AnyIterator에 있습니다.
 
