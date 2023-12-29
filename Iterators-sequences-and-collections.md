@@ -227,7 +227,7 @@ func increment(x: Int) -> Int {
 }
 
 let array = Array(0..<10)
-let incArray = array.map(increment)
+let incArray = array.map(increment)  // 여기 이미 increment 함수가 계산됩니다.
 print("Result: ")
 print(incArray[0], incArray[4])
 
@@ -259,21 +259,15 @@ func increment(x: Int) -> Int {
 }
 
 let array = Array(0..<10000)
-let incArray = array.lazy.map(increment)
+let incArray = array.lazy.map(increment)  // lazy 키워드에 의해 여기서 increment 함수가 계산되지 않습니다.
 print("Result: ")
-print(incArray[0], incArray[4])
+print(incArray[0], incArray[4])  // 여기서 increment 함수가 계산됩니다.
 
 // Output:
 Result: 
 Computing next value of 0
 Computing next value of 4
 1 5
-```
-
-lazy 키워드를 사용하면 아래 코드를 만나도 계산하지 않습니다.
-
-```swift
-let incArray = array.lazy.map(increment)
 ```
 
 lazy 키워드 성격 그대로 incArray에 접근할 때 계산을 시작합니다.
@@ -294,11 +288,13 @@ reduce 함수는 sequence의 element를 순회하며 특정 값을 누적하고,
 func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) throws -> Result) rethrows -> Result
 ```
 
-먼저 제네릭 함수임을 알 수 있습니다.
+먼저 reduce 함수가 제네릭임을 알 수 있습니다.
 
-reduce 함수의 매개변수로 initialResult과 nextPartialResult를 받고 있습니다.
-initialResult은 초기값으로 사용할 값을 넣으면 클로저가 처음 실행될 때, nextPartialResult 에 전달됩니다.
+reduce 함수의 매개변수로 변수 initialResult와 클로저 nextPartialResult를 입력 받습니다.
+initialResult는 초기값으로 사용할 값을 넣으면 클로저가 처음 실행될 때, nextPartialResult의 Result에 전달됩니다.
 그리고 nextPartialResult은 컨테이너의 요소를 새로운 누적값으로 결합하는 클로저입니다.
+
+reduce 함수의 iteration이 진행되며 발생되는 Element가 nextPartialResult 클로저의 Element로 넘어오고 이전의 클로저에서 리턴하는 값이 nextPartialResult 클로저의 Result로 넘어옵니다.
 
 두 번째 파라미터로 전달된 클로저를 좀 더 자세히 보겠습니다.
 클로저의 첫 번째 파라미터는 initialResult로 전달받은 초기값 또는 이전 클로저가 반환하는 return 값이 전달됩니다.
@@ -324,28 +320,34 @@ let numberOfLineBreaks = text.reduce(startValue) { (accumulation: Int, char: Cha
 
 **reduce into**
 
-먼저 reduce 함수와 reduce(into:) 함수의 정의부를 모두 확인해 봅시다.
+먼저 reduce 함수와 reduce(into:) 함수의 정의부를 모두 확인하고 비교해 봅시다.
 
 ```swift
-func reduce<Result>(_ initialResult: Result, _ nextPartialResult: (Result, Element) throws -> Result) rethrows -> Result
-func reduce<Result>(into initialResult: Result, _ updateAccumulatingResult: (inout Result, Element) throws -> ()) rethrows -> Result
+func reduce<Result>(
+  _ initialResult: Result,
+  _ nextPartialResult: (Result, Element) throws -> Result
+) rethrows -> Result
+
+func reduce<Result>(
+  into initialResult: Result,
+  _ updateAccumulatingResult: (inout Result, Element) throws -> ()  // reduce(into:)가 reduce()와 다른 부분입니다.
+) rethrows -> Result
 ```
 
 reduce 함수는 두 가지 형태로 사용됩니다.
-위에서 보았듯이 기본적인 reduce 함수 그리고 reduce(into:) 함수가 있습니다.
-reduce 함수의 초기값으로 값 타입이 들어온다면 reduce(into:) 함수를 사용합시다.
+
+위에서 보았듯이 기본적인 reduce 함수 그리고 reduce(into:) 함수 형태로 사용할 수 있습니다.
+초기값으로 값 타입이 들어온다면 reduce(into:) 함수를 사용합시다.
 
 reduce 함수의 두 번째 매개변수인 클로저의 Result는 immutable 합니다.
-따라서 reduce 함수에서는 Array, Dictionary 등 값 타입을 직접 수정할 수 없기 때문에 새로운 변수로 copy 한 다음에 
-그 값을 변경하고 사용해야 하는 번거로움이 있습니다.
+따라서 reduce 함수의 nextPartialResult 클로저로 들어오는 Result가 Array, Dictionary 등 값 타입으로 들어오면 직접 수정할 수 없기 때문에 mutable한 변수(var)로 복사 후 계산하고 리턴해야 하는 번거로움이 있습니다.
 
-reduce 함수로 값 타입 변수를 초기값으로 받았을 때 immutable 한 reduce의 두 번째 Result를 mutable 한 변수로 복사해야 합니다.
-아래 코드로 살펴봅시다.
+아래 코드로 reduce() 함수에 값 타입이 들어온 상황을 먼저 살펴봅시다.
 
 ```swift
 let grades = [3.2, 4.2, 2.6, 4.1]
 let results = grades.reduce([:]) { (results: [Character: Int], grade: Double) in
-  var copy = results
+  var copy = results  // results가 딕셔너리 타입이기 때문에 var 변수로 results를 복사해서 사용해야 합니다.
   switch grade {
   case 1..<2: copy["D", default: 0] += 1
   case 2..<3: copy["C", default: 0] += 1
