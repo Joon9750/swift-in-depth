@@ -13,8 +13,8 @@
 
 먼저 스위프트에서 데이터 순회(iteration)가 내부적으로 어떻게 동작하는지 살펴봅시다.
 
-쉽게 생각해서 for loop을 사용할 때마다 우린 iterator를 사용하는 것입니다.
-아래 코드처럼 우린 for loop을 사용합니다.
+쉽게 생각하면 for loop을 사용할 때마다 우린 iterator를 사용하는 것입니다.
+아래 코드는 for loop을 사용한 일반적인 데이터 순회 방식입니다.
 
 ```swift
 let cheeses = ["Gouda", "Camembart", "Brie"]
@@ -26,8 +26,7 @@ for cheese in cheeses {
 
 하지만 놀랍게도 for in 구문은 syntactic sugar입니다.
 
-실제로는 makeIterator() 함수로 iterator를 생성하고, while loop 안에서 iterator의 next() 함수를 반복합니다.
-아래 코드로 살펴봅시다.
+for loop을 사용하면 내부적으로 makeIterator() 함수에 의해 iterator가 생성되고, while loop 안에서 iterator의 next() 함수를 반복합니다. 아래 코드는 for loop의 내부적인 동작 방식입니다.
 
 ```swift
 var cheeseItertor = cheeses.makeIterator()
@@ -36,19 +35,23 @@ while let cheese = cheeseIterator.next() {
 }
 ```
 
-cheese 객체에서 makeIterator() 함수를 호출할 수 있는 이유는 cheese 객체가 배열로 Sequence 프로토콜을 따르기 때문입니다.
+cheese 객체에서 makeIterator() 함수를 호출할 수 있는 이유가 무엇일까요?
+cheese 객체가 Sequence 프로토콜을 따르는 Array 타입이기 때문입니다.
 
 makeIterator() 함수는 데이터 순회에 사용되는 iterator를 생성하는 함수로 Sequence 프로토콜에 선언되어 있습니다.
 Sequence 프로토콜을 살펴보기 전에 Sequence 프로토콜과 관련된 IteratorProtocol을 먼저 살펴봅시다.
 
-IteratorProtocol은 Element라고 명명한 연관 값을 갖고 Optional(Element) 데이터 타입을 리턴하는 next() 함수를 가지고 있습니다.
-IteratorProtocol의 이름만 봐도 알 수 있듯이 Iterator의 형태를 정의해둔 프로토콜입니다.
-Sequence 프로토콜이 가진 Iterator도 IteratorProtocol을 따르도록 구현해 두었습니다.
+**IteratorProtocol**
 
-Iterator는 데이터를 순회하며 Element를 하나씩 생성합니다.
+IteratorProtocol은 연관 값 Element와 Optional(Element) 데이터 타입을 리턴하는 next() 함수를 가지고 있습니다.
+IteratorProtocol의 이름만 봐도 알 수 있듯이 Iterator의 형태를 정의한 프로토콜입니다.
+Sequence 프로토콜이 프로퍼티로 가진 Iterator도 IteratorProtocol을 따르도록 정의하고 있습니다.
 
-아래 코드는 IteratorProtocol 코드입니다.
-IteratorProtocl을 채택하는 타입이라면 next() 함수를 필수로 구현해야 합니다.
+Iterator는 데이터를 순회(iteraion)하며 Element를 하나씩 생성합니다.
+
+아래 코드는 IteratorProtocol 정의부입니다.
+IteratorProtocol을 채택하는 타입이라면 next() 함수를 필수로 구현해야 합니다.
+또한 연관 값 Element에 대한 선언도 필수적입니다.
 
 ```swift
 public protocol IteratorProtocol {
@@ -68,13 +71,15 @@ print(groceriesIterator.next())  // nil
 print(groceriesIterator.next())  // nil
 ```
 
-next() 함수가 Element?을 리턴하고 있습니다. 
-옵셔널로 감싼 Element를 리턴하는 이유는 iterator가 모든 Element를 순회했을 때 iterator가 비었을 때 nil을 리턴하기 위함입니다.
+위의 코드에서 next() 함수가 Element? 타입을 리턴하고 있습니다. 
+next() 함수가 옵셔널로 감싼 Element를 리턴하는 이유는 iterator가 모든 Element를 순회하여 iterator가 비었을 때 nil을 리턴하기 위함입니다.
 
-위에서 살펴본 IteratorProtocol과 관련이 깊은 Sequence 프로토콜을 살펴봅시다.
+이제는 위에서 살펴본 IteratorProtocol과 관련이 깊은 Sequence 프로토콜을 살펴봅시다.
 
-Sequence 프로토콜은 굉장히 자주 쓰입니다.
-Sequence 프로토콜이 Iterate의 기반이라고 생각될 정도입니다.
+**Sequence**
+
+Sequence 프로토콜은 개발하며 굉장히 자주 쓰입니다.
+Sequence 프로토콜이 데이터 순회의 기반이라고 생각될 정도입니다.
 또한 나중에 살펴볼 Collection 프로토콜의 부모 프로토콜입니다.
 
 Array, Set, String, Dictionary 등이 Collection 프로토콜을 따르기 때문에 Collection 프로토콜의 부모 프로토콜인 Sequence 프로토콜도 따르게 됩니다.
