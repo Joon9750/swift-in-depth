@@ -1113,7 +1113,7 @@ fruits.forEach { (fruit) in
 }
 ```
 
-아래 링크는 Sequence, Collection 등 잘 정리된 글이니 한 번 읽어봅시다.
+아래 링크는 Sequence, Collection 등 잘 정리된 글이니 참고해 봅시다.
 
 https://itwenty.me/posts/04-swift-collections/
 
