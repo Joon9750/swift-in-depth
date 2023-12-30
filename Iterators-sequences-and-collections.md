@@ -908,16 +908,17 @@ zip(repeatElement("Mr. Sniffles", count: 3), repeatElement(100, count:3)).forEac
 
 ## Creating a collection
 
-보통 개발을 하다 보면 Collection 프로토콜을 따르는 Set, Array 등 스위프트에서 제공하는 데이터 타입을 자주 활용합니다.
-직접 Collection 프로토콜을 따르는 커스텀 타입을 만들 일은 많지 않습니다.
-하지만 Collection 프로토콜을 따르는 커스텀 타입을 만들어 보며 Collection 프로토콜에 대해 더 살펴봅시다.
- 
-지금부터 TravelPlan이라 불리는 데이터를 구현해 볼 것입니다.
-TravelPlan은 여러 활동이 담긴 하루(day)들의 Sequence입니다.
-예를 들어 Florida에 방문하는 TravelPlan이라면 밥을 먹고 박물관에 가는 등 여러 활동이 포함될 수 있습니다.
+개발을 하다 보면 Collection 프로토콜을 따르는 Set, Array 등 스위프트에서 제공하는 데이터 타입을 자주 활용합니다.
 
-또한 TravelPlan 데이터로 iteration이 가능하고 idexing도 지원하기 위해 Collection 프로토콜을 채택한 TravelPlan 데이터 타입을 만들려 합니다.
-먼저 Activity 데이터와 Day 데이터를 구현해 봅시다.
+하지만 Collection 프로토콜을 따르는 커스텀 타입을 직접 만들 수 있습니다.
+지금부터 TravelPlan이라 불리는 Collection 프로토콜을 따르는 데이터 타입을 구현해 봅시다.
+
+TravelPlan은 여러 활동이 담긴 하루(day)들의 Sequence입니다.
+예를 들어 Florida에 방문하는 TravelPlan이라면 하루 일정에 밥을 먹고 박물관에 가는 등 여러 활동이 포함될 수 있습니다.
+
+또한 TravelPlan 데이터 타입에서 iteration이 가능하고 idexing도 지원하기 위해서는 Collection 프로토콜을 채택해야 합니다.
+
+먼저 TravelPlane의 일부로 쓰일 Activity 데이터와 Day 데이터를 구현해 봅시다.
 
 ```swift
 struct Activity: Equatable {
@@ -941,12 +942,12 @@ struct Day: Hashable {
 ```
 
 TravelPlan 데이터 타입에서 Day를 딕셔너리의 key로 사용하기 위해 Day 데이터 타입에 Hashable 프로토콜을 채택했습니다.
-TravelPlan에서 Day를 key로 Activity들을 value로 사용할 것입니다.
+TravelPlan에서 DataType이라 불리는 타입을 key로 Day 타입을 value로 [Activity] 타입을 가진 딕셔너리로 만들었습니다.
 
 아래 코드는 TravelPlan을 구현한 코드입니다.
 
 ```swift
-struct TravelPlane {
+struct TravelPlan {
   typealias DataType = [Day: [Activity]]
 
   private var trips = DataType()
@@ -959,8 +960,11 @@ struct TravelPlane {
 }
 ```
 
-이제는 TravelPlane 데이터 타입에 iteration과 indexing을 제공하기 위해 Collection 프로토콜을 채택하려 합니다.
-그전에 Collection 프로토콜의 정의부를 확인해 봅시다.
+아직 TravelPlan 데이터 타입을 가지고 iteration이나 indexing을 사용할 수 없습니다.
+
+Collection 프로토콜을 채택하여 iteration과 indexing을 제공하려 합니다.
+
+그전에 Collection 프로토콜의 정의부를 확인하고 커스텀 타입이 Collection 프로토콜을 채택했을 때 필수로 구현해야 할 부분을 살펴봅시다.
 
 ```swift
 protocol Collection: Sequence {
@@ -973,7 +977,8 @@ protocol Collection: Sequence {
 }
 ```
 
-Collection 프로토콜을 커스텀 타입에 채택하기 위해서는 startIndex와 endIndex 변수를 구현해야 하고 index(after:) 함수와 subscript(index:) 함수를 필수로 구현해야 합니다.
+Collection 프로토콜을 커스텀 타입에 채택하기 위해서는 위 코드에 보이는 startIndex와 endIndex 변수를 구현해야 하고 index(after:) 함수와 subscript(index:) 함수를 필수로 구현해야 합니다.
+
 아래 코드는 TravelPlan 타입에 Collection 프로토콜을 채택하고 필수 구현 변수와 함수들을 구현한 코드입니다.
 
 ```swift
@@ -995,8 +1000,9 @@ extension TravelPlan: Collection {
 ```
 
 이제 TravelPlan 타입이 Collection 프로토콜까지 채택했기 때문에 iteration과 indexing 모두 가능합니다.
-또한 Collection 프로토콜에서 makeIterator() 함수를 통해 IndexingIterator도 제공하고 있습니다.
-TravelPlan 타입의 커스텀 Iterator 없이 IndexingIterator를 얻을 수 있습니다.
+
+또한 Collection 프로토콜에서 제공하는 makeIterator() 함수를 통해 IndexingIterator를 생성할 수 있습니다.
+다시 말해 TravelPlan 타입의 커스텀 Iterator 없이 TravelPlan 타입을 순회할 IndexingIterator를 얻을 수 있습니다.
 
 ```swift
 // A default Iterator
@@ -1010,11 +1016,13 @@ for (day, activities) in travelPlan {
 ```
 
 Collection 프로토콜을 따르면 subscript 능력을 갖추게 됩니다.
+
 [] 대괄호 안에 index를 넣어줘서 멤버 요소에 접근하는 것이 subscript입니다.
 배열의 서브스크립트는 parameter로 Int형을 index로 받고, 해당 index에 해당하는 Element를 반환하는 형태입니다.
 또한 딕셔너리의 서브스크립트는 Prameter로 Key를 받고, 해당 Key에 해당하는 Value를 반환하는 형태입니다.
 
 그렇다면 커스텀 서브스크립트를 TravelPlan 타입에 구현해 봅시다.
+
 아래 코드를 확인해 봅시다.
 
 ```swift
@@ -1036,13 +1044,16 @@ travelPlan[day]
 ```
 
 위 코드와 같이 subscript 함수를 구현하여 서브스크립트 또한 커스텀 가능합니다.
+
 아래 링크도 참고해 봅시다.
 
 https://babbab2.tistory.com/123
 
 마지막으로 ExpressibleByDictionaryLiteral 프로토콜을 살펴보겠습니다.
+
 앞에서 보았던 ExpressibleByArrayLiteral 프로토콜과 비슷한 개념의 프로토콜입니다.
 ExpressibleByDictionaryLiteral 프로토콜을 채택하면 생성자에 여러 요소를 넣을 수 있도록 합니다.
+
 아래 코드로 살펴봅시다.
 
 ```swift
@@ -1064,7 +1075,7 @@ let adrenalineActivities = [
 let adrenalinePlan = [adrenalineTrip: activites]  // You can now create a TravelPlan from a dictionary!!
 ```
 
-그렇다면 아래 Fruits 타입에 Collection 프로토콜을 채택해 봅시다.
+그렇다면 아래 Fruits 타입에 Collection 프로토콜을 채택해 봅시다. (연습문제)
 
 ```swift
 struct Fruits {
