@@ -235,7 +235,9 @@ map을 사용할 때 계속해서 기억해야 하는 부분은 map에서 새로
 
 ## Mapping over optionals
 
+Optional에서도 map을 사용할 수 있습니다.
 
+배열 mapping 하는 것은 배열의 값들을 변환하지만 Optional을 mapping 하는 것은 단일 값을 변환합니다.
 
 
 
