@@ -212,7 +212,30 @@ mapValues에서는 Key 값은 유지되고 새로운 Value만을 부여하게 �
 
 ## Mapping over sequences
 
+You saw before how you could map over Array and Dictionary types. These types implement a Collection and Sequence protocol.
 
+map을 사용할 때 계속해서 기억해야 하는 부분은 map에서 새로운 Array를 리턴한다는 사실입니다.
+
+아래 코드는 Range Sequence와 map을 함께 사용하여 mock data를 만드는 코드입니다.
+
+```swift
+let names = [
+  "John",
+  "Mary",
+  "Elizabath"
+]
+let nameCount = names.count
+
+let generatedNames = (0..<5).map { index in
+  return names[index % nameCount]
+}
+
+print(generatedNames)  // ["John", "Mary", "Elizabath", "John", "Mary"]
+```
+
+위 코드처럼 Range Sequence와 map을 함께 사용해 mock data를 만들 수 있습니다.
+
+## Mapping over optionals
 
 
 
