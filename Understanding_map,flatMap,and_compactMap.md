@@ -155,22 +155,62 @@ print(commitsDict)  // ["Miranda": 30, "Elly": 650, "John": 0]
 ```
 
 위의 코드처럼 Dictionary를 생성할 때 uniqueKeysWithValues를 사용해 튜플 배열을 딕셔너리로 변환할 수 있습니다.
-하지만 딕셔너리의 Key로 사용될 값이 동일하게 두 개 이상인 튜플 배열의 경우 uniqueKeysWithValues를 통한 딕셔너리로 변환에 런타임 에러가 발생합니다.
 
 [(name: "Miranda", counts: 30), (name: "Miranda", counts: 30) ...] 
 
+하지만 위와 같이 딕셔너리의 Key로 사용될 값이 동일하게 두 개 이상인 튜플 배열의 경우 uniqueKeysWithValues를 통한 딕셔너리로 변환에 런타임 에러가 발생합니다.
+이런 경우 uniqueKeysWithValues가 아닌 uniquingKeysWith을 사용해 딕셔너리를 생성할 수 있습니다.
 
+아래 코드로 확인해 봅시다.
 
+```swift
+let arr = [("four", 4), ("three", 3), ("own", 1), ("two", 2), ("own", 10)]
 
+var dic = Dictionary(arr, uniquingKeysWith: +)
+// [“four": 4, "three": 3, "own": 11, "two": 2]
 
+dic.merge([("two", 20)], uniquingKeysWith: +)
+// ["four": 4, "three": 3, "own": 11, "two": 22]
+```
 
+튜플 배열을 uniqueKeysWithValues로 딕셔너리 객체를 만들었다면, 딕셔너리에 map을 사용하여 mapping하는 코드를 살펴 봅시다.
 
+```swift
+print(commitsDict)  // ["Miranda": 30, "Elly": 650, "John": 0]
 
+let mappedKeysAndValues = commitsDict.map { (name: String, count: Int) -> String in
+  switch count {
+  case 0: return "\(name) isn't involved in the project."
+  case 1..<100: return "\(name) isn't very active on the project."
+  default: return "\(name) is active on the project"
+  }
+}
 
+print(mappedKeysAndValues)  // ["Miranda isn't very active on the project", "Elly is active on the project", ...]
+```
 
+map을 딕셔너리와 함께 사용하면 위 코드와 같이 딕셔너리 요소의 key, value를 한 번에 클로저로 넘깁니다.
+또한 딕셔너리 요소의 value 값만을 클로저로 넘길 수도 있습니다.
+이때 우리는 map을 대신해서 mapValues를 사용하게 됩니다.
 
+아래 코드로 확인해 봅시다.
 
+```swift
+let mappedValues = commitsDict.mapValues { (count: Int) -> String in
+  switch count {
+  case 0: return "Not involved in the project."
+  case 1..<100: return "Not very active on the project."
+  default: return "Is active on the project"
+  }
+}
 
+print(mappedValues)  // ["Miranda": "Not very active on the project.", "Elly": "Is active on the project,...]
+```
+
+위 코드에서 볼 수 있듯이 map에서는 배열을 리턴하지만 mapValues에서는 딕셔너리를 리턴하고 있습니다.
+mapValues에서는 Key 값은 유지되고 새로운 Value만을 부여하게 됩니다.
+
+## Mapping over sequences
 
 
 
