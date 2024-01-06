@@ -139,8 +139,25 @@ for loop에서는 break, continue 키워드를 사용해 순회를 멈출 수 �
 
 배열과 동일하게 딕셔너리 타입에도 map 함수를 적용할 수 있습니다.
 
+커밋한 데이터를 튜플 배열로 저장하고 있을 때 튜플 배열을 딕셔너리로 변환하고, map을 사용해 딕셔너리의 value에 따라 새로운 문자열 배열로 변환해 보겠습니다.
 
+먼저 uniqueKeysWithValues를 사용해 튜플 배열을 딕셔너리로 쉽게 변환할 수 있습니다.
+uniqueKeysWithValues는 딕셔너리에서 제공하는 기능으로 아래와 같이 사용할 수 있습니다.
 
+```swift
+let commitStats = [
+  (name: "Miranda", count: 30),
+  (name: "Elly", count: 650),
+  (name: "John", count: 0)
+]
+let commitsDict = Dictionary(uniqueKeysWithValues: commitStats)
+print(commitsDict)  // ["Miranda": 30, "Elly": 650, "John": 0]
+```
+
+위의 코드처럼 Dictionary를 생성할 때 uniqueKeysWithValues를 사용해 튜플 배열을 딕셔너리로 변환할 수 있습니다.
+하지만 딕셔너리의 Key로 사용될 값이 동일하게 두 개 이상인 튜플 배열의 경우 uniqueKeysWithValues를 통한 딕셔너리로 변환에 런타임 에러가 발생합니다.
+
+[(name: "Miranda", counts: 30), (name: "Miranda", counts: 30) ...] 
 
 
 
