@@ -392,7 +392,7 @@ The map abstraction is called a 'functor'.
 
 https://zeddios.tistory.com/449
 
-
+https://baked-corn.tistory.com/131
 
 
 
