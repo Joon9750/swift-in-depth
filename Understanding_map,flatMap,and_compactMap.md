@@ -273,7 +273,6 @@ class Cover {
 **When to use map on optionals**
 
 Imagine that you're creating a printing service where you can print out books with social media photos and their comments. 
-
 Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
 
 위의 상황을 만족하는 함수를 만들어 봅시다.
@@ -327,7 +326,6 @@ if let 안에서 removeEmojis 함수를 호출했고 마지막에 self.title 변
 우리는 위의 네 가지 과정을 옵셔널 mapping을 통해 확실히 줄일 수 있습니다.
 
 If you were to map over an optional, you'd apply the removeEmojis() function on the unwrapped value inside map(if there is one).
-
 If the optional is nil, the mapping operation is ignored!
 
 아래 코드는 옵셔널 mapping을 통해 위의 Cover 클래스의 코드를 개선한 코드입니다.
@@ -383,11 +381,16 @@ class Cover {
 
 ## map is an abstraction
 
+map은 어떤 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
+이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
 
+map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩니다.
 
+The map abstraction is called a 'functor'.
 
+아래 링크에서 context, functor, monad에 대해 알아봅시다.
 
-
+https://zeddios.tistory.com/449
 
 
 
