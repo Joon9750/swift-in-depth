@@ -408,10 +408,11 @@ https://baked-corn.tistory.com/131
 
 https://zeddios.tistory.com/449
 
+## Grokking flatMap
 
-
-
-
+flatMap은 스위프트에서 중요하게 쓰이는 함수입니다.
+flatMap은 map 연산 이후 flatten(평탄화) 연산을 추가로 진행합니다.
+여기서 말하는 평탄화 작업은 Optional(Optional(4))을 Optional(4)로 [[1,2,3],[1,2]]를 [1,2,3,1,2]로 중첩 구조를 푸는 것을 말합니다.
 
 
 
