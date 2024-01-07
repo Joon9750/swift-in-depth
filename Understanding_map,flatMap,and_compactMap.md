@@ -382,11 +382,11 @@ class Cover {
 ## map is an abstraction
 
 map은 어떤 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
-이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
 
+이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
 map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩니다.
 
-The map abstraction is called a 'functor'.
+The map abstraction is called a functor.
 
 우리는 컨테이너에 매핑(Mapping)이라는 연산을 수행할 수 있습니다.
 여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들도 일종의 컨테이너라고 할 수 있습니다.
