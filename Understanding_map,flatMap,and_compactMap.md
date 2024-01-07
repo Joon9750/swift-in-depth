@@ -388,11 +388,26 @@ map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩�
 
 The map abstraction is called a 'functor'.
 
-아래 링크에서 context, functor, monad에 대해 알아봅시다.
+우리는 컨테이너에 매핑(Mapping)이라는 연산을 수행할 수 있습니다.
+여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들도 일종의 컨테이너라고 할 수 있습니다.
+
+매핑은 내부 원소의 값의 변형만 일어납니다. 그 원소를 담고있는 컨테이너의 변형은 일어나지 않습니다.
+다시 말해, Array에 매핑 연산을 진행하였다고 Array가 Dictionary가 되는 컨테이너의 변형은 일어나지 않는다는 것입니다.
+
+이렇게 값에 변형을 매핑할 수 있는 모든 것들을 Functor라고 합니다.
+주목해야 할 점은 매핑으로 변형된 값은 다시 Functor로 감싼 후 반환된다는 것입니다!
+
+매핑에 쓰이는 대표적인 함수가 지금까지 알아봤던 map입니다.
+위에서 살펴봤던 옵셔널도 Functor의 한 종류인것 입니다.
+
+매핑으로 변형된 값이 다시 Functor로 감싼 후 반환되기 때문에 옵셔널을 매핑했을 때도 옵셔널로 감싼 후 반환됩니다.
+
+아래 글에서 context, functor, monad에 대해 알아봅시다.
+
+https://baked-corn.tistory.com/131
 
 https://zeddios.tistory.com/449
 
-https://baked-corn.tistory.com/131
 
 
 
