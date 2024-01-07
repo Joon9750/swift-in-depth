@@ -295,18 +295,59 @@ func isEmoji(_ scalar: Unicode.Scalar) -> Bool {
 removeEmojis 함수에서는 문자열 입력을 unicodeScalars 키워드를 통해 Scalar로 변환해서 이모지인지 아닌지 확인합니다.
 
 이제 옵셔널을 mapping 하는 방법을 살펴봅시다.
+
+아래와 같은 포토북 커버의 요구사항을 따르는 과정에서 옵셔널과 map을 사용하려 합니다.
+
 포토북의 커버는 항상 이미지를 가지고, 제목은 있을 수도 없을 수도 있습니다.
 여기서 제목 텍스트가 이모지를 가지고 있다면 앞에서 구현했던 removeEmojis 함수로 이모지를 삭제해야 합니다.
 
-아래 코드와 같이 포토북 커버를 생성하려 합니다.
+먼저 map 없이 포토북 커버 클래스를 구현해보겠습니다.
 
 ```swift
+class Cover {
+  let image: UIImage
+  let title: String?
 
+  init(image: UIImage, title: String?) {
+    self.image = image
+
+    var cleanedTitle: String? = nil
+    if let title = title {
+      cleanedTitle = removeEmojis(title)
+    }
+    self.title = cleanedTitle
+  }
+}
 ```
 
+옵셔널 title을 초기화하기 위해 임시 변수인 cleanTitle를 만들었고 if let을 통해 옵셔널 title을 언래핑했습니다.
+if let 안에서 removeEmojis 함수를 호출했고 마지막에 self.title 변수에 임시 변수인 cleanTitle 값을 넣었습니다.
 
+우리는 위의 네 가지 과정을 옵셔널 mapping을 통해 확실히 줄일 수 있습니다.
 
+If you were to map over an optional, you'd apply the removeEmojis() function on the unwrapped value inside map(if there is one).
+If the optional is nil, the mapping operation is ignored!
 
+아래 코드는 옵셔널 mapping을 통해 위의 Cover 클래스의 코드를 개선한 코드입니다.
+
+```swift
+class Cover {
+  let image: UIImage
+  let title: String?
+
+  init(image: UIImage, title: String?) {
+    self.image = image
+    self.title = title.map { (string: String) -> String in
+      return removeEmojis(string)
+    }
+  }
+}
+```
+
+title.map에서 map이 기본적으로 새로운 값을 리턴하기 때문에 더 이상 임시 변수를 선언할 필요가 없습니다.
+또한 title이 nil이었을 때 map 클로저로 nil이 넘어가지 않고 단순히 nil이 리턴됩니다.
+따라서 map 클로저로 넘어가는 모든 값들은 nil이 아닌 옵셔널 내부 값들입니다.
+이로 인해 map 클로저에서 추가적인 옵셔널 언래핑 과정이 필요 없습니다.
 
 
 
