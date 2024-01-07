@@ -275,8 +275,34 @@ class Cover {
 Imagine that you're creating a printing service where you can print out books with social media photos and their comments. 
 Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
 
+위의 상황을 만족하는 함수를 만들어 봅시다.
+옵셔널과 map을 함께 사용하기 전에 문자열에서 이모지를 지우는 removeEmojis 함수를 만들어 봅시다.
+아래 코드로 확인해 봅시다.
 
+```swift
+func removeEmojis(_ string: String) -> String {
+  var scalars = string.unicodeScalars
+  scalars.removeAll(where: isEmoji)
+  return String(scalars)
+}
 
+func isEmoji(_ scalar: Unicode.Scalar) -> Bool {
+  // 생략...
+  return true
+}
+```
+
+removeEmojis 함수에서는 문자열 입력을 unicodeScalars 키워드를 통해 Scalar로 변환해서 이모지인지 아닌지 확인합니다.
+
+이제 옵셔널을 mapping 하는 방법을 살펴봅시다.
+포토북의 커버는 항상 이미지를 가지고, 제목은 있을 수도 없을 수도 있습니다.
+여기서 제목 텍스트가 이모지를 가지고 있다면 앞에서 구현했던 removeEmojis 함수로 이모지를 삭제해야 합니다.
+
+아래 코드와 같이 포토북 커버를 생성하려 합니다.
+
+```swift
+
+```
 
 
 
