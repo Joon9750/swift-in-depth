@@ -273,6 +273,7 @@ class Cover {
 **When to use map on optionals**
 
 Imagine that you're creating a printing service where you can print out books with social media photos and their comments. 
+
 Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
 
 위의 상황을 만족하는 함수를 만들어 봅시다.
@@ -326,6 +327,7 @@ if let 안에서 removeEmojis 함수를 호출했고 마지막에 self.title 변
 우리는 위의 네 가지 과정을 옵셔널 mapping을 통해 확실히 줄일 수 있습니다.
 
 If you were to map over an optional, you'd apply the removeEmojis() function on the unwrapped value inside map(if there is one).
+
 If the optional is nil, the mapping operation is ignored!
 
 아래 코드는 옵셔널 mapping을 통해 위의 Cover 클래스의 코드를 개선한 코드입니다.
@@ -345,9 +347,44 @@ class Cover {
 ```
 
 title.map에서 map이 기본적으로 새로운 값을 리턴하기 때문에 더 이상 임시 변수를 선언할 필요가 없습니다.
+
 또한 title이 nil이었을 때 map 클로저로 nil이 넘어가지 않고 단순히 nil이 리턴됩니다.
-따라서 map 클로저로 넘어가는 모든 값들은 nil이 아닌 옵셔널 내부 값들입니다.
-이로 인해 map 클로저에서 추가적인 옵셔널 언래핑 과정이 필요 없습니다.
+map 클로저에서 추가적인 옵셔널 언래핑 과정이 필요 없이 옵셔널 내부 값을 사용할 수 있습니다.
+
+하지만 옵셔널을 mapping 했을 때 결과적으로 return 하는 값은 다시 옵셔널을 씌워서 리턴합니다.
+물론 nil은 Optional(nil)이 아닌 nil로 리턴됩니다.
+
+옵셔널과 map을 함께 사용할 때 조금 더 축약된 코드를 아래와 같이 쓸 수 있습니다.
+
+```swift
+self.title = title.map { removeEmojis($0) }
+```
+
+심지어 map에서 클로저를 생성하지 않고도 아래와 같이 사용할 수 있습니다.
+클로저를 생성하지 않기 때문에 {}가 아닌 ()를 사용합니다. 
+
+```swift
+self.title = title.map(removeEmojis)
+```
+
+결과적으로 아래와 같은 Cover 클래스를 구현할 수 있게 됩니다.
+
+```swift
+class Cover {
+  let image: UIImage
+  let title: String?
+
+  init(image: UIImage, title: String?) {
+    self.image = image
+    self.title = title.map(removeEmojis)
+  }
+}
+```
+
+## map is an abstraction
+
+
+
 
 
 
