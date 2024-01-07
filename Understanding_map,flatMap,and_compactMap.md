@@ -413,9 +413,65 @@ https://zeddios.tistory.com/449
 flatMap은 스위프트에서 중요하게 쓰이는 함수입니다.
 
 flatMap은 map 연산 이후 flatten(평탄화) 연산을 추가로 진행합니다.
+다시 말해 map의 연산과 동일하지만 map 연산 이후 추가적인 flatten 연산이 진행됩니다.
 
-여기서 말하는 평탄화 작업은 Optional(Optional(4))을 Optional(4)로 [[1,2,3],[1,2]]를 [1,2,3,1,2]로 중첩 구조를 푸는 것을 말합니다.
+여기서 말하는 평탄화 작업은 Optional(Optional(4))을 Optional(4)로 [[1,2,3],[1,2]]를 [1,2,3,1,2]로 중첩 구조를 단일 구조로 푸는 것을 말합니다.
 
+그렇다면 flatMap이 쓰이는 상황은 어떤 상황일까요?
+아래 코드는 flatMap이 아닌 map을 사용한 코드입니다.
+어떤 문제가 있는지 살펴 봅시다.
+
+```swift
+let receivedData = ["url": "https://www.clubpenguin.com"]
+let path: String? = receivedData["url"]
+
+let url = path.map { (string: String) -> URL? in
+  let url = URL(string: string)  // Optional(https://www.clubpenguin.com)
+  return url
+}
+print(url)  // Optional(Optional(https://www.clubpenguin.com))
+```
+
+map을 사용했을 때 url은 옵셔널이 중첩된 구조를 가집니다.
+
+URL(string: string) 자체가 옵셔널인 동시에 path가 옵셔널이기 때문에 path를 매핑했을 때 리턴되는 결과는 옵셔널로 감싸서 리턴하기 때문에 중첩된 옵셔널 구조를 가지게 됩니다.
+(매핑으로 변형된 값은 다시 Functor로 감싼 후 반환됨을 기억합시다!)
+
+중첩 옵셔널을 피하기 위해서 강제 언래핑을 사용할 수 있습니다.
+아래 코드로 확인해 봅시다.
+
+```swift
+let receivedData = ["url": "https://www.clubpenguin.com"]
+let path: String? = receivedData["url"]
+
+let url = path.map { (string: String) -> URL in
+  let url = URL(string: string)!  // https://www.clubpenguin.com
+  return url
+}
+print(url)  // Optional(https://www.clubpenguin.com)
+```
+
+하지만 URL로 변형되는 string이 잘못된 url 주소일 경우 크래쉬가 발생합니다.
+언제나 강제 언래핑은 크래쉬를 발생할 가능성이 있기 때문에 지양해야 합니다.
+
+앞에서 소개했듯이 flatMap은 map 연산 이후 중첩 구조를 푸는 flatten 연산을 진행합니다.
+flatMap을 사용해 중첩 옵셔널 문제를 해결해 봅시다.
+
+```swift
+let receivedData = ["url": "https://www.clubpenguin.com"]
+let path: String? = receivedData["url"]
+
+let url = path.flatMap { (string: String) -> URL? in
+  let url = URL(string: string)  // Optional(https://www.clubpenguin.com)
+  return url
+}
+print(url)  // Optional(https://www.clubpenguin.com)
+```
+
+flatMap은 map 연산 이후 옵셔널 중첩 중 한 겹을 제거하게 됩니다.
+flatMap은 중첩 옵셔널을 해결하기 위한 좋은 방법이 될 수 있습니다.
+
+**Fighting the pyramid of doom**
 
 
 
