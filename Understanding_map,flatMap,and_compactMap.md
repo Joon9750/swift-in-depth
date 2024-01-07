@@ -271,6 +271,7 @@ class Cover {
 위에서 title.map(removeEmojis).map { $0.trimmingCharacters(in: .whitespaces) } 코드를 보면, 어디에도 언래핑 코드가 없지만 옵셔널 속 값을 사용하고 있음을 알 수 있습니다.
 
 **When to use map on optionals**
+
 Imagine that you're creating a printing service where you can print out books with social media photos and their comments. 
 Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
 
