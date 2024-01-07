@@ -235,9 +235,64 @@ map을 사용할 때 계속해서 기억해야 하는 부분은 map에서 새로
 
 ## Mapping over optionals
 
-Optional에서도 map을 사용할 수 있습니다.
+옵셔널에서도 map을 사용할 수 있습니다.
 
-배열 mapping 하는 것은 배열의 값들을 변환하지만 Optional을 mapping 하는 것은 단일 값을 변환합니다.
+지금까지 배열을 mapping 하는 것은 배열의 값들을 변환하지만 옵셔널을 mapping 하는 것은 단일 값을 변환합니다.
+
+옵셔널에서 map을 사용할 때 여러 이점을 얻을 수 있습니다.
+
+먼저 옵셔널을 mapping하면 특별한 언래핑 없이 옵셔널 속 값을 map 클로저 내에서 언래핑된 상태로 사용할 수 있습니다.
+다시 말해, 옵셔널 언래핑을 지연시킬 수 있습니다.
+
+두 번째로 map의 클로저 안에서는 옵셔널을 다루는지 몰라도 됩니다.
+옵셔널과 map을 함께 사용할 때 옵셔널이 nil인 경우 map 연산은 동작하지 않고 nil을 리턴하고 옵셔널에 값이 있을 경우 값을 map 클로저 안으로 전달합니다.
+따라서 map 클로저 안에서 호출하는 함수 입장에서 옵셔널의 여부를 알 필요가 없습니다.
+
+세 번째로 map은 결과적으로 새로운 배열을 리턴하기 때문에 for loop에서 필요한 var 타입 임시 변수가 map을 사용하면 필요하지 않습니다.
+따라서 var 타입 임시 변수 없이 수동 언래핑 없이 옵셔널을 사용할 수 있습니다.
+
+마지막으로 옵셔널과 map을 사용해 언래핑 없이 반복적인 chaining이 가능합니다.
+아래 코드를 살펴 봅시다.
+
+```swift
+class Cover {
+  let image: UIImage
+  let title: String?
+
+  init(image: UIImage, title: String?) {
+    self.image = image
+    self.title = title.map(removeEmojis).map { $0.trimmingCharacters(in: .whitespaces) }
+  }
+}
+```
+
+물론 map 클로저 밖에서 애플리케이션 어딘가에서 Cover 클래스의 title 프로퍼티에 접근하기 위해서는 옵셔널 언래핑이 필요합니다.
+하지만 옵셔널을 mapping 할 때는 옵셔널을 언래핑한 것처럼 사용할 수 있습니다.
+위에서 title.map(removeEmojis).map { $0.trimmingCharacters(in: .whitespaces) } 코드를 보면, 어디에도 언래핑 코드가 없지만 옵셔널 속 값을 사용하고 있음을 알 수 있습니다.
+
+**When to use map on optionals**
+Imagine that you're creating a printing service where you can print out books with social media photos and their comments. 
+Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
