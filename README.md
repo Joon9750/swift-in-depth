@@ -20,7 +20,7 @@
 | 6    | [Generics](Generics.md) | 2023.12.17 |
 | 7    | [Putting the pro in protocol-oriented programming](Putting-the-pro-in-protocol-oriented-programming.md) | 2023.12.23 |
 | 8    | [Iterators, sequences, and collections](Iterators-sequences-and-collections.md) | 2023.12.31 |
-| 9    | [Understanding map, flatMap, and compactMap](Understanding_map,flatMap,and_compactMap.md) | 2024.01.06 |
+| 9    | [Understanding map, flatMap, and compactMap](Understanding_map,flatMap,and_compactMap.md) | 2024.01.07 |
 | 10   | [Asynchronous error handling with Result]() |  |
 | 11   | [Protocol extensions]() |  |
 | 12   | [Swift patterns]() |  |
