@@ -574,11 +574,64 @@ flatMap에 의해 옵셔널이 중첩되더라도 메핑 이후 평탄화 작업
 아래 코드로 flatMap을 사용해 반복적인 half 함수 호출 과정을 살펴 봅시다.
 이제 더 이상 피라미드 형태의 코드를 만들지 않을 수 있습니다. 
 
+```swift
+let startValue = 40
+let twenty = half(startValue)  // Optional(20)
+let five =
+    twenty
+        .flatMap { (int: Int) -> Int? in
+          print(int)  // 20
+          let ten = half(int)
+          print(ten)  // Optional(10)
+          return ten
+        }.flatMap { (int: Int) -> Int? in
+          print(int)  // 10
+          let five = half(10)
+          print(five)  // Optional(5)
+          return five
+}
 
+print(five)  // Optional(5)
+```
 
+flatMap도 map과 동일하게 동작하기 때문에 옵셔널에 flatMap 연산을 했을 때 옵셔널의 내부 값이 flatMap의 클로저로 들어옵니다.
+물론 옵셔널이 nil이라면 클로저가 동작하지 않고 nil을 리턴합니다.
 
+만약 map이었다면 클로저가 끝났을 때 다시 옵셔널로 감싸서 리턴하고 끝나겠지만, flatMap이기 때문에 옵셔널로 감싼 이후 중첩된 옵셔널을 제거하는 동작까지 수행합니다.
 
+위의 코드를 보면 flatMap에 의해 단일 옵셔널만 리턴되기 때문에 계속해서 chaining 하며 half 함수를 사용하더라도 피라미드 코드 구조가 나타나지 않습니다.
+중첩 if let 구문을 사용했을 때 만들어야 했던 무의미한 임시 변수를 더 이상 추적할 필요 없습니다.
 
+map과 같이 nil이 flatMap으로 들어오면 이후의 동작은 이루어지지 않고 nil을 리턴하게 됩니다.
+
+아래 코드로 nil이 flatMap으로 들어왔을 때를 살펴 봅시다.
+
+```swift
+let startValue = 40
+let twenty = half(startValue)  // Optional(20)
+let someNil =
+    twenty
+        .flatMap { (int: Int) -> Int? in
+          print(int)  // 20
+          let ten = half(int)
+          print(ten)  // Optional(10)
+          return ten
+        }.flatMap { (int: Int) -> Int? in
+          print(int)  // 10
+          let five = half(10)
+          print(five)  // Optional(5)
+          return five
+        }.flatMap { (int: Int) -> Int? in
+          print(int)  // 5
+          let someNilValue = half(int)
+          print(someNilValue)  // nil
+          return someNilValue
+        }.flatMap { (int: Int) -> Int? in
+          return half(int)  // This code is never called because you're calling flatMap on a nil value!
+}
+
+print(someNil)  // nil
+```
 
 
 
