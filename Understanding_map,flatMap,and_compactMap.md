@@ -496,8 +496,85 @@ print(half(5))  // nil
 아래 코드로 확인해 봅시다.
 
 ```swift
-var value
+var value: Int? = nil
+let startValue = 80
+// 피라미드 코드
+if let halvedValue = half(startValue) {
+  print(halvedValue)  // 40
+  value = halvedValue
+  if let halvedValue = half(halvedValue) {
+    print(halvedValue)  // 20
+    value = halvedValue
+    if let halvedValue = half(halvedValue) {
+      print(halvedValue)  // 10
+      if let halvedValue = half(halvedValue) {
+        value = halvedValue
+      } else {
+        value = nil
+      }
+    } else {
+      value = nil
+    }
+  } else {
+    value = nil
+  }
+} 
+
+print(value)  // Optional(5)
 ```
+
+half 함수를 계속해서 사용한다면 리턴되는 옵셔널을 계속해서 언래핑해야 하기 때문에 위 코드와 같은 피라미드 코드가 발생합니다.
+물론 flatMap을 사용하기 전에 if let을 아래 코드와 같이 축약해서 사용할 수 있습니다.
+
+```swift
+let startValue = 80
+var endValue: Int? = nil
+
+if let firstHalf = half(startValue),
+  let secondHalf = half(firstValue),
+  let thirdHalf = half(secondHalf),
+  let fourthHalf = half(thirdHalf) {
+  endValue = fourthHalf
+}
+print(endValue)  // Optional(5)
+```
+
+하지만 중첩 if let 구문은 각 if let 마다 변수들을 이름 짖기 어렵습니다.
+과연 firstHalf, secondHalf ... 같은 변수명들은 아무 의미 없는 변수명입니다.
+
+또한 모든 함수들이 half 함수처럼 하나의 입력에 하나의 결과를 리턴을 갖지 않습니다.
+따라서 옵셔널이 중첩으로 발생하는 상황에서 if let은 적합하지 않습니다.
+
+flatMap을 사용해 중첩 옵셔널 언래핑을 해결해 봅시다.
+
+flatMap은 map과 동일한 동작을 하지만 메핑이 끝난 이후 중첩된 구조를 제거합니다.
+아래 순서로 flatMap이 동작합니다.
+
+1. Start with an optional.
+2. With flatmap, you apply a function to the value inside an optional. This function will itself return an optional.
+3. You end up with a nested(중첩) optional.
+4. The nested optional is flattened(평탄화) to a regular optional.
+
+코드를 통해 flatMap이 동작하는 방법을 살펴 봅시다.
+
+```swift
+let startValue = 8
+let four = half(startValue)  // Optional(4)
+let two = four.flatMap { (int: Int) -> Int? in
+  print(int)  // 4
+  let nestedTwo = half(two)
+  print(nestedTwo)  // Optional(2)
+  return nestedTwo
+}
+
+print(two)  // Optional(2)
+```
+
+flatMap에 의해 옵셔널이 중첩되더라도 메핑 이후 평탄화 작업을 통해 단일 옵셔널 구조로 계속해서 chainig 됩니다.
+아래 코드로 flatMap을 사용해 반복적인 half 함수 호출 과정을 살펴 봅시다.
+이제 더 이상 피라미드 형태의 코드를 만들지 않을 수 있습니다. 
+
+
 
 
 
