@@ -672,3 +672,107 @@ let alternativeProduct =
 하지만 flatMap 또한 map과 동일한 기능을 하고 메핑 이후 추가적으로 평탄화 작업을 하게 됩니다.
 
 ## flatMapping over collections
+flatMap을 지금까지 옵셔널에서 사용했습니다.
+flatMap은 옵셔널 외에도 Collection 타입들과도 함께 사용할 수 있습니다.
+
+flatMap이 중첩 옵셔널을 평탄화 했듯이 Collection 타입들과 사용했을 때도 동일한 개념의 평탄화 작업을 map 연산 이후 추가합니다.
+Optional(Optional(3))을 Optional(3)으로 평탄화 했듯이 [[1,2],[3,4]] 배열을 [1,2,3,4]로 평탄화합니다.
+flatMap이 Collection 타입과 동작하는 과정을 살펴 봅시다.
+
+1. You have a regular array [2,3].
+2. With flatMap, you apply a function to each value inside the array. This function turns a value into [value,value], another array.
+3. You end up with subarrays [[2,2],[3,3]]. flatMap flattens the nested arrays to [2,2,3,3].
+
+아래 코드는 flatMap을 Collection 타입 중 하나인 배열에 적용한 코드입니다.
+
+```swift
+let repeated = [2, 3].flatMap { (value: Int) -> [Int] in
+  return [value, value]
+}
+
+print(repeated)  // [2, 2, 3, 3]
+```
+
+위의 [2, 3] 배열에 map을 사용했다면 [[2, 2], [2, 2]] 배열이 리턴되지만 flatMap에 의해 중첩 배열이 평탄화 되어 [2, 3] 배열이 리턴하게 됩니다.
+
+flatMap이 중첩 배열을 단일 배열로 평탄화하는 코드를 한 번 더 살펴 봅시다.
+
+```swift
+let stringsArr = [["I", "just"], ["want", "to"], ["learn", "about", ["protocols"]]
+let flattenedArray = stringsArr.flatMap { $0 }
+
+print(flattenedArray)  // ["I", "just", "want", "to", "learn", "about", "protocols"]
+```
+
+**flatMapping over strings**
+
+String도 Collection 타입 중 하나입니다.
+당연히 flatMap과 String도 함께 쓰입니다.
+
+아래 코드는 Swift 문자열을 S-w-i-f-t 문자열로 변환하는 함수를 구현한 코드입니다.
+
+```swift
+"Swift".interspersed("-")  // S-w-i-f-t
+
+extension String {
+  func interspersed(_ element: Character) -> String {
+    let characters = self.flatMap { (char: Character) -> [Character] in
+      return [char, element]  // [S, -], [w, -] ...
+    }.dropLast()
+    return String(characters)  // [S, -, w, -, ...]
+  }
+}
+```
+
+심지어 위의 interspersed 함수를 아래와 같이 축약할 수 있습니다.
+
+```swift
+extension String {
+  func interspersed(_ element: Character) -> String {
+    let characters = self.flatMap { return [$0, element] }.dropLast()
+    return String(characters)
+  }
+}
+```
+
+**Combining flatMap with map**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
