@@ -600,6 +600,7 @@ flatMap도 map과 동일하게 동작하기 때문에 옵셔널에 flatMap 연�
 만약 map이었다면 클로저가 끝났을 때 다시 옵셔널로 감싸서 리턴하고 끝나겠지만, flatMap이기 때문에 옵셔널로 감싼 이후 중첩된 옵셔널을 제거하는 동작까지 수행합니다.
 
 위의 코드를 보면 flatMap에 의해 단일 옵셔널만 리턴되기 때문에 계속해서 chaining 하며 half 함수를 사용하더라도 피라미드 코드 구조가 나타나지 않습니다.
+
 중첩 if let 구문을 사용했을 때 만들어야 했던 무의미한 임시 변수를 더 이상 추적할 필요 없습니다.
 
 map과 같이 nil이 flatMap으로 들어오면 이후의 동작은 이루어지지 않고 nil을 리턴하게 됩니다.
@@ -633,11 +634,41 @@ let someNil =
 print(someNil)  // nil
 ```
 
+위의 코드에서 네 번째 flatMap은 동작하지 않습니다.
+세 번째 flatMap에서 nil이 리턴되어 네 번째 flatMap이 동작하지 않는것 입니다.
 
+nil을 통해 flatMap의 동작을 break하는 능력 또한 flatMap의 장점입니다.
 
+flatMap을 아래 코드와 같이 더 짧게 사용할 수도 있습니다.
 
+```swift
+let endResult =
+    half(80)
+        .flatMap(half)
+        .flatMap(half)
+        .flatMap(half)
 
+print(endResult)  // Optional(5) 
+```
 
+다른 예시를 가지고 flatMap을 적용해 봅시다.
 
+"imagine a scenario where you'd find a user by an id, find the user's favorite product, and see if any related product exists."
 
+map과 flatMap을 사용해 데이터 변환과 함께 chaining 하는 과정에서 불필요한 임시변수들과 if let 중첩을 피할 수 있습니다.
+아래 코드로 살펴 봅시다.
 
+```swift
+let alternativeProduct =
+    findUser(3)
+    .flatMap(findFavoriteProduct)
+    .flatMap(findRelatedProduct)
+    .map { product in
+      product.description.trimmingCharacters(in: .whitespaces)
+    }
+```
+
+다시 말해 flatMap을 사용하면 중복 옵셔널에 의한 중복 언래핑(if let)과 임시 변수들 없이 코드를 깔끔히 적을 수 있습니다.
+하지만 flatMap 또한 map과 동일한 기능을 하고 메핑 이후 추가적으로 평탄화 작업을 하게 됩니다.
+
+## flatMapping over collections
