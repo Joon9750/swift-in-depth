@@ -1,4 +1,4 @@
-![image](https://github.com/hongjunehuke/SwiftInDepth/assets/83629193/a7ab2564-bb96-4eb0-b619-5e1ad061fc2e)# Understanding map, flatMap, and compactMap
+#Understanding map, flatMap, and compactMap
 
 ## This chapter overs
 - Mapping over arrays, dictionaries, and other collections
