@@ -818,35 +818,36 @@ flatMap과 compactMap 모두 중첩해서 사용하거나 chaining 할 수 있�
 아래 코드로 flatMap과 compactMap을 중첩해서 사용하는 방법을 살펴 봅시다.
 
 ```swift
-
+let string = "abc"
+let results = string.flatMap { a -> [(Character, Character)] in
+  string.compactMap { b -> (Character, Character)? in
+    if a == b {
+      return nil
+    } else {
+      return (a, b)
+    }
+  }
+}
+print(results)  // [("a", "b"), ("a", "c"), ("b", "a"), ("b", "c"), ("c", "a"), ("c", "b")]
 ```
 
+By adding map and flatMap to your toolbelt, you can harness their powers and add powerful immutable abstractions to your code in a succinct manner!!
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Summary
+- The map and flatMap methods are concepts taken from the functional programming world.
+- The map method is an abstraction called a functor.
+- A functor represents a container - or context - of which you can transform its value with map.
+- The map method is defined on many types, including Array, Dictionary, Sequence, and Collections protocol, and Optional.
+- The map method is a crucial element when transforming data inside a pipeline.
+- Imperative-style programming is a fine alternative to functional, style programming.
+- Imperative-style programming can be more performant. In contrast, functional-style programming can involve immutable transformations and can sometimes be more readable and show clearer intent.
+- The flatMap method is a flatten operation after a map operation.
+- With flatMap you can flatten a nested optional to a single optional.
+- With flatMap you can sequence operations on an optional in an immutable way.
+- Once an optional is nil, map and flatMap ignores any chained operations.
+- If you return nil from a flatMap, you can short-circuit operations.
+- With flatMap you can transform arrays and sequences in powerful ways with very little code.
+- With compactMap you can filter nils out of arrays and sequences of optionals.
+- You can also filter nils with an imperative style by using a for loop.
+- You can nest flatMap and compactMap operations for the same results.
+- On collections and sequences, you can combine flatMap with map to combine all their values.
