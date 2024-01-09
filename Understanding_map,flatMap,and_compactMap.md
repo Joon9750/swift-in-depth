@@ -1,4 +1,4 @@
-# Understanding map, flatMap, and compactMap
+![image](https://github.com/hongjunehuke/SwiftInDepth/assets/83629193/a7ab2564-bb96-4eb0-b619-5e1ad061fc2e)# Understanding map, flatMap, and compactMap
 
 ## This chapter overs
 - Mapping over arrays, dictionaries, and other collections
@@ -737,15 +737,89 @@ extension String {
 
 **Combining flatMap with map**
 
+flatMap과 함께 map을 사용할 때 적은 코드로도 강력한 기능을 수행하는 코드를 구현할 수 있습니다.
+포커 카드 덱을 만들어야 할 상황을 가정하고 flatMap과 map을 함께 사용한 코드를 구현해 봅시다.
 
+아래 코드를 살펴 봅시다.
 
+```swift
+let suits = ["Hearts", "Clubs", "Diamonds", "Spades"]
+let faces = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
+var deckOfCards = suits.flatMap { suit in
+  faces.map { face in
+    (suit, face)
+  }
+}
+deckOfCards.shuffle()
+print(deckOfCards)  // [("Diamonds", "5"), ("Hearts", "8"), ...]
+```
 
+With flatMap you remove one layer of nesting so that you nestly end up with an array of tuples.
 
+**Using compactMap**
 
+compactMap은 중복된 레이어를 평탄화라는 flatMap과 달리 Collection 속의 nil을 필터링합니다.
 
+String을 URL로 변환할 때 잘못된 String에 의해 nil이 생성되었을 때 Collection 속 nil을 compactMap으로 필터링 해봅시다.
 
+아래 코드로 살펴 봅시다.
 
+```swift
+let wrongUrl = URL(string: "OMG SHOES")
+print(wrongUrl)  // nil
+let properUrl = URL(string: "https://www.swift.org")
+print(properUrl)  // Optional(hppts://www.swift.org)
+
+let strings = [
+  "https://www.duckduckgo.com",
+  "https://www.twitter.com",
+  "OMG SHOES",
+  "https://www.swift.org"
+]
+// map 사용 시 nil이 필터링되지 않습니다.
+let optionalUrls = strings.map { URL(string: $0) }
+print(optionalUrls)  // [Optional(https://www.duckduckgo.com), Optional(https://www.twitter.com), nil, Optional(https://www.swift.org)]
+
+// compactMap 사용 시 nil이 필터링됩니다.
+let urls = strings.compactMap(URL.init)
+print(urls)  // [Optional(https://www.duckduckgo.com), Optional(https://www.twitter.com), Optional(https://www.swift.org)]
+```
+
+물론 map이나 compactMap이 효과적일 수 있지만, for loop 또한 좋은 선택지가 될 수 있습니다.
+for loop은 break, continue, return 등을 통해 looping을 원하는 지점에 끊을 수 있습니다.
+
+또한 열거형의 패턴 매칭에 for loop와 case let의 조합은 자주 사용됩니다.
+for case let을 통해 배열의 nil을 필터링할 수 있습니다.
+
+아래 코드를 살펴 봅시다.
+
+```swift
+let optionalUrls: [URL?] = [
+  URL(string: "https://www.duckduckgo.com"),
+  URL(string: "Bananaphone"),
+  URL(string: "https//www.swift.org")
+]
+
+for case let url? in optionalUrls {
+  print("The url is \(url)")
+}
+
+// Output:
+// The url is https://www.duckduckgo.com
+// The url is https//www.swift.org
+```
+
+**Nesting or chaining**
+
+flatMap과 compactMap 모두 중첩해서 사용하거나 chaining 할 수 있습니다.
+
+두 연산자를 동시에 사용하는 방식은 클로저 내부에 캡슐화 된 값들을 참조할 수 있고 여러모로 유용합니다.
+아래 코드로 flatMap과 compactMap을 중첩해서 사용하는 방법을 살펴 봅시다.
+
+```swift
+
+```
 
 
 
