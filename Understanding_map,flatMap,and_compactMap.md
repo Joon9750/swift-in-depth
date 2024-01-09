@@ -1,4 +1,4 @@
-#Understanding map, flatMap, and compactMap
+# Understanding map, flatMap, and compactMap
 
 ## This chapter overs
 - Mapping over arrays, dictionaries, and other collections
