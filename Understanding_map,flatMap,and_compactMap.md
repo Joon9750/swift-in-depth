@@ -92,26 +92,26 @@ map과 for loop가 동일한 결과를 만들지만, map은 for loop 보다 간�
 
 ## map is an abstraction
 
-map은 어떤 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
+map은 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
 
 이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
-map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩니다.
 
 The map abstraction is called a functor.
 
-우리는 컨테이너에 매핑(Mapping)이라는 연산을 수행할 수 있습니다.
-여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들도 일종의 컨테이너라고 할 수 있습니다.
+map을 통해 컨테이너에 매핑(Mapping) 연산을 수행할 수 있습니다.
+여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들을 일종의 컨테이너라고 할 수 있습니다.
 
-매핑은 내부 원소의 값의 변형만 일어납니다. 그 원소를 담고있는 컨테이너의 변형은 일어나지 않습니다.
+매핑은 내부 원소의 값의 변형만 일어납니다. 
+그 원소를 담고있는 컨테이너의 변형은 일어나지 않습니다.
 다시 말해, Array에 매핑 연산을 진행하였다고 Array가 Dictionary가 되는 컨테이너의 변형은 일어나지 않는다는 것입니다.
 
 이렇게 값에 변형을 매핑할 수 있는 모든 것들을 Functor라고 합니다.
-주목해야 할 점은 매핑으로 변형된 값은 다시 Functor로 감싼 후 반환된다는 것입니다!
 
-매핑에 쓰이는 대표적인 함수가 지금까지 알아봤던 map입니다.
-위에서 살펴봤던 옵셔널도 Functor의 한 종류인것 입니다.
+주목해야 할 점은 매핑으로 리턴되는 값은 다시 Functor로 감싼 후 반환된다는 것입니다!
 
-매핑으로 변형된 값이 다시 Functor로 감싼 후 반환되기 때문에 옵셔널을 매핑했을 때도 옵셔널로 감싼 후 반환됩니다.
+매핑에 쓰이는 대표적인 함수가 map입니다. 옵셔널도 Functor의 한 종류입니다.
+
+매핑으로 리턴된 값이 다시 Functor로 감싼 후 반환되기 때문에 옵셔널을 매핑했을 때도 옵셔널로 감싼 후 반환됩니다.
 
 아래 글에서 context, functor, monad에 대해 알아봅시다.
 
@@ -124,6 +124,7 @@ https://zeddios.tistory.com/449
 데이터 변환에 있어 파이프라인은 각 단계를 표현하는 유용한 방법입니다.
 
 지금부터 이름과 커밋 개수 데이터들 중에서 커밋 개수가 0개인 데이터를 필터링하고 나머지 데이터 중 커밋 개수만 내림차순 정렬하는 함수를 만들어 봅시다.
+
 해당 함수를 for loop을 사용해 먼저 구현해 봅시다.
 
 아래 코드를 확인해 봅시다.
@@ -139,6 +140,7 @@ func counts(statistics: [(String, Int)]) -> [Int] {
 ```
 
 위의 코드 같은 for loop 방식은 counts 임시변수가 필요합니다.
+
 for loop 방식을 pipeline을 활용한 방식으로 고쳐봅시다.
 
 ```swift
@@ -152,32 +154,38 @@ func counts(statistics: [(String, Int)]) -> [Int] {
 ```
 
 for loop을 대신해 각 단계를 개별적으로 설명하는 파이프라인 방식을 사용해 코드를 간결하게 개선했습니다.
-위 코드처럼 map, filter, sorted 등을 결합해 파이프라인을 구축할 수 있습니다.
-파이프라인을 구축하는 작업에 있어 map 함수는 새로운 객체를 리턴하기 때문에 중요합니다.
 
-파이프라인을 사용한 방법은 깔끔하고 불변한 방식으로 데이터를 변환할 수 있습니다.
+위 코드처럼 map, filter, sorted 등을 결합해 파이프라인을 구축할 수 있습니다.
+파이프라인을 구축하는 작업에 있어 map 함수는 새로운 객체를 리턴하기 때문에 굉장히 중요합니다.
+
+파이프라인을 사용한 방법은 깔끔하고 불변한(immutable) 방식으로 데이터를 변환할 수 있습니다.
+
 그에 반해, for loop 방식은 하나의 for 구문 안에서 많은 연산이 실행될 경우 복잡한 순회를 발생시키고 변경 가능성이 열린 객체를 만들어야 하는 단점이 있습니다.
 
-파이프라인 방식은 각 연산자마다 데이터 순회를 진행합니다.
+파이프라인 방식과 for loop 방식에는 두 가지 차이점이 있습니다.
+
+첫 번째 차이점은 for loop과 달리 파이프라인 방식은 각 연산자마다 데이터 순회를 진행합니다.
 
 따라서 위의 counts 함수는 map, filter, sorted 함수로 세 번의 데이터 순회가 발생합니다.
 그에 반해 for loop 방식은 한 번의 데이터 순회만 발생합니다.
 물론 근소하게 for loop 방식이 성능적 이점을 가지지만 대부분의 상황에서 파이프라인 방식도 성능적으로 충분합니다.
 
-파이프라인 방식은 for loop과 달리 데이터 순회 도중에 멈출 수 없습니다.
+두 번째 차이점은 for loop과 달리 파이프라인 방식은 데이터 순회를 도중에 멈출 수 없습니다.
 
 파이프라인 방식에서는 완전한 순회를 돌아야 합니다.
 for loop에서는 break, continue 키워드를 사용해 순회를 멈출 수 있습니다.
-일반적으로 가독성이 높고 불변의 성격을 가진 파이프라인 방식이 성능보다 중요합니다.
+일반적으로 가독성이 높고 불변의(immutable) 성격을 가진 파이프라인 방식이 성능보다 중요합니다.
 
 **Mapping over a dictionary**
 
 배열과 동일하게 딕셔너리 타입에도 map 함수를 적용할 수 있습니다.
 
-커밋한 데이터를 튜플 배열로 저장하고 있을 때 튜플 배열을 딕셔너리로 변환하고, map을 사용해 딕셔너리의 value에 따라 새로운 문자열 배열로 변환해 보겠습니다.
+커밋한 데이터를 튜플 배열로 저장하고 있을 때 튜플 배열을 딕셔너리로 변환하고, map을 사용해 딕셔너리의 value에 따라 새로운 문자열 배열로 변환하려 할 때 map 함수를 적용해 봅시다.
 
-먼저 uniqueKeysWithValues를 사용해 튜플 배열을 딕셔너리로 쉽게 변환할 수 있습니다.
-uniqueKeysWithValues는 딕셔너리에서 제공하는 기능으로 아래와 같이 사용할 수 있습니다.
+먼저 **uniqueKeysWithValues**를 사용해 튜플 배열을 딕셔너리로 쉽게 변환할 수 있습니다.
+
+uniqueKeysWithValues는 딕셔너리를 생성할 때(init) 튜플을 생성자에 넣어 딕셔너리로 변환할 수 있습니다.
+아래 코드를 살펴 봅시다.
 
 ```swift
 let commitStats = [
@@ -191,7 +199,7 @@ print(commitsDict)  // ["Miranda": 30, "Elly": 650, "John": 0]
 
 위의 코드처럼 Dictionary를 생성할 때 uniqueKeysWithValues를 사용해 튜플 배열을 딕셔너리로 변환할 수 있습니다.
 
-[(name: "Miranda", counts: 30), (name: "Miranda", counts: 30) ...] 
+[(name: "Miranda", counts: 20), (name: "Miranda", counts: 30) ...] 
 
 하지만 위와 같이 딕셔너리의 Key로 사용될 값이 동일하게 두 개 이상인 튜플 배열의 경우 uniqueKeysWithValues를 통한 딕셔너리로 변환에 런타임 에러가 발생합니다.
 이런 경우 uniqueKeysWithValues가 아닌 uniquingKeysWith을 사용해 딕셔너리를 생성할 수 있습니다.
@@ -225,8 +233,9 @@ print(mappedKeysAndValues)  // ["Miranda isn't very active on the project", "Ell
 ```
 
 map을 딕셔너리와 함께 사용하면 위 코드와 같이 딕셔너리 요소의 key, value를 한 번에 클로저로 넘깁니다.
+
 또한 딕셔너리 요소의 value 값만을 클로저로 넘길 수도 있습니다.
-이때 우리는 map을 대신해서 mapValues를 사용하게 됩니다.
+이때 우리는 map을 대신해서 **mapValues**를 사용하게 됩니다.
 
 아래 코드로 확인해 봅시다.
 
@@ -243,7 +252,7 @@ print(mappedValues)  // ["Miranda": "Not very active on the project.", "Elly": "
 ```
 
 위 코드에서 볼 수 있듯이 map에서는 배열을 리턴하지만 mapValues에서는 딕셔너리를 리턴하고 있습니다.
-mapValues에서는 Key 값은 유지되고 새로운 Value만을 부여하게 됩니다.
+mapValues에서는 딕셔너리의 value들을 가지고 새로운 컨테이너를 리턴하게 됩니다.
 
 ## Mapping over sequences
 
