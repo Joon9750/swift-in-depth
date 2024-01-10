@@ -577,15 +577,16 @@ print(endValue)  // Optional(5)
 또한 모든 함수들이 half 함수처럼 하나의 입력에 하나의 결과를 리턴을 갖지 않습니다.
 따라서 옵셔널이 중첩으로 발생하는 상황에서 if let은 적합하지 않습니다.
 
-flatMap을 사용해 중첩 옵셔널 언래핑을 해결해 봅시다.
+flatMap을 사용해 중첩 옵셔널 언래핑에 의한 피라미드 코드 구조를 해결해 봅시다.
 
-flatMap은 map과 동일한 동작을 하지만 메핑이 끝난 이후 중첩된 구조를 제거합니다.
+flatMap은 map과 동일한 동작을 하지만 매핑이 끝난 이후 중첩된 구조를 제거합니다.
+
 아래 순서로 flatMap이 동작합니다.
 
 1. Start with an optional.
 2. With flatmap, you apply a function to the value inside an optional. This function will itself return an optional.
 3. You end up with a nested(중첩) optional.
-4. The nested optional is flattened(평탄화) to a regular optional.
+4. The nested optional is flattened(평탄화) to a regular optional!
 
 코드를 통해 flatMap이 동작하는 방법을 살펴 봅시다.
 
@@ -602,7 +603,7 @@ let two = four.flatMap { (int: Int) -> Int? in
 print(two)  // Optional(2)
 ```
 
-flatMap에 의해 옵셔널이 중첩되더라도 메핑 이후 평탄화 작업을 통해 단일 옵셔널 구조로 계속해서 chainig 됩니다.
+flatMap은 옵셔널이 중첩되더라도 매핑 이후 평탄화 작업을 통해 단일 옵셔널로 계속해서 chainig 됩니다.
 아래 코드로 flatMap을 사용해 반복적인 half 함수 호출 과정을 살펴 봅시다.
 이제 더 이상 피라미드 형태의 코드를 만들지 않을 수 있습니다. 
 
