@@ -252,6 +252,7 @@ print(mappedValues)  // ["Miranda": "Not very active on the project.", "Elly": "
 ```
 
 위 코드에서 볼 수 있듯이 map에서는 배열을 리턴하지만 mapValues에서는 딕셔너리를 리턴하고 있습니다.
+
 mapValues에서는 딕셔너리의 value들을 가지고 새로운 컨테이너를 리턴하게 됩니다.
 
 ## Mapping over sequences
@@ -275,27 +276,30 @@ let generatedNames = (0..<5).map { index in
 print(generatedNames)  // ["John", "Mary", "Elizabath", "John", "Mary"]
 ```
 
-map을 사용할 때 계속해서 기억해야 하는 부분은 map에서 새로운 Array를 리턴한다는 사실입니다.
+map을 사용할 때 기억해야 하는 부분은 map에서 새로운 Array를 리턴한다는 사실입니다.
 
 ## Mapping over optionals
 
 옵셔널에서도 map을 사용할 수 있습니다.
 
-지금까지 배열을 mapping 하는 것은 배열의 값들을 변환하지만 옵셔널을 mapping 하는 것은 단일 값을 변환합니다.
+지금까지 배열을 mapping 하는 것은 배열의 값들을 변환하고 새로운 컨테이너를 리턴하지만 옵셔널을 mapping 하는 것은 단일 값을 변환합니다.
 
-옵셔널에서 map을 사용할 때 여러 이점을 얻을 수 있습니다.
+옵셔널과 map을 함께 사용할 때 여러 이점을 얻을 수 있습니다.
 
 먼저 옵셔널을 mapping하면 특별한 언래핑 없이 옵셔널 속 값을 map 클로저 내에서 언래핑된 상태로 사용할 수 있습니다.
-다시 말해, 옵셔널 언래핑을 지연시킬 수 있습니다.
+다시 말해, 옵셔널 언래핑을 매핑을 통해 지연시킬 수 있습니다.
 
 두 번째로 map의 클로저 안에서는 옵셔널을 다루는지 몰라도 됩니다.
-옵셔널과 map을 함께 사용할 때 옵셔널이 nil인 경우 map 연산은 동작하지 않고 nil을 리턴하고 옵셔널에 값이 있을 경우 값을 map 클로저 안으로 전달합니다.
+
+옵셔널과 map을 함께 사용할 때 옵셔널이 nil인 경우 map 연산은 동작하지 않고 nil을 리턴합니다.
+옵셔널에 값이 있을 경우 언래핑된 값을 map 클로저 안으로 전달합니다.
 따라서 map 클로저 안에서 호출하는 함수 입장에서 옵셔널의 여부를 알 필요가 없습니다.
 
 세 번째로 map은 결과적으로 새로운 배열을 리턴하기 때문에 for loop에서 필요한 var 타입 임시 변수가 map을 사용하면 필요하지 않습니다.
 따라서 var 타입 임시 변수 없이 수동 언래핑 없이 옵셔널을 사용할 수 있습니다.
 
 마지막으로 옵셔널과 map을 사용해 언래핑 없이 반복적인 chaining이 가능합니다.
+
 아래 코드를 살펴 봅시다.
 
 ```swift
@@ -310,9 +314,10 @@ class Cover {
 }
 ```
 
-물론 map 클로저 밖에서 애플리케이션 어딘가에서 Cover 클래스의 title 프로퍼티에 접근하기 위해서는 옵셔널 언래핑이 필요합니다.
-하지만 옵셔널을 mapping 할 때는 옵셔널을 언래핑한 것처럼 사용할 수 있습니다.
-위에서 title.map(removeEmojis).map { $0.trimmingCharacters(in: .whitespaces) } 코드를 보면, 어디에도 언래핑 코드가 없지만 옵셔널 속 값을 사용하고 있음을 알 수 있습니다.
+물론 map 클로저 밖에서(애플리케이션 어딘가에서) Cover 클래스의 title 프로퍼티에 접근하기 위해서는 옵셔널 언래핑이 필요합니다.
+하지만 옵셔널을 mapping 할 때는 map 클로저 안에서만 옵셔널을 언래핑한 것처럼 사용할 수 있습니다.
+
+위의 title.map(removeEmojis).map { $0.trimmingCharacters(in: .whitespaces) } 코드를 보면, 어디에도 언래핑 코드가 없지만 옵셔널 속 값을 사용하고 있음을 알 수 있습니다.
 
 **When to use map on optionals**
 
@@ -320,7 +325,9 @@ Imagine that you're creating a printing service where you can print out books wi
 Unfortunatley, the printing service doesn't support special characters, such as emojis, so you need to strip emojis from the texts.
 
 위의 상황을 만족하는 함수를 만들어 봅시다.
+
 옵셔널과 map을 함께 사용하기 전에 문자열에서 이모지를 지우는 removeEmojis 함수를 만들어 봅시다.
+
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -336,16 +343,16 @@ func isEmoji(_ scalar: Unicode.Scalar) -> Bool {
 }
 ```
 
-removeEmojis 함수에서는 문자열 입력을 unicodeScalars 키워드를 통해 Scalar로 변환해서 이모지인지 아닌지 확인합니다.
+removeEmojis 함수에서 문자열 입력을 unicodeScalars 키워드를 통해 Scalar로 변환해 이모지인지 아닌지 확인합니다.
 
 이제 옵셔널을 mapping 하는 방법을 살펴봅시다.
 
-아래와 같은 포토북 커버의 요구사항을 따르는 과정에서 옵셔널과 map을 사용하려 합니다.
+removeEmojis 함수를 사용해 아래와 같은 포토북 커버의 요구사항을 따르는 과정에서 옵셔널과 map을 사용하려 합니다.
 
 포토북의 커버는 항상 이미지를 가지고, 제목은 있을 수도 없을 수도 있습니다.
 여기서 제목 텍스트가 이모지를 가지고 있다면 앞에서 구현했던 removeEmojis 함수로 이모지를 삭제해야 합니다.
 
-먼저 map 없이 포토북 커버 클래스를 구현해보겠습니다.
+먼저 옵셔널과 map 없이 포토북 커버 클래스를 구현해보겠습니다.
 
 ```swift
 class Cover {
@@ -364,12 +371,13 @@ class Cover {
 }
 ```
 
-옵셔널 title을 초기화하기 위해 임시 변수인 cleanTitle를 만들었고 if let을 통해 옵셔널 title을 언래핑했습니다.
+map 없이 윱셔널을 사용할 때 옵셔널 변수를 초기화하기 위해 임시 변수인 cleanTitle를 만들었고 if let을 통해 옵셔널 title을 언래핑했습니다.
 if let 안에서 removeEmojis 함수를 호출했고 마지막에 self.title 변수에 임시 변수인 cleanTitle 값을 넣었습니다.
 
-우리는 위의 네 가지 과정을 옵셔널 mapping을 통해 확실히 줄일 수 있습니다.
+if let과 옵셔널을 함께 사용하는 일반적인 코드를 옵셔널 mapping을 통해 확실히 줄일 수 있습니다.
 
 If you were to map over an optional, you'd apply the removeEmojis() function on the unwrapped value inside map(if there is one).
+
 If the optional is nil, the mapping operation is ignored!
 
 아래 코드는 옵셔널 mapping을 통해 위의 Cover 클래스의 코드를 개선한 코드입니다.
