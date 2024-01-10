@@ -10,8 +10,9 @@
 
 ## Becoming familiar with map
 map 함수는 스위프트가 지향하는 함수형 프로그래밍에 어울리는 함수 중 하나입니다.
+
 map은 데이터를 변형하고자 할 때 사용합니다.
-기존 데이터를 변형하여 새로운 컨테이너를 만드는데, 기존 데이터는 변형되지 않습니다.
+map은 기존의 컨테이너의 요소에 대해 정의한 클로저로 매핑한 결과를 새로운 컨테이너로 반환합니다.
 
 아래 코드는 map 함수의 정의부입니다.
 
@@ -19,11 +20,16 @@ map은 데이터를 변형하고자 할 때 사용합니다.
 func map<T>(_ transform: (Self.Element) throws -> T) rethrows -> [T]
 ```
 
-물론 for loop 방식(명령형)도 좋은 시작입니다.
+정의부에서 transform은 매핑 클로저로, 컨테이너의 요소를 매개변수로 받아들이고 정의한 클로저의 형태에 맞게 변환된 값을 반환합니다.
+또한 map 정의부에서 리턴하는 [T]는 컨테이너의 변환된 요소를 포함하는 배열을 반환합니다.
+
+물론 for loop 방식(명령형)도 유용할 때가 많습니다.
 하지만 for loop 방식에는 몇가지 boilerplate가 존재할 수 있습니다.
 
-아래에서 살펴볼 예시는 프로젝트에 참가한 사람들의 이름과 커밋 개수들을 더 읽기 쉬운 형식으로 변형하는 상황입니다.
-먼저 소개되는 코드는 for loop 방식입니다. for loop 방식이 가진 boilerplate를 확인하고 map(함수형) 함수로 개선해 봅시다.
+아래에서 살펴볼 예시는 프로젝트에 참가한 사람들의 이름과 커밋 개수들을 더 읽기 쉬운 형식으로 변환하는 상황입니다.
+
+먼저 for loop 방식을 살펴 봅시다. 
+for loop 방식이 가진 boilerplate를 확인하고 map(함수형) 함수로 개선해 봅시다.
 
 ```swift
 let commitStats = [
@@ -37,7 +43,7 @@ print(readableStats)  // ["Miranda isn't very active on the project", "Elly is q
 
 // for loop 사용
 func resolveCounts(statistics: [(String, Int)]) -> [String] {
-  var resolvedCommits = [String]()  // for loop을 위한 임시변수
+  var resolvedCommits = [String]()  // for loop을 위한 임시변수!
   for (name, count) in statistics {
     let involvement: String
 
@@ -53,14 +59,16 @@ func resolveCounts(statistics: [(String, Int)]) -> [String] {
 }
 ```
 
-위의 resolveCounts 함수의 for loop 코드를 살펴보면 resolvedCommits 임시변수를 필요로 합니다. 
-이 부분이 for loop의 boilerplate라고 할 수 있습니다.
-resolvedCommits 변수는 var로 선언되어 실수로라도 변형될 가능성이 있습니다.
+위의 for loop 방식의 resolveCounts 함수를 살펴보면 resolvedCommits 임시변수가 필요합니다.
 
-이때 map을 사용하면 추가적인 var 타입 임시변수 없이 데이터를 순회하며 클로저로 요소를 보내고 이후에 새로운 결과를 리턴합니다.
+이 부분이 for loop의 boilerplate라고 할 수 있습니다.
+resolvedCommits 임시변수는 var로 선언되어 실수로라도 변형될 가능성이 있습니다.
+
+for loop 대신 map을 사용하면 별도의 임시변수 없이 데이터 순회 이후 새로운 컨테이너를 리턴할 수 있습니다.
 map을 사용하면 새로운 결과를 만들어 리턴하기 때문에 추가적인 임시변수가 필요하지 않습니다.
 
 아래 코드는 위의 for loop 코드를 map을 사용한 코드로 리팩토링한 코드입니다.
+map을 통해 데이터를 순회하며 각 요소가 클로저로 넘어갑니다.
 
 ```swift
 func resolveCounts(statistics: [(String, Int)]) -> [String] {
@@ -74,17 +82,44 @@ func resolveCounts(statistics: [(String, Int)]) -> [String] {
 }
 ```
 
-위 코드는 아래와 같은 과정에 따라 데이터를 변형합니다.
+위 코드는 아래와 같은 과정에 따라 데이터를 변환합니다.
 
 1. You being with an array.
-
-2. With map, you apply a function to each value inside the array.
-
+2. With map, you apply a function to each value inside the array.(in closure)
 3. Map creates a new array with the transformed values inside.
 
-map과 for loop가 동일한 결과를 만들지만, map은 for loop 보다 간결하고 불변한 코드를 만들 수 있습니다.
+map과 for loop가 동일한 결과를 만들지만, map은 for loop 보다 간결하고 불변한(immutable) 코드를 만들 수 있습니다.
 
-**Creating a pipeline with map**
+## map is an abstraction
+
+map은 어떤 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
+
+이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
+map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩니다.
+
+The map abstraction is called a functor.
+
+우리는 컨테이너에 매핑(Mapping)이라는 연산을 수행할 수 있습니다.
+여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들도 일종의 컨테이너라고 할 수 있습니다.
+
+매핑은 내부 원소의 값의 변형만 일어납니다. 그 원소를 담고있는 컨테이너의 변형은 일어나지 않습니다.
+다시 말해, Array에 매핑 연산을 진행하였다고 Array가 Dictionary가 되는 컨테이너의 변형은 일어나지 않는다는 것입니다.
+
+이렇게 값에 변형을 매핑할 수 있는 모든 것들을 Functor라고 합니다.
+주목해야 할 점은 매핑으로 변형된 값은 다시 Functor로 감싼 후 반환된다는 것입니다!
+
+매핑에 쓰이는 대표적인 함수가 지금까지 알아봤던 map입니다.
+위에서 살펴봤던 옵셔널도 Functor의 한 종류인것 입니다.
+
+매핑으로 변형된 값이 다시 Functor로 감싼 후 반환되기 때문에 옵셔널을 매핑했을 때도 옵셔널로 감싼 후 반환됩니다.
+
+아래 글에서 context, functor, monad에 대해 알아봅시다.
+
+https://baked-corn.tistory.com/131
+
+https://zeddios.tistory.com/449
+
+## Creating a pipeline with map
 
 데이터 변환에 있어 파이프라인은 각 단계를 표현하는 유용한 방법입니다.
 
@@ -378,35 +413,6 @@ class Cover {
   }
 }
 ```
-
-## map is an abstraction
-
-map은 어떤 컨테이너(arrays, dictionaries, optionals)에 상관 없이 데이터를 변환할 수 있습니다.
-
-이런 부분에서 map을 추상적 개념으로 볼 수 있습니다.
-map을 사용하기 때문에 removeEmojis 함수가 모든 타입에 적용됩니다.
-
-The map abstraction is called a functor.
-
-우리는 컨테이너에 매핑(Mapping)이라는 연산을 수행할 수 있습니다.
-여기서 컨테이너란 우리가 흔히 사용하는 자료구조인 Array, Set 그리고 Dictionary와 같은 자료구조들도 일종의 컨테이너라고 할 수 있습니다.
-
-매핑은 내부 원소의 값의 변형만 일어납니다. 그 원소를 담고있는 컨테이너의 변형은 일어나지 않습니다.
-다시 말해, Array에 매핑 연산을 진행하였다고 Array가 Dictionary가 되는 컨테이너의 변형은 일어나지 않는다는 것입니다.
-
-이렇게 값에 변형을 매핑할 수 있는 모든 것들을 Functor라고 합니다.
-주목해야 할 점은 매핑으로 변형된 값은 다시 Functor로 감싼 후 반환된다는 것입니다!
-
-매핑에 쓰이는 대표적인 함수가 지금까지 알아봤던 map입니다.
-위에서 살펴봤던 옵셔널도 Functor의 한 종류인것 입니다.
-
-매핑으로 변형된 값이 다시 Functor로 감싼 후 반환되기 때문에 옵셔널을 매핑했을 때도 옵셔널로 감싼 후 반환됩니다.
-
-아래 글에서 context, functor, monad에 대해 알아봅시다.
-
-https://baked-corn.tistory.com/131
-
-https://zeddios.tistory.com/449
 
 ## Grokking flatMap
 
