@@ -396,12 +396,13 @@ class Cover {
 }
 ```
 
-title.map에서 map이 기본적으로 새로운 값을 리턴하기 때문에 더 이상 임시 변수를 선언할 필요가 없습니다.
+title.map에서 map이 기본적으로 새로운 값을 리턴하기 때문에 더 이상 리턴에 사용할 임시 변수를 선언할 필요가 없습니다.
 
-또한 title이 nil이었을 때 map 클로저로 nil이 넘어가지 않고 단순히 nil이 리턴됩니다.
 map 클로저에서 추가적인 옵셔널 언래핑 과정이 필요 없이 옵셔널 내부 값을 사용할 수 있습니다.
+또한 title이 nil이었을 때 nil이 map 클로저로 넘어가지 않고 단순히 nil이 리턴됩니다.
 
 하지만 옵셔널을 mapping 했을 때 결과적으로 return 하는 값은 다시 옵셔널을 씌워서 리턴합니다.
+이는 위에서 살펴 봤던 기존 Functor로 감싸서 리턴되는 성격을 따르는 것입니다.
 물론 nil은 Optional(nil)이 아닌 nil로 리턴됩니다.
 
 옵셔널과 map을 함께 사용할 때 조금 더 축약된 코드를 아래와 같이 쓸 수 있습니다.
@@ -411,6 +412,7 @@ self.title = title.map { removeEmojis($0) }
 ```
 
 심지어 map에서 클로저를 생성하지 않고도 아래와 같이 사용할 수 있습니다.
+
 클로저를 생성하지 않기 때문에 {}가 아닌 ()를 사용합니다. 
 
 ```swift
@@ -433,14 +435,16 @@ class Cover {
 
 ## Grokking flatMap
 
-flatMap은 스위프트에서 중요하게 쓰이는 함수입니다.
+지금까지 map을 살펴봤다면 이제 flatMap을 살펴봅시다.
+flatMap은 스위프트에서 중요하게 쓰입니다.
 
 flatMap은 map 연산 이후 flatten(평탄화) 연산을 추가로 진행합니다.
 다시 말해 map의 연산과 동일하지만 map 연산 이후 추가적인 flatten 연산이 진행됩니다.
 
-여기서 말하는 평탄화 작업은 Optional(Optional(4))을 Optional(4)로 [[1,2,3],[1,2]]를 [1,2,3,1,2]로 중첩 구조를 단일 구조로 푸는 것을 말합니다.
+flatMap에서 진해되는 평탄화 작업은 Optional(Optional(4))을 Optional(4)로 [[1,2,3],[1,2]]를 [1,2,3,1,2]로 중첩 구조를 단일 구조로 푸는 것을 말합니다.
 
 그렇다면 flatMap이 쓰이는 상황은 어떤 상황일까요?
+
 아래 코드는 flatMap이 아닌 map을 사용한 코드입니다.
 어떤 문제가 있는지 살펴 봅시다.
 
@@ -457,10 +461,10 @@ print(url)  // Optional(Optional(https://www.clubpenguin.com))
 
 map을 사용했을 때 url은 옵셔널이 중첩된 구조를 가집니다.
 
-URL(string: string) 자체가 옵셔널인 동시에 path가 옵셔널이기 때문에 path를 매핑했을 때 리턴되는 결과는 옵셔널로 감싸서 리턴하기 때문에 중첩된 옵셔널 구조를 가지게 됩니다.
-(매핑으로 변형된 값은 다시 Functor로 감싼 후 반환됨을 기억합시다!)
+URL(string: string) 자체가 옵셔널인 동시에 path가 옵셔널로 리턴되는 결과에도 동일한 Functor인 옵셔널로 감싸서 리턴되며 중첩 옵셔널 구조를 가지게 됩니다.
+(매핑 이후 리턴되는 값은 다시 Functor로 감싼 후 반환됨을 기억합시다!)
 
-중첩 옵셔널을 피하기 위해서 강제 언래핑을 사용할 수 있습니다.
+물론 중첩 옵셔널을 피하기 위해서 강제 언래핑을 사용할 수 있습니다.(하지만 지양해야 합니다.)
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -474,10 +478,11 @@ let url = path.map { (string: String) -> URL in
 print(url)  // Optional(https://www.clubpenguin.com)
 ```
 
-하지만 URL로 변형되는 string이 잘못된 url 주소일 경우 크래쉬가 발생합니다.
+하지만 강제 언래핑으로 인해 URL로 변형되는 string이 잘못된 url 주소일 경우 크래쉬가 발생합니다.
 언제나 강제 언래핑은 크래쉬를 발생할 가능성이 있기 때문에 지양해야 합니다.
 
 앞에서 소개했듯이 flatMap은 map 연산 이후 중첩 구조를 푸는 flatten 연산을 진행합니다.
+
 flatMap을 사용해 중첩 옵셔널 문제를 해결해 봅시다.
 
 ```swift
@@ -491,7 +496,8 @@ let url = path.flatMap { (string: String) -> URL? in
 print(url)  // Optional(https://www.clubpenguin.com)
 ```
 
-flatMap은 map 연산 이후 옵셔널 중첩 중 한 겹을 제거하게 됩니다.
+flatMap은 map 연산 이후 리턴되는 옵셔널 중첩 중 한 겹을 제거하게 됩니다.
+
 flatMap은 중첩 옵셔널을 해결하기 위한 좋은 방법이 될 수 있습니다.
 
 **Fighting the pyramid of doom**
