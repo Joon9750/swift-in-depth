@@ -464,7 +464,8 @@ map을 사용했을 때 url은 옵셔널이 중첩된 구조를 가집니다.
 URL(string: string) 자체가 옵셔널인 동시에 path가 옵셔널로 리턴되는 결과에도 동일한 Functor인 옵셔널로 감싸서 리턴되며 중첩 옵셔널 구조를 가지게 됩니다.
 (매핑 이후 리턴되는 값은 다시 Functor로 감싼 후 반환됨을 기억합시다!)
 
-물론 중첩 옵셔널을 피하기 위해서 강제 언래핑을 사용할 수 있습니다.(하지만 지양해야 합니다.)
+물론 중첩 옵셔널을 피하기 위해서 강제 언래핑을 사용할 수 있습니다.(하지만 지양해야 합니다)
+
 아래 코드로 확인해 봅시다.
 
 ```swift
@@ -509,6 +510,7 @@ flatMap은 중첩 옵셔널을 해결하기 위한 좋은 방법이 될 수 있�
 half 함수는 짝수가 들어올 경우 이등분한 값에 옵셔널로 감싸서 리턴하고 홀수가 들어올 경우 nil을 리턴합니다.
 
 피라미드 형태의 코드 구조를 살펴보기 전에 Int 값을 이등분하고 옵셔널 Int를 리턴하는 함수 half를 구현하고, half 함수를 반복적으로 사용할 때 발생하는 피라미드 코드 형식을 살펴 봅시다.
+
 half 함수가 옵셔널을 리턴하기 때문에 half 함수를 반복적으로 사용하면 옵셔널 언래핑을 위한 중첩 if let 코드로 이해 피라미드 코드 형식이 발생하게 됩니다.
 
 앞으로 피라미드 코드 형식을 살펴보고 이를 flatMap으로 개선하는 방법도 살펴봅시다.
@@ -603,9 +605,10 @@ let two = four.flatMap { (int: Int) -> Int? in
 print(two)  // Optional(2)
 ```
 
-flatMap은 옵셔널이 중첩되더라도 매핑 이후 평탄화 작업을 통해 단일 옵셔널로 계속해서 chainig 됩니다.
+flatMap은 옵셔널이 중첩되더라도 매핑 이후 평탄화 작업을 통해 단일 옵셔널로 계속해서 chainig 할 수 있습니다.
+
 아래 코드로 flatMap을 사용해 반복적인 half 함수 호출 과정을 살펴 봅시다.
-이제 더 이상 피라미드 형태의 코드를 만들지 않을 수 있습니다. 
+flatMap을 통해 더 이상 피라미드 형태의 코드를 만들지 않을 수 있습니다. 
 
 ```swift
 let startValue = 40
@@ -627,14 +630,11 @@ let five =
 print(five)  // Optional(5)
 ```
 
-flatMap도 map과 동일하게 동작하기 때문에 옵셔널에 flatMap 연산을 했을 때 옵셔널의 내부 값이 flatMap의 클로저로 들어옵니다.
-물론 옵셔널이 nil이라면 클로저가 동작하지 않고 nil을 리턴합니다.
+flatMap도 map과 동일하게 동작하기 때문에 옵셔널에 flatMap 연산을 했을 때 옵셔널의 내부 값 즉 언래핑 된 값이 flatMap의 클로저로 들어옵니다. 물론 옵셔널이 nil이라면 클로저가 동작하지 않고 nil을 리턴합니다.
 
 만약 map이었다면 클로저가 끝났을 때 다시 옵셔널로 감싸서 리턴하고 끝나겠지만, flatMap이기 때문에 옵셔널로 감싼 이후 중첩된 옵셔널을 제거하는 동작까지 수행합니다.
 
-위의 코드를 보면 flatMap에 의해 단일 옵셔널만 리턴되기 때문에 계속해서 chaining 하며 half 함수를 사용하더라도 피라미드 코드 구조가 나타나지 않습니다.
-
-중첩 if let 구문을 사용했을 때 만들어야 했던 무의미한 임시 변수를 더 이상 추적할 필요 없습니다.
+flatMap을 통해 중첩 if let 구문을 피하면 if let에 의해 만들어야 했던 무의미한 임시 변수를 더 이상 추적할 필요 없습니다.
 
 map과 같이 nil이 flatMap으로 들어오면 이후의 동작은 이루어지지 않고 nil을 리턴하게 됩니다.
 
@@ -670,7 +670,7 @@ print(someNil)  // nil
 위의 코드에서 네 번째 flatMap은 동작하지 않습니다.
 세 번째 flatMap에서 nil이 리턴되어 네 번째 flatMap이 동작하지 않는것 입니다.
 
-nil을 통해 flatMap의 동작을 break하는 능력 또한 flatMap의 장점입니다.
+nil을 통해 flatMap의 순회를 중단하는 능력 또한 flatMap의 특징이자 장점입니다.
 
 flatMap을 아래 코드와 같이 더 짧게 사용할 수도 있습니다.
 
@@ -701,14 +701,15 @@ let alternativeProduct =
     }
 ```
 
-다시 말해 flatMap을 사용하면 중복 옵셔널에 의한 중복 언래핑(if let)과 임시 변수들 없이 코드를 깔끔히 적을 수 있습니다.
-하지만 flatMap 또한 map과 동일한 기능을 하고 메핑 이후 추가적으로 평탄화 작업을 하게 됩니다.
+다시 말해 flatMap을 사용하면 중복 옵셔널에 의한 중복 언래핑(if let)과 임시 변수 없이 코드를 깔끔히 적을 수 있습니다.
+하지만 flatMap 또한 map과 동일한 기능을 하고 매핑 이후 추가적인 평탄화 작업을 하게 됩니다.
 
 ## flatMapping over collections
-flatMap을 지금까지 옵셔널에서 사용했습니다.
+위에서는 flatMap을 옵셔널에 사용했습니다.
 flatMap은 옵셔널 외에도 Collection 타입들과도 함께 사용할 수 있습니다.
 
-flatMap이 중첩 옵셔널을 평탄화 했듯이 Collection 타입들과 사용했을 때도 동일한 개념의 평탄화 작업을 map 연산 이후 추가합니다.
+flatMap이 중첩 옵셔널을 평탄화 했듯이 Collection 타입들과 사용했을 때도 동일한 개념의 평탄화 작업을 map 연산 이후 진행합니다.
+
 Optional(Optional(3))을 Optional(3)으로 평탄화 했듯이 [[1,2],[3,4]] 배열을 [1,2,3,4]로 평탄화합니다.
 flatMap이 Collection 타입과 동작하는 과정을 살펴 봅시다.
 
@@ -726,7 +727,7 @@ let repeated = [2, 3].flatMap { (value: Int) -> [Int] in
 print(repeated)  // [2, 2, 3, 3]
 ```
 
-위의 [2, 3] 배열에 map을 사용했다면 [[2, 2], [2, 2]] 배열이 리턴되지만 flatMap에 의해 중첩 배열이 평탄화 되어 [2, 3] 배열이 리턴하게 됩니다.
+위의 [2, 3] 배열에 map을 사용했다면 [[2, 2], [2, 2]] 배열이 리턴되지만, flatMap에 의해 중첩 배열이 평탄화 되어 [2, 3] 배열이 리턴하게 됩니다.
 
 flatMap이 중첩 배열을 단일 배열로 평탄화하는 코드를 한 번 더 살펴 봅시다.
 
@@ -757,7 +758,10 @@ extension String {
 }
 ```
 
-심지어 위의 interspersed 함수를 아래와 같이 축약할 수 있습니다.
+만약 interspersed 함수에 map을 사용했다면 [S, -, w, -, ...] 배열이 아닌 [[S, -], [w, -], ... ] 형태의 중첩 배열이 리턴됩니다.
+하지만 flatMap의 평탄화 작업에 의해 중첩 배열이 [S, -, w, -, ...] 단일 배열로 리턴됩니다.
+
+위의 interspersed 함수를 아래와 같이 축약할 수 있습니다.
 
 ```swift
 extension String {
@@ -771,6 +775,7 @@ extension String {
 **Combining flatMap with map**
 
 flatMap과 함께 map을 사용할 때 적은 코드로도 강력한 기능을 수행하는 코드를 구현할 수 있습니다.
+
 포커 카드 덱을 만들어야 할 상황을 가정하고 flatMap과 map을 함께 사용한 코드를 구현해 봅시다.
 
 아래 코드를 살펴 봅시다.
@@ -792,7 +797,7 @@ With flatMap you remove one layer of nesting so that you nestly end up with an a
 
 **Using compactMap**
 
-compactMap은 중복된 레이어를 평탄화라는 flatMap과 달리 Collection 속의 nil을 필터링합니다.
+compactMap은 중복된 레이어를 평탄화하는 flatMap과 달리 Collection 속의 nil을 필터링합니다!
 
 String을 URL로 변환할 때 잘못된 String에 의해 nil이 생성되었을 때 Collection 속 nil을 compactMap으로 필터링 해봅시다.
 
@@ -820,10 +825,10 @@ print(urls)  // [Optional(https://www.duckduckgo.com), Optional(https://www.twit
 ```
 
 물론 map이나 compactMap이 효과적일 수 있지만, for loop 또한 좋은 선택지가 될 수 있습니다.
-for loop은 break, continue, return 등을 통해 looping을 원하는 지점에 끊을 수 있습니다.
+for loop은 break, continue, return 등을 통해 데이터 순회를 원하는 지점에 끊을 수 있습니다.
 
 또한 열거형의 패턴 매칭에 for loop와 case let의 조합은 자주 사용됩니다.
-for case let을 통해 배열의 nil을 필터링할 수 있습니다.
+**for case let**을 통해 배열의 nil을 필터링할 수 있습니다.
 
 아래 코드를 살펴 봅시다.
 
@@ -845,9 +850,8 @@ for case let url? in optionalUrls {
 
 **Nesting or chaining**
 
-flatMap과 compactMap 모두 중첩해서 사용하거나 chaining 할 수 있습니다.
+flatMap과 compactMap 모두 중첩해서 사용하여 chaining 할 수 있습니다. 굉장히 유용한 방법입니다.
 
-두 연산자를 동시에 사용하는 방식은 클로저 내부에 캡슐화 된 값들을 참조할 수 있고 여러모로 유용합니다.
 아래 코드로 flatMap과 compactMap을 중첩해서 사용하는 방법을 살펴 봅시다.
 
 ```swift
