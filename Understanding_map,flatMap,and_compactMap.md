@@ -708,14 +708,14 @@ let alternativeProduct =
 위에서는 flatMap을 옵셔널에 사용했습니다.
 flatMap은 옵셔널 외에도 Collection 타입들과도 함께 사용할 수 있습니다.
 
-flatMap이 중첩 옵셔널을 평탄화 했듯이 Collection 타입들과 사용했을 때도 동일한 개념의 평탄화 작업을 map 연산 이후 진행합니다.
+flatMap이 중첩 옵셔널을 평탄화했듯이 Collection 타입들과 사용했을 때도 동일한 개념의 평탄화 작업을 map 연산 이후 진행합니다.
 
-Optional(Optional(3))을 Optional(3)으로 평탄화했듯이 [[1,2],[3,4]] 배열을 [1,2,3,4]로 평탄화합니다.
+Optional(Optional(3))을 Optional(3)로 평탄화했듯이 [[1, 2],[3, 4]] 배열을 [1, 2, 3, 4]로 평탄화합니다.
 flatMap이 Collection 타입과 동작하는 과정을 살펴봅시다.
 
-1. You have a regular array [2,3].
-2. With flatMap, you apply a function to each value inside the array. This function turns a value into [value,value], another array.
-3. You end up with subarrays [[2,2],[3,3]]. flatMap flattens the nested arrays to [2,2,3,3].
+1. You have a regular array [2, 3].
+2. With flatMap, you apply a function to each value inside the array. This function turns a value into [value, value], another array.
+3. You end up with subarrays [[2, 2], [3, 3]]. flatMap flattens the nested arrays to [2, 2, 3, 3].
 
 아래 코드는 flatMap을 Collection 타입 중 하나인 배열에 적용한 코드입니다.
 
@@ -727,9 +727,9 @@ let repeated = [2, 3].flatMap { (value: Int) -> [Int] in
 print(repeated)  // [2, 2, 3, 3]
 ```
 
-위의 [2, 3] 배열에 map을 사용했다면 [[2, 2], [2, 2]] 배열이 리턴되지만, flatMap에 의해 중첩 배열이 평탄화 되어 [2, 3] 배열이 리턴하게 됩니다.
+위의 [2, 3] 배열에 map을 사용했다면 [[2, 2], [2, 2]] 배열이 리턴되지만, flatMap에 의해 중첩 배열이 평탄화되어 [2, 3] 배열이 리턴하게 됩니다.
 
-flatMap이 중첩 배열을 단일 배열로 평탄화하는 코드를 한 번 더 살펴 봅시다.
+flatMap이 중첩 배열을 단일 배열로 평탄화하는 코드를 한 번 더 살펴봅시다.
 
 ```swift
 let stringsArr = [["I", "just"], ["want", "to"], ["learn", "about", ["protocols"]]
@@ -758,7 +758,7 @@ extension String {
 }
 ```
 
-만약 interspersed 함수에 map을 사용했다면 [S, -, w, -, ...] 배열이 아닌 [[S, -], [w, -], ... ] 형태의 중첩 배열이 리턴됩니다.
+만약 interspersed 함수에 map을 사용했다면 [S, -, w, -, ...] 배열이 아닌 [[S, -], [w, -], ...] 형태의 중첩 배열이 리턴됩니다.
 하지만 flatMap의 평탄화 작업에 의해 중첩 배열이 [S, -, w, -, ...] 단일 배열로 리턴됩니다.
 
 위의 interspersed 함수를 아래와 같이 축약할 수 있습니다.
@@ -778,7 +778,7 @@ flatMap과 함께 map을 사용할 때 적은 코드로도 강력한 기능을 �
 
 포커 카드 덱을 만들어야 할 상황을 가정하고 flatMap과 map을 함께 사용한 코드를 구현해 봅시다.
 
-아래 코드를 살펴 봅시다.
+아래 코드를 살펴봅시다.
 
 ```swift
 let suits = ["Hearts", "Clubs", "Diamonds", "Spades"]
@@ -799,9 +799,9 @@ With flatMap you remove one layer of nesting so that you nestly end up with an a
 
 compactMap은 중복된 레이어를 평탄화하는 flatMap과 달리 Collection 속의 nil을 필터링합니다!
 
-String을 URL로 변환할 때 잘못된 String에 의해 nil이 생성되었을 때 Collection 속 nil을 compactMap으로 필터링 해봅시다.
+String을 URL로 변환할 때 잘못된 String에 의해 nil이 생성되었을 때 Collection 속 nil을 compactMap으로 필터링해 봅시다.
 
-아래 코드로 살펴 봅시다.
+아래 코드로 살펴봅시다.
 
 ```swift
 let wrongUrl = URL(string: "OMG SHOES")
@@ -830,7 +830,7 @@ for loop은 break, continue, return 등을 통해 데이터 순회를 원하는 
 또한 열거형의 패턴 매칭에 for loop와 case let의 조합은 자주 사용됩니다.
 **for case let**을 통해 배열의 nil을 필터링할 수 있습니다.
 
-아래 코드를 살펴 봅시다.
+아래 코드를 살펴봅시다.
 
 ```swift
 let optionalUrls: [URL?] = [
@@ -852,7 +852,7 @@ for case let url? in optionalUrls {
 
 flatMap과 compactMap 모두 중첩해서 사용하여 chaining 할 수 있습니다. 굉장히 유용한 방법입니다.
 
-아래 코드로 flatMap과 compactMap을 중첩해서 사용하는 방법을 살펴 봅시다.
+아래 코드로 flatMap과 compactMap을 중첩해서 사용하는 방법을 살펴봅시다.
 
 ```swift
 let string = "abc"
