@@ -256,6 +256,77 @@ print(mappedValues)  // ["Miranda": "Not very active on the project.", "Elly": "
 
 mapValues에서는 딕셔너리의 value들을 가지고 새로운 컨테이너를 리턴하게 됩니다.
 
+그렇다면 ["a", "b", "c"]와 같은 단일 배열을 [["a"], ["b"], ["c"]]와 같은 중첩 배열로 변형 시켜봅시다.
+아래 코드로 살펴봅시다.
+
+```swift
+func makeSubArrays<T>(_ arr: [T]) -> [[T]] {
+  return arr.map { [$0] }
+}
+
+makeSubArrays(["a", "b", "c"])  // [[a], [b], [c]]
+makeSubArrays([100, 50, 1])  // [[100], [50], [1]]
+```
+
+이번에는 영화 정보를 저장하고 있는 딕셔너리 구조를 아래와 같이 변환하는 방법을 구현합시다.
+
+```swift
+let moviesAndRatings: [String: Float] = ["Home Alone 4": 1.2, "Who FramedRoger Rabbit?": 4.6, "Star Wars": 2.2]
+let moviesHumanRadable = transformRating(moviesAndRatings)
+print(moviesHumanRadable)  // ["Home Alone 4": "Weak", "Who FramedRoger Rabbit?": "Excellent", "Star Wars": "Average"]
+```
+
+[String: Float] 딕셔너리를 [String: String] 딕셔너리로 변환하기 때문에 mapValue를 사용할 수 있습니다.
+아래 코드를 살펴봅시다.
+
+```swift
+func transformRating<T>(_ dict: [T: Float]) -> [T: String] {
+  return dict.mapValues { (rating) -> String in
+    switch rating {
+    case ..<1: return "Very weak"
+    case ..<2: return "Weak"
+    case ..<3: return "Average"
+    case ..<4: return "Good"
+    case ..<5: return "Excellent"
+    default: fatalError("Unknown rating")
+    }
+  }
+}
+
+let moviesAndRatings: [String: Float] = ["Home Alone 4": 1.2, "Who FramedRoger Rabbit?": 4.6, "Star Wars": 2.2]
+let moviesHumanRadable = transformRating(moviesAndRatings)  // ["Home Alone 4": "Weak", "Who FramedRoger Rabbit?": "Excellent", "Star Wars": "Average"]
+```
+
+그렇다면 moviesAndRatings 딕셔너리를 아래와 같은 문자열 배열로 변환하는 경우를 살펴봅시다.
+
+```swift
+let movies: [String: Float] = ["Home Alone 4": 1.2, "Who FramedRoger Rabbit?": 4.6, "Star Wars": 2.2]
+// ["Home Alone 4 (Weak)", "Who FramedRoger Rabbit? (Excellent)", "Star Wars (Average)"] 이렇게 변환됩니다.
+```
+
+위와 같은 문자열 배열로 변환하기 위해 아래와 같이 구현했습니다.
+
+```swift
+let movies: [String: Float] = ["Home Alone 4": 1.2, "Who FramedRoger Rabbit?": 4.6, "Star Wars": 2.2]
+
+func convertRating(_ rating: Float) -> String {
+  switch rating {
+  case ..<1: return "Very weak"
+  case ..<2: return "Weak"
+  case ..<3: return "Average"
+  case ..<4: return "Good"
+  case ..<5: return "Excellent"
+  default: fatalError("Unknown rating")
+  }
+}
+
+let movieDescriptions = movies.map { (tuple) in
+  return "\(tuple.key) (\(convertRating(tuple.value))"
+}
+
+print(movieDescriptions)  // ["Home Alone 4 (Weak)", "Who FramedRoger Rabbit? (Excellent)", "Star Wars (Average)"]
+```
+
 ## Mapping over sequences
 
 You saw before how you could map over Array and Dictionary types. These types implement a Collection and Sequence protocol.
