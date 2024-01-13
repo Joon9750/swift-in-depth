@@ -504,6 +504,45 @@ class Cover {
 }
 ```
 
+지금부터는 아래 코드에서 boilerplate 요소를 찾고 map을 사용해 고쳐봅시다.
+(Given a contact data dictionary, the following code gets the street and city from the data and cleans up the strings. See if you can reduce the boilerplate(and be sure to use map somewhere))
+
+```swift
+let contact =
+    ["address":
+        [
+            "zipcode": "12345",
+            "street": "broadway",
+            "city": "wichita"
+        ]
+]
+
+func capitalizeAndTrimmed(_ string: String) -> String {
+  return string.trimmingCharacters(in: .whitespaces).capitalized
+}
+
+// Clean up this code:
+var capitalizedStreet: String? = nil
+var capitalizedCity: String? = nil
+
+if let address = contact["address"] {
+  if let street = address["street"] {
+    capitalizedStreet = capitalizedAndTrimmed(street.capitalized)
+  }
+  if let city = address["city"] {
+    capitalizedCity = capitalizedAndTrimmed(city.capitalized)
+  }
+}
+```
+
+위와 같이 중첩 if let 구문을 map 연산자를 사용해 개선할 수 있습니다.
+아래 코드로 살펴봅시다.
+
+```swift
+let someStreet = contact["address"]?[street"].map(capitalizedAndTrimmed)
+let someCity = contact["address"]?["city"].map(capitalizedAndTrimmed)
+```
+
 ## Grokking flatMap
 
 지금까지 map을 살펴봤다면 이제 flatMap을 살펴봅시다.
