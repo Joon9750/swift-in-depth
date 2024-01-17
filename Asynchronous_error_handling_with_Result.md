@@ -108,6 +108,8 @@ https://babbab2.tistory.com/164
 
 다시 callURL 함수의 코드를 살펴봅시다.
 
+**Creating an API using Result**
+
 callURL 함수의 호출부를 보면 error와 data를 모두 체크해야합니다. 심지어 error와 data 모두 없는 상황이 존재합니다. 
 이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수 있습니다.
 여러 가능성이 존재하고 error와 data가 모두 들어오거나 들어오지 않는 이상한 상황을 제어하지 못합니다.
@@ -117,9 +119,10 @@ Result 타입은 열거형으로 error **또는** data를 가집니다.
 열거형의 성격으로 이상한 상황을 포함한 여러 가능성을 success와 failure 중 한 가지로 줄일 수 있습니다.
 
 또한 Result 타입을 사용하면 compile-time guarantee를 얻습니다.
-Result 타입을 사용해 컴파일 타임에 response를 success(with a value) 또는 failure(with an error)로 결정할 수 있습니다. 
+Result 타입을 사용해 컴파일 타임에 response를 success(with a value) 또는 failure(with an error)로 강제할 수 있습니다. 
 
 아래 코드는 위 Cocoa Touch-style API 호출을 Result 타입을 사용한 방식으로 고친 코드입니다.
+아직 callURL 함수 안의 URLSession API 호출 코드는 고치지 않았습니다. 해당 부분은 아래에서 살펴봅시다.
 
 ```swift
 enum NetworkError: Error {
@@ -128,33 +131,78 @@ enum NetworkError: Error {
 
 func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkError>) -> Void) {
   let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
-    // ... details will be filled in shortly
+    // ... details will be filled in shortly. 아래에서 살펴볼 예정입니다.
   })
   task.resume()
 }
 
 let url = URL(string: "https://itunes.apple.com/search?term=iron%20man")
 
-callURL(with: url) { (result: Result<Data, NetworkError) in
+callURL(with: url) { (result: Result<Data, NetworkError) in  // 컴파일 타임에 failure case가 가진 error의 타입을 알 수 있습니다.
   switch result {
   case .success(let data):
     let value = String(data: data, encoding: .utf8)
     print(value)
-  case .failure(let error):  // Result 열거형의 패턴 매칭을 통해 에러를 catch 합니다. 
+  case .failure(let error):  // Result 열거형의 패턴 매칭을 통해 에러를 처리합니다. 
     print(error)
   }
 }
 ```
 
+위의 코드와 같이 Result 타입을 사용하면 success와 failure의 패턴 매칭으로 compile-time safety를 얻게 됩니다.
+더 이상 data와 error가 동시에 존재하거나 존재하지 않는 이상한 상황에 대응하지 않아도 됩니다.
 
+Result 타입을 사용하며 중요한 부분은 Result의 value를 얻기 위해서는 error에 대한 처리도 필수적이고 반대 상황에서도 value에 대한 처리가 필수적입니다.
 
+물론 Result의 failure 상황의 error를 핸들링하지 않고 무시할 수 있습니다.
+if case let을 사용해 Result 타입의 success 케이스에만 대응하면 가능합니다.
+하지만 Result의 value를 얻고 싶다면 컴파일러에게 error에 대한 처리도 알리는 것이 올바른 방법입니다.
 
+if case let 구문 외에도 Result 타입의 failure(error)를 핸들링하고 싶지 않다면 **dematerialize** 함수를 사용할 수 있습니다.
+dematerialize 함수는 Result 타입이 failure 일 때 failure의 이유를 무시할 수 있습니다.
 
+아래 코드와 같이 dematerialize 함수를 사용해 Result 타입을 패턴 매칭 없이 value 값을 얻을 수 있습니다.
 
+```swift
+let value: Data? = try? result.dematerialize()
+```
 
+**Bridging from Cocoa Touch to Result**
 
+이제는 callURL 함수 안의 URLSession API 호출 코드에 Result 타입을 사용해 봅시다.
 
+```swift
+URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in ... }
+```
 
+URLSession.shared.dataTask가 리턴하는 data, response, error 데이터를 Result 타입으로 변환해야 합니다.
+
+세 가지 데이터를 Result 타입으로 변환하기 위해 Result 타입에 custom init을 추가해야 합니다.
+URLSession.shared.dataTask가 리턴하는 세 가지 데이터를 Result 타입으로 변환해야 
+
+```swift
+func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkError>) -> Void)
+```
+
+위와 같은 callURL 함수의 선언부를 만족할 수 있습니다.
+
+아래 코드는 Result 타입에 custom init을 추가하고 callURL 함수의 URLSession.shared.dataTask에서 리턴되는 세 가지 데이터를 Result 타입으로 변환하는 코드입니다.
+
+```swift
+publice enum Result<Value, ErrorType> {
+  // ... 생략
+
+  init(value: Value?, error: ErrorType?) {
+    if let error = error {
+      self = .failure(error)
+    } else if let value = value {
+      self = .success(value)
+    } else {
+      fatalError("Could not create Result")
+    }
+  }
+}  
+```
 
 
 
