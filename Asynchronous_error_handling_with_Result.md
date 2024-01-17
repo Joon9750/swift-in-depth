@@ -89,6 +89,8 @@ callURL(with: url) { (data, error) in
 @escaping 키워드와 ?을 클로저에 함께 사용할 경우 @escaping 키워드를 지우라는 경고가 뜹니다.
 
 ```swift
+@escaping ((Data?, Error?)-> Void)?  // 에러 발생
+
 ((Data?, Error?)-> Void)?
 ```
 
@@ -107,6 +109,58 @@ https://babbab2.tistory.com/164
 다시 callURL 함수의 코드를 살펴봅시다.
 
 callURL 함수의 호출부를 보면 error와 data를 모두 체크해야합니다. 심지어 error와 data 모두 없는 상황이 존재합니다. 
+이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수 있습니다.
+여러 가능성이 존재하고 error와 data가 모두 들어오거나 들어오지 않는 이상한 상황을 제어하지 못합니다.
+또한 위 코드에서는 error 핸들링에 있어 compile-time guarantee를 얻지 못합니다.
+
+Result 타입은 열거형으로 error **또는** data를 가집니다.
+열거형의 성격으로 이상한 상황을 포함한 여러 가능성을 success와 failure 중 한 가지로 줄일 수 있습니다.
+
+또한 Result 타입을 사용하면 compile-time guarantee를 얻습니다.
+Result 타입을 사용해 컴파일 타임에 response를 success(with a value) 또는 failure(with an error)로 결정할 수 있습니다. 
+
+아래 코드는 위 Cocoa Touch-style API 호출을 Result 타입을 사용한 방식으로 고친 코드입니다.
+
+```swift
+enum NetworkError: Error {
+  case fetchFailed(Error)
+}
+
+func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkError>) -> Void) {
+  let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
+    // ... details will be filled in shortly
+  })
+  task.resume()
+}
+
+let url = URL(string: "https://itunes.apple.com/search?term=iron%20man")
+
+callURL(with: url) { (result: Result<Data, NetworkError) in
+  switch result {
+  case .success(let data):
+    let value = String(data: data, encoding: .utf8)
+    print(value)
+  case .failure(let error):  // Result 열거형의 패턴 매칭을 통해 에러를 catch 합니다. 
+    print(error)
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
