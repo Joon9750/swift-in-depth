@@ -323,13 +323,59 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 따라서 위의 search() 함수에서 Result 타입의 String data를 JSON으로 변형할 때 map을 사용하면 효과적입니다.
 
-map에 의해 Result 타입이 success 케이스의 경우 Value를 변환하는 과정을 살펴봅시다.
+map에 의해 Result 타입이 success 케이스의 경우 Result 타입의 Value를 변환하는 과정을 살펴봅시다.
 
-1. You have result: one with a value.
+1. You have result: with a value.
 2. With map, you apply a function to the value inside a result.
-3. Map
+3. Map rewraps the transformed value in a result.
 
+이제는 Result 타입이 failure 케이스의 경우 map이 동작하는 과정을 살펴봅시다.
 
+1. You have result: with an error.
+2. Map does nothing with a failing result.
+3. The failing result is still the same old failling result.
+
+map은 failure 케이스의 Result 타입에는 동작하지 않고 success 케이스의 Result 타입에만 동작합니다.
+하지만 **mapError**을 사용하면 map과 반대로 Result 타입이 failure 케이스일 때 error를 매핑하고 success 케이스의 경우 mapError가 동작하지 않습니다.
+
+mapError가 success 케이스를 가진 Result 타입에 동작하는 과정을 살펴봅시다.
+
+1. You have success result: with a value.
+2. mapError does nothing with a successful result.
+3. The successful result is still the same.
+
+이번에는 mapError가 failure 케이스를 가진 Result 타입에 동작하는 과정을 살펴봅시다.
+
+1. You have failure result: with a error.
+2. With mapError, you apply a function to the error inside a result.
+3. mapError rewraps the transformed error in a result.
+
+다시 말해 map을 통해 Result 타입의 Value를 매핑하여 값을 변환하고 mapError로 Result 타입의 Error를 매핑하여 값을 변환할 수 있습니다.
+
+With the power of both map and mapError combined, you can turn a Result<Data, NetworkError> into a Result<JSON, SearchResultError>, aka SearchResult<JSON>.
+
+지금부터 map과 mapError를 통해 Result 타입의 데이터 변환하여 위의 보일러 플레이트 코드를 개선할 수 있습니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
+  // ... 생략
+
+  callURL(with: url) { result in
+    let convertedResult: SearchResult<JSON> =
+      result
+          .map { (data: Data) -> JSON in
+              guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
+                    let jsonDictionary = json as? JSON else {
+                      return [:]
+                  }
+                return jsonDictionary
+              }
+              .mapError { (netwrokError
+  }
+}
+```
 
 
 
