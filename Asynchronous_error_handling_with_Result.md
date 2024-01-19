@@ -276,12 +276,13 @@ search() 함수에서는 completionHandler로 최종적으로 SearchResult<JSON>
 
 ```swift
 func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
-  let encodedString = term.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)  // 옵셔널 타입입니다.
+  // encodedString 변수는 옵셔널 타입입니다.
+  let encodedString = term.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
   // map을 사용해 옵셔널 언래핑을 미룰 수 있습니다.
   let path = encodedString.map { "https://itunes.apple.com/search?term=" + $0 }
 
   guard let url = path.flatMap(URL.init) else {
-    completionHandler(SearchResult(.invalidTerm(term)))
+    completionHandler(SearchResult(.invalidTerm(term)))  // 1.
     return
   }
 
@@ -290,28 +291,43 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
     case .success(let data):
       if let json = try? JSONSerialization.jsonObject(with: data, options: []),
         let jsonDictionary = json as? JSON {
-          let result = SearchResult<JSON>(jsonDictionary)
-          completionHandler(result)
+          let result = SearchResult<JSON>(jsonDictionary)  
+          completionHandler(result)  // 2.
         } else {
           let result = SearchResult<JSON>(.invalidData)
-          completionHandler(result)
+          completionHandler(result)  // 3.
         }
     case .failure(let error):
+      // lower-level error를 higher-level error로 변환합니다.
       let result = SearchResult<JSON>(.underlyingError(error))
-      completionHandler(result)
+      completionHandler(result)  // 4.
     }
   }
 }
 ```
 
 위의 코드에서는 여러 번의 CompletionHandler를 호출합니다. 
-여러 번의 CompletionHandler 호출에 의해 Result 타입 또한 여러 개를 생성해야 합니다.
+여러 번의 CompletionHandler 호출에 필요한 Result 타입 또한 여러 개를 생성해야 합니다.
 이런 점에서 위의 코드는 boilerplate code를 가집니다.
 
-이때 map, flatMap, flatMap을 사용해 단일 Result 타입의 Value와 Error를 변환하며 한 번의 CompletionHandler로 search() 함수를 구현할 수 있습니다.
+이때 map, flatMap, flatMap을 사용해 단일 Result 타입의 Value와 Error를 변환해 한 번의 CompletionHandler로 search() 함수를 구현할 수 있습니다.
 
+## Transforming values inside Result
 
+옵셔널에 map을 사용해 옵셔널 언래핑을 미뤘던것처럼 Result 타입과 map도 함께 사용할 수 있습니다.
+옵셔널을 매핑하듯이 Result를 매핑하여 변형할 수 있습니다.
 
+매핑 없이 일반적인 경우 Result를 가졌을 때 Result 타입을 넘기고 변형한 이후 switch(패턴 매칭)를 통해 Result 내부의 값을 추출할 수 있습니다.
+
+하지만 map을 사용하면 옵셔널을 매핑할 때 옵셔널 언래핑을 할 필요 없이 내부 값을 다루고 다시 옵셔널로 감쌌듯이, Result를 매핑하면 success 케이스의 경우 내부 value가 클로저로 들어가고 failure 케이스 경우 map 연산이 무시됩니다. 
+
+따라서 위의 search() 함수에서 Result 타입의 String data를 JSON으로 변형할 때 map을 사용하면 효과적입니다.
+
+map에 의해 Result 타입이 success 케이스의 경우 Value를 변환하는 과정을 살펴봅시다.
+
+1. You have result: one with a value.
+2. With map, you apply a function to the value inside a result.
+3. Map
 
 
 
