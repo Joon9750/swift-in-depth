@@ -248,8 +248,67 @@ SearchResult<Value> 타입은 Value와 Error 타입 모두 제네릭 타입이�
 아래 코드로 살펴봅시다.
 
 ```swift
+typealias SearchResult<Value> = Result<Value, SearchResultError>
 
+let searchResult = SearchResult("Tony Stark")
+print(searchResult)  // success("Tony Stark")
 ```
+
+위 코드에서 SearchResult 타입의 에러 타입은 SearchResultError로 고정되었고 Value 타입은 고정되지 않았습니다.
+
+JSON 타입도 typealias 키워드를 통해 만들어 봅시다.
+[String: Any] 타입보다 JSON 타입이 읽기 쉬운 코드를 만듭니다.
+
+```swift
+typealias JSON = [String: Any]
+```
+
+typealias 키워드를 통해 SearchResult<JSON> 타입을 만들었습니다.
+SearchResult<JSON> 타입의 실제 타입은 Result<[String: Any], SearchResultError> 타입입니다.
+
+**The search function**
+
+지금부터 iTunes Store에서 문자열로 검색하는 search() 함수를 구현해 봅시다.
+
+search() 함수에서는 completionHandler로 최종적으로 SearchResult<JSON> 타입을 리턴하기 위해, data를 JSON으로 파싱하고 lower-level error인 NetworkError를 SearchResultError로 변환하는 과정까지 포함하고 있습니다. 
+
+아래 코드로 살펴봅시다.
+
+```swift
+func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
+  let encodedString = term.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)  // 옵셔널 타입입니다.
+  // map을 사용해 옵셔널 언래핑을 미룰 수 있습니다.
+  let path = encodedString.map { "https://itunes.apple.com/search?term=" + $0 }
+
+  guard let url = path.flatMap(URL.init) else {
+    completionHandler(SearchResult(.invalidTerm(term)))
+    return
+  }
+
+  callURL(with: url) { result in
+    switch result {
+    case .success(let data):
+      if let json = try? JSONSerialization.jsonObject(with: data, options: []),
+        let jsonDictionary = json as? JSON {
+          let result = SearchResult<JSON>(jsonDictionary)
+          completionHandler(result)
+        } else {
+          let result = SearchResult<JSON>(.invalidData)
+          completionHandler(result)
+        }
+    case .failure(let error):
+      let result = SearchResult<JSON>(.underlyingError(error))
+      completionHandler(result)
+    }
+  }
+}
+```
+
+위의 코드에서는 여러 번의 CompletionHandler를 호출합니다. 
+여러 번의 CompletionHandler 호출에 의해 Result 타입 또한 여러 개를 생성해야 합니다.
+이런 점에서 위의 코드는 boilerplate code를 가집니다.
+
+이때 map, flatMap, flatMap을 사용해 단일 Result 타입의 Value와 Error를 변환하며 한 번의 CompletionHandler로 search() 함수를 구현할 수 있습니다.
 
 
 
