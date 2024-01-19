@@ -366,17 +366,40 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
     let convertedResult: SearchResult<JSON> =
       result
           .map { (data: Data) -> JSON in
-              guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
-                    let jsonDictionary = json as? JSON else {
-                      return [:]
-                  }
-                return jsonDictionary
-              }
-              .mapError { (netwrokError
+            guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
+              let jsonDictionary = json as? JSON else {
+                return [:]  // data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴합니다.
+            }
+            return jsonDictionary
+          }
+          .mapError { (networkError: NetworkError) -> SearchResultError in
+            return SearchResultError.underlying(networkError)
+          }
+      completionHandler(convertedResult)
   }
 }
 ```
 
+위의 코드와 같이 map과 mapError를 통해 Result 타입 내의 value와 error를 변환해 마지막 Result를 completionHandler로 리턴하여 한 번의 completionHandler만 호출하도록 함수를 만들 수 있습니다.
+
+Just like with optionals, you delay any error handling until you want to get the value out.
+
+하지만 위의 코드에서 data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴하고 있습니다.
+빈 딕셔너리를 리턴하는 대신 Error를 가지는 방식으로 개선하려 합니다.
+
+이때 우리는 **faltMap**을 사용하여 개선할 수 있습니다.
+
+**flatMapping over Result**
+
+빈 딕셔너리를 리턴하는 대신 Error를 던지는 방식으로 개선할 수 있지만 Result 타입을 사용하는 것과 error throwing이 섞이면 이상할 수 있습니다. (뒤에서 Result 타입과 error throwing을 섞는 방식도 살펴볼 예정입니다.)
+
+따라서 빈 딕셔너리를 리턴하는 대신 failure 케이스를 가진 Result를 리턴하는 방식으로 코드를 개선할 수 있습니다.
+
+하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면 결과적으로 SearchResult<SearchResult<JSON>>과 같은 중첩 Result 타입이 만들어 집니다.
+
+이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화 할 수 있습니다.
+
+결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
 
 
 
