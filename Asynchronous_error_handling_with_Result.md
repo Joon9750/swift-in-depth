@@ -192,6 +192,7 @@ func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkEr
 publice enum Result<Value, ErrorType> {
   // ... 생략
 
+  // custom init
   init(value: Value?, error: ErrorType?) {
     if let error = error {
       self = .failure(error)
@@ -201,8 +202,59 @@ publice enum Result<Value, ErrorType> {
       fatalError("Could not create Result")
     }
   }
-}  
+}
+
+func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkErrork>) -> Void) {
+  let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
+    let dataTaskError = error.map { NetworkError.fetchFailed($0) }
+    let result = Result<Data, NetworkError>(value: data, error: dataTaskError)  // Result enum의 custom init으로 Result 타입 생성
+    completionHandler(result)
+  })
+  task.resume()
+}
 ```
+
+모든 API가 value를 리턴하지 않을 수 있습니다.
+Result<(), MyError> 또는 Result<Void, MyError>와 같이 () 또는 Void를 사용해 value 값을 가지지 않는 Result 타입을 만들 수 있습니다.
+
+## Propagating Result
+
+Let's make your API a bit higher-level so that instead of manually creating URLs, you can search for items in the iTunes Store by passing strings.
+
+지금까지 위에서 다룬 NetworkError와 같이 lower-level 에러가 아닌 아래와 같은 higher-level 에러 SearchResultError를 다룰 것입니다. SearchResultError가 검색 기능의 추상적인 개념과 적합합니다.
+
+SearchResultError 코드를 살펴봅시다.
+
+```swift
+enum SearchResultError: Error {
+  case invalidTerm(String)  // when an URL can't be created
+  case underlyingError(NetworkError)  // underlyingError cse carries the lower-level NetworkError for troubleshooting
+  case invalidData  // when the raw data could not be parsed to JSON
+}
+
+search(term: "Iron man") { result: Result<[String: Any]>, SearchResultError> in
+  print(result)
+}
+```
+
+**Typealiasing for convenience**
+
+search() 함수를 구현하기 전에 **typealias** 키워드를 사용해 Result 타입을 축약해 편리하게 사용할 수 있습니다.
+typealias 키워드를 통해 Result 타입의 data나 error 타입을 고정할 수 있습니다.
+
+예를 들어 Result<Value, SearchResultError> 타입을 SearchResult<Value>로 typealias 한다면 에러 타입을 SearchResultError 타입으로 고정하게 됩니다.
+SearchResult<Value> 타입은 Value와 Error 타입 모두 제네릭 타입이었지만 이제는 Value만 제네릭 타입이 됩니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+
+```
+
+
+
+
+
 
 
 
