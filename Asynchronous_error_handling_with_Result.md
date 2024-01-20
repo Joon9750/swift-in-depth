@@ -506,20 +506,15 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
   callURL(with: url) { result in
     let convertedResult: SearchResult<JSON> =
       result
-          .mapError { (networkError: NetworkError) -> SearchResultError in
-            return SearchResultError.underlying(networkError)
-          }              
+          .mapError { SearchResultError.underlyingError($0) }          
           .flatMap { (data: Data) -> SearchResult<JSON> in
-            // 생략
-          }
-          .flatMap { (json: JSON) -> SearchResult<JSON> in
-            // 생략
-          }
-          .map { (json: JSON) -> [JSON] in
-
-          }
-          .flatMap { (mediaItems: [JSON]) -> SearchResult<JSON> in
-
+            do {
+              let searchResult: SearchResultError<JSON> = Result(try parseData(data))
+              return searchResult  
+            } catch {
+              // parseData 함수에서 던지는 에러를 SearchResultError로 변환합니다.
+              return SearchResult(.invalidData(data))
+            }
           }
     completionHandler(convertedResult)
   }
@@ -543,28 +538,36 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
   callURL(with: url) { result in
     let convertedResult: SearchResult<JSON> =
       result
-          .mapError { SearchResultError.underlyingError($0) }          
+          // Transform error type to SearchResultError
+          .mapError { (networkError: NetworkError) -> SearchResultError in
+            return SearchResultError.underlying(networkError)
+          }
+          // Parse Data to JSON, or return SearchResultError              
           .flatMap { (data: Data) -> SearchResult<JSON> in
-            do {
-              let searchResult: SearchResultError<JSON> = Result(try parseData(data))
-              return searchResult  
-            } catch {
-              // parseData 함수에서 던지는 에러를 SearchResultError로 변환합니다.
-              return SearchResult(.invalidData(data))
-            }
+            // 생략
+          }
+          // validate Data
+          .flatMap { (json: JSON) -> SearchResult<JSON> in
+            // 생략
+          }
+          // filter value
+          .map { (json: JSON) -> [JSON] in
+            // 생략
+          }
+          // Save to database
+          .flatMap { (mediaItems: [JSON]) -> SearchResult<JSON> in
+            // 생략
+            database.store(mediaItems)
           }
     completionHandler(convertedResult)
   }
 }
 ```
 
+map과 flatMap은 Result 타입이 failure일 경우 무시합니다.
+flatMap에서 특정 에러로 인해 failure인 Result가 리턴된다면 이후의 mapping이나 flatmapping은 무시됩니다.
 
-
-
-
-
-
-
+## Multiple errors inside of Result
 
 
 
