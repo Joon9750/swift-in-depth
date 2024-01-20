@@ -496,11 +496,88 @@ do {
 ```
 
 throwing function을 Result 타입으로 변환했다면 이 방법으로 search 함수를 완성해 봅시다.
+
 아래 코드로 살펴봅시다.
 
 ```swift
+func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
+  // ... 생략
 
+  callURL(with: url) { result in
+    let convertedResult: SearchResult<JSON> =
+      result
+          .mapError { (networkError: NetworkError) -> SearchResultError in
+            return SearchResultError.underlying(networkError)
+          }              
+          .flatMap { (data: Data) -> SearchResult<JSON> in
+            // 생략
+          }
+          .flatMap { (json: JSON) -> SearchResult<JSON> in
+            // 생략
+          }
+          .map { (json: JSON) -> [JSON] in
+
+          }
+          .flatMap { (mediaItems: [JSON]) -> SearchResult<JSON> in
+
+          }
+    completionHandler(convertedResult)
+  }
+}
 ```
+
+**Weaving errors through a pipeline**
+
+위에서 살펴본 map, flatMap, mapError를 파이프라인 형식으로 구성하여 에러를 던지는 함수 없이도 에러를 핸들링 할 수 있습니다.
+Result 타입이 파이프라인을 통과하고 나서 최종적으로 패턴 매칭을 통해 에러를 핸들링합니다.
+
+flatMap은 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸지만, map은 항상 Happy path에 프로그램의 흐름을 유지시켜줍니다.
+flatMap이 사용하게 된 이유가 Error를 던질 상황에 Result 타입을 리턴하기 위함으로 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸는 것입니다.
+
+에러를 던지는 함수 없이 파이프라인 방식으로 에러를 핸들링한 아래 코드를 살펴봅시다.
+
+```swift
+func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
+  // ... 생략
+
+  callURL(with: url) { result in
+    let convertedResult: SearchResult<JSON> =
+      result
+          .mapError { SearchResultError.underlyingError($0) }          
+          .flatMap { (data: Data) -> SearchResult<JSON> in
+            do {
+              let searchResult: SearchResultError<JSON> = Result(try parseData(data))
+              return searchResult  
+            } catch {
+              // parseData 함수에서 던지는 에러를 SearchResultError로 변환합니다.
+              return SearchResult(.invalidData(data))
+            }
+          }
+    completionHandler(convertedResult)
+  }
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
