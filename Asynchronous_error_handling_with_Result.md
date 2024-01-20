@@ -375,7 +375,7 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
           .mapError { (networkError: NetworkError) -> SearchResultError in
             return SearchResultError.underlying(networkError)
           }
-      completionHandler(convertedResult)
+    completionHandler(convertedResult)
   }
 }
 ```
@@ -398,8 +398,62 @@ Just like with optionals, you delay any error handling until you want to get the
 하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면 결과적으로 SearchResult<SearchResult<JSON>>과 같은 중첩 Result 타입이 만들어 집니다.
 
 이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화 할 수 있습니다.
+물론 Error 케이스를 가진 Result는 map과 동일하게 flatMap에서도 무시됩니다.
 
 결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
+
+flatMap이 success 케이스의 Result와 동작하는 과정을 살펴봅시다.
+flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure 케이스의 Result를 생성하고 성공 시 success 케이스의 Result를 생성합니다.
+
+추가적으로 flatMap은 failure 케이스의 Result는 무시하게 됩니다.
+
+1. You start with a successful result containing Data(x2) and with one result containing an error.
+2. With flatMap, you apply a function to the value inside the result. This function will itself return a new result. (This new result could be successful and carry a value, or be a failure result containing an error. But if you start with a result containing an error, any flatMap action is ignored.)
+3. You end up with a nested result. (If you start with an error, then nothing is transformed or nested.)
+4. The nested result is flattened to a regular result. (If you start wih an error, nothing happened and the result remains the same.
+
+이제는 위에서 데이터 변환 실패 시 빈 딕셔너리를 생성하는 코드를 빈 딕셔너리가 아닌 failure 케이스의 Result를 생성하도록 고쳐봅시다.
+
+아래 코드는 데이터 변환 실패 시 failure 케이스의 Result를 생성하고 이후 중첩된 Result 타입을 flatMap으로 평탄화하는 코드입니다.
+
+```swift
+func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
+  // ... 생략
+
+  callURL(with: url) { result in
+    let convertedResult: SearchResult<JSON> =
+      result
+          .mapError { (networkError: NetworkError) -> SearchResultError in
+            return SearchResultError.underlying(networkError)
+          }          
+          .flatMap { (data: Data) -> SearchResult<JSON> in  // 리턴되는 타입이 JSON에서 SearchResult<JSON>으로 수정됐습니다.
+            guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
+              let jsonDictionary = json as? JSON else {
+                // data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴하지 않고 failure 케이스를 가진 Result 타입을 리턴합니다.
+                return SearchResult(.invalidData)  
+            }
+            return SearchResult(jsonDictionary)
+          }
+    completionHandler(convertedResult)
+  }
+}
+```
+
+위에서 이야기 했듯이 Result 타입의 Error는 flatMap으로 변환할 수 없습니다.
+Result 타입의 Error는 mapError로 변환 가능합니다.
+
+## Mixing Result with throwing functions
+
+지금까지는 Result 타입의 mapping, flatmapping 연산 안에서(클로저 안에서) Error를 던지는 함수를 호출하는 방식을 피했습니다.
+지금부터 Result 타입의 mapping, flatmapping 연산 안에서 Error를 던지는 함수를 추가해보고 마지막에는 Error를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링해봅시다.
+
+search 함수의 flatMap 클로저 안에서 Data -> JSON으로 변환할 때 Error를 던지는 parseData() 함수를 사용해봅시다.
+
+
+
+
+
+
 
 
 
