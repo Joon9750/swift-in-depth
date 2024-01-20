@@ -447,16 +447,60 @@ Result 타입의 Error는 mapError로 변환 가능합니다.
 지금까지는 Result 타입의 mapping, flatmapping 연산 안에서(클로저 안에서) Error를 던지는 함수를 호출하는 방식을 피했습니다.
 지금부터 Result 타입의 mapping, flatmapping 연산 안에서 Error를 던지는 함수를 추가해보고 마지막에는 Error를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링해봅시다.
 
-search 함수의 flatMap 클로저 안에서 Data -> JSON으로 변환할 때 Error를 던지는 parseData() 함수를 사용해봅시다.
+search 함수의 flatMap 클로저 안에서 Data -> JSON으로 변환할 때 Error를 던지는 parseData 함수를 사용해봅시다.
+parseData 함수는 JSON으로 데이터 변환에 실패 했을 때 ParsingError 에러를 던집니다.
 
+먼저 ParsingError 열거형과 parseData 함수를 코드로 살펴봅시다.
 
+```swift
+enum ParsingError: Error {
+  case couldNotParseJSON
+}
 
+// 함수에 throws 키워드를 추가해 에러를 던질 수 있음을 알립니다.
+func parseData(_ data: Data) throws -> JSON {
+  guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
+        let jsonDictionary = json as? JSON else {
+          throw ParasingError.couldNotParseJSON
+        }
+  return jsonDictionay
+}
+```
 
+error를 던지는 함수가 error를 던졌을 때 이를 failure 케이스의 Result 타입으로 변환하여 대응할 수 있습니다.
 
+Result의 생성자(init)로 error를 던지는 함수를 try 키워드와 함께 넣습니다.
+이때 함수가 error를 던지는 여부에 따라 Result가 success 케이스로 생성될지 failure 케이스로 생성될지 결정됩니다.
+함수가 error를 던졌을 때 failure 케이스의 Result 타입을 생성합니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+let searchResult: Result<JSON, SearchResultError> = Result(try parseData(data))
+```
 
+위의 코드는 한 가지 문제가 있습니다.
 
+parseData 함수가 던질 에러 타입을 런타임에서야 알 수 있고 만약 parseData 함수가 SearchResultError 타입의 에러를 던지지 않는다면 다른 타입의 에러에 추가적으로 대응해야 합니다.
+
+이를 해결하기 위해서 아래 코드와 같이 **do-catch** 구문이 필요합니다.
+
+```swift
+do {
+  let searchResult: Result<JSON, SearchResultError> = Result(try parseData(data))
+} catch {
+  print(error)  // ParsingError.couldNotParseData
+  // 결국 SearchResultError와 다른 에러 타입이 리턴되면 catch에서 Result(.invalidData(data)를 리턴해야 합니다. 
+  let searchResult: Result<JSON, SearchResultError> = Result(.invalidData(data))
+}
+```
+
+throwing function을 Result 타입으로 변환했다면 이 방법으로 search 함수를 완성해 봅시다.
+아래 코드로 살펴봅시다.
+
+```swift
+
+```
 
 
 
