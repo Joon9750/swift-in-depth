@@ -618,13 +618,51 @@ AnyError는 에러 타입을 런타임에 알게 됩니다. 따라서 정확한 
 
 아래 코드로 AnyError의 쓰임을 살펴봅시다.
 
+Imagine that you're creating a function to transfer money, called processPayment. 
+You can return different types of errors in each step, which relieves you of the burden of translating different errors to one specific type.
 
+```swift
+func processPayment(fromAccount: Account, toAccount: Account, amoutInCents: Int, completion: @escaping (Result<String, AnyError>) -> Void) {
+  guard amountInCents > 0 else {
+    completion(Result(PaymentError.amountTooLow))
+    return
+  }
 
+  guard isValid(toAccount) && isValid(fromAccount) else {
+    completion(Result(AccountError.invalidAccount))
+    return
+  }
 
+  // Process payment
 
+  moneyAPI.transfer(amountInCents, from: fromAccount, to: toAccount) { (result: Result<Data, AnyError>) in
+    let response = result.mapAny(parseResponse)  // mapAny!!
+    completion(response)
+  }
+}
+```
 
+AnyError를 가진 Result 타입을 사용하면 Result 타입에 mapAny를 사용 가능합니다.
 
+The **mapAny** method works similarly to map, except that it can accept any throwing function.
 
+mapAny 안의 함수에서 error를 던지면 해당 에러를 AnyError로 감싸서 리턴하게 됩니다.
 
+mapAny를 통해 에러 핸들링(catch) 없이 map으로 에러를 던지는 함수를 넘길 수 있습니다.
+
+mapAny는 flatMap 처럼 클로저 안에서 새로운 Result 타입을 리턴하여 Result의 에러 타입을 변환할 수는 없습니다.
+그저 mapAny에 속하는 함수가 에러를 리턴하면 해당 에러를 AnyError로 감싸서 리턴 시켜줍니다.
+
+따라서 map은 연산에 속하는 함수가 에러를 던지지 못하는 함수임을 나타내고, mapAny는 에러를 던질 수 있는 함수임을 나타냅니다!
+
+The difference between map and mapAny is that map works on all Result types, but it doesn't catch errors from throwing functions.
+In contrast, mapAny works on both throwing and nonthrowing functions, but it's available only on Result types containing AnyError.
+
+결과적으로 mapAny를 통해 Result의 value를 매핑하고 에러가 발생할 경우 AnyError로 감싼 에러를 가진 Result 타입을 얻을 수 있습니다.
+
+**Matching with AnyError**
+
+AnyError 속 실제 에러 타입을 꺼내기 위해서는 underlyingError 프로퍼티를 사용해야 합니다.
+AnyError 속 에러에 따라 failure 케이스를 매칭하는 코드를 살펴봅시다.
 
 
