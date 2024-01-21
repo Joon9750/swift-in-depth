@@ -569,18 +569,54 @@ flatMap에서 특정 에러로 인해 failure인 Result가 리턴된다면 이�
 
 ## Multiple errors inside of Result
 
+지금까지는 에러가 발생했을 때 Result 타입의 failure 케이스가 단일 에러 타입을 가지도록 했습니다.
+위에서 다뤘던 Result 타입의 단일 에러 타입은 SearchResultError입니다.
 
+에러 타입을 하나로 특정하는 방법은 좋습니다. 
+하지만 다뤄야할 에러 타입이 너무 다양하다면 초기 프로젝트 시기에는 모든 에러 타입을 정확한 단일 에러 타입으로 확정하기 부담스러울 수 있습니다.
 
+이때 우리는 SPM(Swift Package Manager)에서 제공하는 제네릭 타입인 **AnyError**를 사용하여 에러의 타입을 런타임에 알 수 있도록 하여 정확한 에러 타입을 선언할 부담을 덜어줍니다.
+AnyError는 Result 내부의 Error에 들어가는 모든 에러 타입에 대응합니다. 
+Result 내부의 에러는 Error 타입을 따르기 때문에 AnyError 또한 Error를 따르는 모든 에러에 대응할 수 있습니다.(?)
 
+예를 들어 Result<String, AnyError>와 같이 사용될 수 있습니다.
 
+AnyError를 가진 Result 타입을 생성하는 방법은 두 가지가 있습니다.
 
+첫 번째로 일반적인 Error를 AnyError로 변환 후 Result 타입에 변환된 AnyError를 넣는 방식입니다.
 
+이때 AnyError(일반적인 Error)와 같은 형식으로 AnyError의 생성자에 일반적인 Error를 넣어 AnyError를 생성할 수 있습니다.
+아래 코드와 같습니다.
 
+```swift
+enum PaymentError: Error {
+  case amountTooLow
+  case insufficientFunds
+}
 
+let error: AnyError = AnyError(PaymentError.amountTooLow)
+let result: Result<String, AnyError> = Result(error)
 
+let directResult: Result<String, AnyError> = Result(PaymentError.amountTooLow)
+```
 
+result와 같이 AnyError를 Result 생성자에 넣을 수 있고 directResult와 같이 이미 자료형을 Result<String, AnyError>로 선언했다면 일반적인 Error를 Result 생성자에 바로 넣을 수 있습니다.
+자료형이 Result<String, AnyError>이기 때문에 Result의 생성자로 들어온 일반적인 Error도 자동으로 AnyError 타입으로 형변환됩니다.
 
+두 번째 방법은 에러를 던지는 함수를 Result의 생성자에 넣는 방법입니다.
+아래 코드로 살펴봅시다.
 
+```swift
+let otherResult: Result<String, AnyError> = Result(anyError: { () throws -> String in
+  throw PaymentError.insufficientFunds
+}
+```
+
+AnyError는 에러 타입을 런타임에 알게 됩니다. 따라서 정확한 에러 타입을 알 필요 없을 때 AnyError를 Result 타입과 함께 사용할 수 있습니다.
+
+파이프라인에서 각 단계별로 리턴되는 에러 타입이 다양할 경우, AnyError를 사용해 리턴되는 에러들을 특정 에러 타입으로 변환할 부담을 줄여줍니다.
+
+아래 코드로 AnyError의 쓰임을 살펴봅시다.
 
 
 
