@@ -665,4 +665,62 @@ In contrast, mapAny works on both throwing and nonthrowing functions, but it's a
 AnyError 속 실제 에러 타입을 꺼내기 위해서는 underlyingError 프로퍼티를 사용해야 합니다.
 AnyError 속 에러에 따라 failure 케이스를 매칭하는 코드를 살펴봅시다.
 
+```swift
+processPayment(fromAccount: from, toAccount: to, amountInCents: 100) { (result: Result<String, AnyError>) in
+  switch result {
+  case .success(let value): print(value)
+  case .failure(let error) where error.underlyingError is AccountError:
+    print("Account error")
+  case .failure(let error):
+    print(error)
+  }
+}
+```
+
+프로젝트 초기가 아니고 시간적 여유가 있다면 AnyError가 아니라 일반적 error를 사용해 컴파일 타임에 이점을 얻을 수 있도록 합시다.
+
+AnyError를 사용하면 더욱 유연성있는 코드를 만듭니다.
+
+하지만 Result의 error 타입을 컴파일 타임에 알 수 있도록 했던 장점을 AnyError의 사용으로 인해 런타임에 알게 된다는 단점도 존재합니다.
+
+## Impossible failure and Result
+
+Result 타입을 가지는 프로토콜을 따를 때, 프로토콜을 따르는 타입에서 Result의 failure가 발생하는 상황이 절대 일어나지 않는 경우가 있습니다. (never fail)
+
+Result 타입은 success와 failure 케이스를 갖지만, failure 케이스가 발생할 가능성이 없을 때 빈 Error 타입을 만들어서 대응하거나 Never 타입으로 대응할 수 있습니다.
+
+먼저 Result 타입을 가지는 프로토콜을 코드로 구현해 봅시다.
+
+```swift
+protocol Service {
+  associatedtype Value
+  associatedtype Err: Error
+  func load(complete: @escaping (Result<Value, Err>) -> Void)
+}
+```
+
+위의 Service 프로토콜을 따르는 SubscriptionsLoader 타입에서 load 함수는 항상 성공합니다.
+
+이때 Error 타입을 따르는 빈 열거형을 만들어 Result 속 Error로 넣어야 합니다.
+
+아래 코드는 Service 프로토콜을 따르는 SubscriptionsLoader 클래스를 구현한 코드입니다.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
