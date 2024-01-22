@@ -86,51 +86,21 @@ callURL(with: url) { (data, error) in
 ```
 
 위의 callURL 함수의 URLSession.dataTask의 작업이 끝났을 때 completionHandler가 호출됩니다.
+URLSession.dataTask 작업에 시간이 걸리기 때문에 @escaping 클로저로 completionHandler를 선언했습니다. 
 
-작업에 시간이 걸리기 때문에 @escaping 클로저로 completionHandler를 선언했습니다. 
+callURL 함수의 호출부를 보면 error와 data를 모두 체크해야 합니다. 
 
-일반적인 클로저의 경우 함수의 실행 흐름을 탈출하지 않아, 함수가 종료되기 전에 무조건 실행 되어야 합니다.
-하지만 @escaping 키워드가 붙은 클로저의 경우 비동기 상황에서 함수의 실행 흐름에 상관 없이 실행되는 클로저입니다.
+Cocoa Touch-style 방식은 callURL 함수에서 이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수도 있습니다. error와 data 모두 없는 말도 안되는 상황까지 대응해야 합니다.
 
-추가적으로 파라미터로 받을 클로저가 있을 수도, 없을 때 @escaping 클로저에 옵셔널을 추가하려면 아래와 같이 ?를 추가하는 대신 @escaping 키워드를 지워야 합니다.
+또한 Cocoa Touch-style 방식은 에러 핸들링에 있어 컴파일 타임 이점을 얻지 못합니다.
 
-@escaping 키워드와 ?을 클로저에 함께 사용할 경우 @escaping 키워드를 지우라는 경고가 뜹니다.
+하지만 Result 타입은 열거형으로 error **또는** data를 가집니다.
 
-```swift
-@escaping ((Data?, Error?)-> Void)?  // 에러 발생
+열거형의 성격으로 success와 failure가 동시에 참이거나 거짓인 상황을 success와 failure 중 한 가지로 줄일 수 있습니다.
 
-((Data?, Error?)-> Void)?
-```
-
-위와 같이 @escaping 키워드를 지우고 클로저에 ?(옵셔널) 선언만 해도 @escaping 클로저와 동일한 동작을 합니다.
-결론적으로 함수 파라미터의 클로저가 Optional Type인 경우에는 자동으로 escaping으로 동작하기 때문에 추가적인 @escaping 키워드를 지워야 하는것입니다.
-
-하지만 위의 옵셔널 클로저는 더 이상 클로저 타입이 아닙니다.
-옵셔널을 붙이기 전의 @escaping (Data?, Error?) -> Void 클로저는 클로저 타입입니다.
-하지만 클로저 타입에 옵셔널을 붙이면 더 이상 해당 클로저는 클로저 타입이 아닌 옵셔널 타입이 됩니다.
-Int와 Optional(Int)가 타입이 다른 것과 같은 맥락입니다.
-
-아래 링크을 참고해 봅시다.
-
-https://babbab2.tistory.com/164
-
-다시 callURL 함수의 코드를 살펴봅시다.
-
-**Creating an API using Result**
-
-callURL 함수의 호출부를 보면 error와 data를 모두 체크해야 합니다. 심지어 error와 data 모두 없는 상황이 존재합니다. 
-이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수 있습니다.
-여러 가능성이 존재하고 error와 data가 모두 들어오거나 들어오지 않는 이상한 상황을 제어하지 못합니다.
-또한 위 코드에서는 error 핸들링에 있어 compile-time guarantee를 얻지 못합니다.
-
-Result 타입은 열거형으로 error **또는** data를 가집니다.
-열거형의 성격으로 이상한 상황을 포함한 여러 가능성을 success와 failure 중 한 가지로 줄일 수 있습니다.
-
-또한 Result 타입을 사용하면 compile-time guarantee를 얻습니다.
 Result 타입을 사용해 컴파일 타임에 response를 success(with a value) 또는 failure(with an error)로 강제할 수 있습니다. 
 
 아래 코드는 위 Cocoa Touch-style API 호출을 Result 타입을 사용한 방식으로 고친 코드입니다.
-아직 callURL 함수 안의 URLSession API 호출 코드는 고치지 않았습니다. 해당 부분은 아래에서 살펴봅시다.
 
 ```swift
 enum NetworkError: Error {
@@ -157,7 +127,10 @@ callURL(with: url) { (result: Result<Data, NetworkError) in  // 컴파일 타임
 }
 ```
 
-위의 코드와 같이 Result 타입을 사용하면 success와 failure의 패턴 매칭으로 compile-time safety를 얻게 됩니다.
+아직 callURL 함수 안의 URLSession API 호출 코드는 고치지 않았습니다. 해당 부분은 아래에서 살펴봅시다.
+
+위의 코드와 같이 Result 타입을 사용하면 success와 failure의 패턴 매칭으로 컴파일 타임 안전성을 얻게 됩니다.
+
 더 이상 data와 error가 동시에 존재하거나 존재하지 않는 이상한 상황에 대응하지 않아도 됩니다.
 
 Result 타입을 사용하며 중요한 부분은 Result의 value를 얻기 위해서는 error에 대한 처리도 필수적이고 반대 상황에서도 value에 대한 처리가 필수적입니다.
