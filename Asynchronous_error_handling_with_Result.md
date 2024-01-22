@@ -773,7 +773,7 @@ public enum Never {}
 extension Never: Error {}
 
 final class SubscriptionsLoader: Service {
-  func load(complete: @escaping (Result<[Subscription], BogusError>) -> Void) {
+  func load(complete: @escaping (Result<[Subscription], Never>) -> Void) {
     // ...load data. Always succeeds
     let subscriptions = [Subscription(), Subscription()]
     complete(Result(subscriptions))
@@ -781,16 +781,18 @@ final class SubscriptionsLoader: Service {
 }
 ```
 
+Result 타입의 Error에 Never을 넣을 수 있듯이 Success 케이스의 Value에도 Never를 넣을 수 있습니다.
+Success 케이스의 Value에 Never를 넣게 되면 절대 Success 되지 않는 동작을 의미합니다.
 
-
-
-
-
-
-
-
-
-
-
-
-
+## Summary
+- Using the default way of URLSession's data tasks is an error-prone way of error handling.
+- Result is offered by the Swift Package Manager and is a good way to handle asynchronous error handling.
+- Result has two generics and is a lot like Optional, but has a context of why something failed.
+- Result is a compile-time safe way of error handling, and you can see which error to expect before running a program.
+- By using map and flatMap and mapError, you can cleanly chain transformations of your data while carrying an error context.
+- Throwing functions can be converted to a Result via a special throwing initializer. This initializer allows you to mix and match two error throwing idioms.
+- You can postpone strict error handling with the use of AnyError.
+- With AnyError, multiple errors can live inside Result.
+- If you're working with many types of errors, working with AnyError can be faster, at the expense of not knowing which errors to expect at compile time.
+- AnyError can be a good alternative to NSError so that you reap the benefits of Swift error types.
+- You can use the Never type to indicate that a Result can't have a failure case, or a success case.
