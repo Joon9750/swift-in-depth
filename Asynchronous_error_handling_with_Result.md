@@ -12,10 +12,11 @@
 - How to show intent with the Never type
 
 ## Why use the Result type?
-chapter 6에서는 동기적 상황에서 에러를 핸들링하는 방법을 살펴봤다면 앞으로는 비동기 상황에서의 에러 핸들링을 살펴볼 것입니다.
+chapter 6에서 동기적 상황의 에러를 핸들링하는 방법을 살펴봤다면 앞으로는 비동기 상황에서의 에러 핸들링을 살펴볼 것입니다.
 
-스위프트에서 공식적으로 비동기 상황에서의 에러 핸들링 기법을 제공하지 않습니다.
-Swift Package Manager에서 제공하는 Result 타입을 사용하게 됩니다.
+스위프트에서는 공식적으로 비동기 상황에서의 에러 핸들링 기법을 제공하지 않습니다.
+
+대신 Swift Package Manager에서 제공하는 Result 타입을 사용하게 됩니다.
 
 **Result is like Optional, with a twist**
 
@@ -34,25 +35,30 @@ public enum Result<Value, ErrorType: Swift.Error> {
 ```
 
 Result는 success(Value)와 failure(ErrorType) 두 개의 케이스를 가진 열거형입니다.
-열거형이기 때문에 success 또는 failure 중 하나의 상태만 가지게 됩니다.
-다시 말해 success와 failure가 동시에 참이거나 거짓일 경우는 없습니다.
 
-또한 ErrorType은 Swift.Error 타입으로 제약되어 있습니다.
-따라서 ErrorType에 들어오는 타입은 Error 타입을 반드시 채택해야 합니다.
+열거형이기 때문에 success **또는** failure 중 하나의 상태만 가지게 됩니다.
+다시 말해 success와 failure가 동시에 참이거나 거짓일 가능성을 차단합니다.
+
+또한 Result의 ErrorType은 Swift.Error 타입으로 제약되어 있습니다.
+따라서 ErrorType에 들어오는 타입은 반드시 Error 타입을 채택해야 합니다.
+
 그에 반해 success의 Value 타입에 경우 타입 제약이 없기 때문에 모든 타입이 Value로 들어올 수 있습니다.
 
-옵셔널은 Value 또는 nil을 가지지만 Result는 Value 또는 Error를 가지게 됩니다.
+옵셔널은 Value 또는 nil을 가지지만, Result는 Value 또는 Error를 가지게 됩니다.
+
 failure의 경우 단순히 빈 값(nil)을 가지는 옵셔널과 달리 Error를 가지기 때문에 실패에 대한 맥락을 제공할 수 있습니다.
 
-결과적으로 Result 타입은 success와 failure의 값(Value, ErrorType)을 모두 요구합니다.
-우리는 에러가 발생할 때 Result 타입에 ErrorType을 넘겨 대응하고 정상적으로 동작한다면 Value를 넘겨 에러를 핸들링할 수 있습니다.
+결과적으로 Result 타입은 이후 패턴 매칭을 통해 success와 failure에 대한 대응을 모두 구현해야 합니다.
+
+에러가 발생할 때 Result 타입에 ErrorType을 넘겨 대응하고 정상적으로 동작한다면 Value를 넘겨 에러를 핸들링할 수 있습니다.
 
 **Understanding the benefits of Result**
 
 Result 타입의 이점을 느끼기 위해 먼저 Cocoa Touch-style의 에러 핸들링이 비동기 상황에서 보이는 문제점을 살펴봅시다.
-해당 문제점을 Result 타입으로 해결해 봅시다.
 
-아래에서 예시로 구현할 API는 iTunes Store에서 검색하는 기능을 가졌습니다.
+Cocoa Toach-style 에러 핸들링의 문제점을 Result 타입으로 해결해 봅시다.
+
+지금부터 구현할 API는 iTunes Store에서 특정 url로 검색하는 기능을 하는 API입니다.
 
 먼저 Cocoa Touch-style의 코드를 살펴봅시다.
 
@@ -73,7 +79,7 @@ callURL(with: url) { (data, error) in
     let value = String(data: data, encoding: .utf8)
     print(value)
   } else {
-    // error도 없고 data도 없는 상황
+    // error도 없고 data도 없는 상황 - 말도 안되는 상황에 대한 처리를 해야합니다.
     // What goes here?
   }
 }
@@ -82,10 +88,12 @@ callURL(with: url) { (data, error) in
 위의 callURL 함수의 URLSession.dataTask의 작업이 끝났을 때 completionHandler가 호출됩니다.
 
 작업에 시간이 걸리기 때문에 @escaping 클로저로 completionHandler를 선언했습니다. 
+
 일반적인 클로저의 경우 함수의 실행 흐름을 탈출하지 않아, 함수가 종료되기 전에 무조건 실행 되어야 합니다.
 하지만 @escaping 키워드가 붙은 클로저의 경우 비동기 상황에서 함수의 실행 흐름에 상관 없이 실행되는 클로저입니다.
 
 추가적으로 파라미터로 받을 클로저가 있을 수도, 없을 때 @escaping 클로저에 옵셔널을 추가하려면 아래와 같이 ?를 추가하는 대신 @escaping 키워드를 지워야 합니다.
+
 @escaping 키워드와 ?을 클로저에 함께 사용할 경우 @escaping 키워드를 지우라는 경고가 뜹니다.
 
 ```swift
@@ -110,7 +118,7 @@ https://babbab2.tistory.com/164
 
 **Creating an API using Result**
 
-callURL 함수의 호출부를 보면 error와 data를 모두 체크해야합니다. 심지어 error와 data 모두 없는 상황이 존재합니다. 
+callURL 함수의 호출부를 보면 error와 data를 모두 체크해야 합니다. 심지어 error와 data 모두 없는 상황이 존재합니다. 
 이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수 있습니다.
 여러 가능성이 존재하고 error와 data가 모두 들어오거나 들어오지 않는 이상한 상황을 제어하지 못합니다.
 또한 위 코드에서는 error 핸들링에 있어 compile-time guarantee를 얻지 못합니다.
