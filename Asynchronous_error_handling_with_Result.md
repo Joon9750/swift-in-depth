@@ -703,13 +703,83 @@ protocol Service {
 
 이때 Error 타입을 따르는 빈 열거형을 만들어 Result 속 Error로 넣어야 합니다.
 
-아래 코드는 Service 프로토콜을 따르는 SubscriptionsLoader 클래스를 구현한 코드입니다.
+아래 코드는 Service 프로토콜을 따르는 SubscriptionsLoader 클래스를 구현한 코드입니다. 
 
+이때 SubscriptionsLoader 클래스의 load 함수는 항상 성공하는 함수이기 때문에 Result<Value, Err> 타입으로 리턴되는 Error에는 빈 열거형을 넣게 됩니다.
 
+```swift
+struct Subscription {
+  // ...details omitted
+}
 
+enum BogusError: Error {}  // 빈 열거형
 
+final class SubscriptionsLoader: Service {
+  func load(complete: @escaping (Result<[Subscription], BogusError>) -> Void) {
+    // ...load data. Always succeeds
+    let subscriptions = [Subscription(), Subscription()]
+    complete(Result(subscriptions))
+  }
+}
+```
 
+BogusError는 빈 열거형이기 때문에 인스턴스화 할 수 없습니다.
 
+컴파일러는 Error 케이스에 빈 열거형(BogusError)을 넣으면 Result 타입의 failure 케이스를 switch case 매칭할 수 없습니다.
+
+물론 아래 코드와 같이 failure 케이스 매칭 없이, success 케이스만 case 매칭할 수 있습니다. 
+
+```swift
+let subscriptionsLoader = SubscriptionsLoader()
+subscriptionsLoader.load { (result: Result<[Subscription], BogusError>) in
+  switch result {
+  case .success(let subscriptions): print(subscriptions)
+  // You don't need .failure
+  }
+}
+```
+
+이처럼 에러가 발생하지 않는 상황에서 빈 열거형을 Error 타입으로 넣는 방식의 장점은 열거형의 케이스를 줄일 수 있고 코드를 깔끔하게 만듭니다.
+
+하지만 빈 열거형을 Error 타입으로 넣는 방식은 공식적인 방식은 아닙니다.
+
+**Never** 타입이 빈 열거형을 대신하는 공식적인 방식입니다.
+
+Never 타입은 컴파일러에게 특정 경로(케이스)로 연결되지 않는다는 사실을 알립니다.
+다시 말해 불가능한 경로를 나타냅니다.
+
+아래 코드로 Never 타입을 살펴봅시다.
+
+```swift
+func crashAndBurn() -> Never {
+  fatalError("Something very, very bad happened")
+}
+```
+
+위의 crashAndBurn 함수는 Never 타입을 리턴하기 때문에 절대 값을 리턴하지 않는 함수임을 보장합니다.
+
+Never 타입의 구현부는 아래 코드와 같습니다.
+
+```swift
+public enum Never {}
+```
+
+앞에서 봤던 빈 열거형 BogusError를 Never 타입으로 대체 가능합니다.
+물론 Result 타입의 Error로 Never 타입을 사용하려면 Never 타입을 Error 타입을 따르도록 해야 합니다.
+
+아래 코드는 BogusError를 Never 타입으로 고친 코드입니다.
+
+```swift
+extension Never: Error {}
+
+final class SubscriptionsLoader: Service {
+  func load(complete: @escaping (Result<[Subscription], BogusError>) -> Void) {
+    // ...load data. Always succeeds
+    let subscriptions = [Subscription(), Subscription()]
+    complete(Result(subscriptions))
+  }
+}
+```
 
 
 
