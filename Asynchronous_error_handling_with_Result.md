@@ -620,7 +620,7 @@ let otherResult: Result<String, AnyError> = Result(anyError: { () throws -> Stri
 AnyError는 에러 타입을 런타임에 알게 됩니다. 따라서 정확한 에러 타입을 알 필요 없을 때 AnyError를 Result 타입과 함께 사용할 수 있습니다.
 파이프라인에서 각 단계별로 리턴되는 에러 타입이 다양할 경우, AnyError를 사용해 리턴되는 에러들을 특정 에러 타입으로 변환할 부담을 줄여줍니다.
 
-processPayment라는 돈을 이체하는 함수를 만들고 있다고 상상해 봅시다.
+AnyError를 활용하여 processPayment라는 돈을 이체하는 함수를 만들어봅시다.
 각 단계에서 다양한 유형의 오류를 반환할 수 있으므로 AnyError를 통해 다양한 오류를 하나의 특정 유형으로 변환해야 하는 부담을 줄일 수 있습니다.
 
 아래 코드로 살펴봅시다.
@@ -651,6 +651,8 @@ AnyError를 가진 Result 타입을 사용하면 Result 타입에 mapAny를 사�
 mapAny 메소드는 에러를 던지는 함수를 허용한다는 점을 제외하면 map과 유사하게 작동합니다.
 
 mapAny 안의 함수에서 error를 던지면 해당 에러를 AnyError로 감싸서 리턴하게 됩니다.
+즉 AnyError를 가진 Result failure 케이스를 리턴합니다. 
+
 mapAny를 통해 에러 핸들링(catch) 없이 map으로 에러를 던지는 함수를 넘길 수 있습니다.
 
 mapAny는 flatMap 처럼 클로저 안에서 새로운 Result 타입을 리턴하여 Result의 에러 타입을 변환할 수는 없습니다.
@@ -658,21 +660,23 @@ mapAny는 flatMap 처럼 클로저 안에서 새로운 Result 타입을 리턴�
 
 따라서 map은 연산에 속하는 함수가 에러를 던지지 못하는 함수임을 나타내고, mapAny는 에러를 던질 수 있는 함수임을 나타냅니다!
 
-The difference between map and mapAny is that map works on all Result types, but it doesn't catch errors from throwing functions.
-In contrast, mapAny works on both throwing and nonthrowing functions, but it's available only on Result types containing AnyError.
+map과 mapAny의 차이점은 map이 모든 Result 유형에서 작동하지만 함수 발생 시 오류를 포착하지 못한다는 것입니다.
+반대로, mapAny는 에러를 던지는 함수와 던지지 않는 함수 모두에서 작동하지만 AnyError를 포함하는 Result 유형에서만 사용할 수 있습니다.
 
-결과적으로 mapAny를 통해 Result의 value를 매핑하고 에러가 발생할 경우 AnyError로 감싼 에러를 가진 Result 타입을 얻을 수 있습니다.
+**결과적으로 mapAny를 통해 Result의 value를 매핑하고 에러가 발생할 경우 AnyError로 감싼 에러를 가진 Result 타입을 얻을 수 있습니다.**
 
 **Matching with AnyError**
 
-AnyError 속 실제 에러 타입을 꺼내기 위해서는 underlyingError 프로퍼티를 사용해야 합니다.
-AnyError 속 에러에 따라 failure 케이스를 매칭하는 코드를 살펴봅시다.
+AnyError 속 실제 에러 타입을 꺼내기 위해서는 **underlyingError** 프로퍼티를 사용해야 합니다.
+
+AnyError 속 에러에 따라 failure 케이스를 매칭하는 아래 코드를 살펴봅시다.
 
 ```swift
 processPayment(fromAccount: from, toAccount: to, amountInCents: 100) { (result: Result<String, AnyError>) in
   switch result {
   case .success(let value): print(value)
   case .failure(let error) where error.underlyingError is AccountError:
+    // Result 타입이 가진 AnyError의 타입이 AccountError 타입일 경우를 나타냅니다.
     print("Account error")
   case .failure(let error):
     print(error)
@@ -680,11 +684,10 @@ processPayment(fromAccount: from, toAccount: to, amountInCents: 100) { (result: 
 }
 ```
 
-프로젝트 초기가 아니고 시간적 여유가 있다면 AnyError가 아니라 일반적 error를 사용해 컴파일 타임에 이점을 얻을 수 있도록 합시다.
-
 AnyError를 사용하면 더욱 유연성있는 코드를 만듭니다.
 
-하지만 Result의 error 타입을 컴파일 타임에 알 수 있도록 했던 장점을 AnyError의 사용으로 인해 런타임에 알게 된다는 단점도 존재합니다.
+하지만 AnyError는 Result의 error 타입을 컴파일 타임에 알 수 있도록 했던 장점을 잃게 됩니다.
+따라서 프로젝트 초기가 아니고 시간적 여유가 있다면 AnyError가 아니라 일반적 error를 사용해 컴파일 타임에 이점을 얻을 수 있도록 합시다.
 
 ## Impossible failure and Result
 
@@ -702,20 +705,19 @@ protocol Service {
 }
 ```
 
-위의 Service 프로토콜을 따르는 SubscriptionsLoader 타입에서 load 함수는 항상 성공합니다.
-
-이때 Error 타입을 따르는 빈 열거형을 만들어 Result 속 Error로 넣어야 합니다.
+위의 Service 프로토콜을 따르는 SubscriptionsLoader 타입에서 load 함수를 항상 성공하는 함수라고 가정하겠습니다.
+항상 성공하는 함수의 리턴이 Result 타입이기 때문에 Error 타입을 따르는 빈 열거형을 만들어 Result 속 Error로 넣어야 합니다.
 
 아래 코드는 Service 프로토콜을 따르는 SubscriptionsLoader 클래스를 구현한 코드입니다. 
-
-이때 SubscriptionsLoader 클래스의 load 함수는 항상 성공하는 함수이기 때문에 Result<Value, Err> 타입으로 리턴되는 Error에는 빈 열거형을 넣게 됩니다.
+SubscriptionsLoader 클래스의 load 함수는 항상 성공하는 함수이기 때문에 Result<Value, Err> 타입으로 리턴되는 Error에는 빈 열거형을 넣게 됩니다.
 
 ```swift
 struct Subscription {
   // ...details omitted
 }
 
-enum BogusError: Error {}  // 빈 열거형
+// 빈 열거형
+enum BogusError: Error {} 
 
 final class SubscriptionsLoader: Service {
   func load(complete: @escaping (Result<[Subscription], BogusError>) -> Void) {
@@ -726,9 +728,8 @@ final class SubscriptionsLoader: Service {
 }
 ```
 
-BogusError는 빈 열거형이기 때문에 인스턴스화 할 수 없습니다.
-
-컴파일러는 Error 케이스에 빈 열거형(BogusError)을 넣으면 Result 타입의 failure 케이스를 switch case 매칭할 수 없습니다.
+BogusError는 빈 열거형이기 때문에 인스턴스화 할 필요도 할 수 없습니다.
+또한 Error 케이스에 빈 열거형(BogusError)을 넣으면, Result 타입의 failure 케이스를 switch case 매칭할 수 없습니다.
 
 물론 아래 코드와 같이 failure 케이스 매칭 없이, success 케이스만 case 매칭할 수 있습니다. 
 
