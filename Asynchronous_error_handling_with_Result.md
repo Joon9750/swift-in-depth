@@ -265,7 +265,7 @@ SearchResult<JSON> 타입의 실제 타입은 Result<[String: Any], SearchResult
 
 이제 본격적으로 문자열을 전달하여 iTunes Store에서 항목을 검색하는 search 함수를 구현해봅시다.
 
-search() 함수에서는 completionHandler로 최종적으로 SearchResult<JSON> 타입을 리턴하기 위해, data를 JSON으로 파싱하고 lower-level error인 NetworkError를 SearchResultError로 변환하는 과정까지 포함하고 있습니다. 
+search() 함수에서는 completionHandler로 SearchResult<JSON> 타입을 리턴하기 위해, data를 JSON으로 파싱하고 저차원 에러 NetworkError를 고차원 에러 SearchResultError로 변환하는 과정을 포함하고 있습니다.
 
 아래 코드로 살펴봅시다.
 
@@ -273,11 +273,11 @@ search() 함수에서는 completionHandler로 최종적으로 SearchResult<JSON>
 func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
   // encodedString 변수는 옵셔널 타입입니다.
   let encodedString = term.addingPercentEncoding(withAllowedCharacters: .urlHostAllowed)
-  // map을 사용해 옵셔널 언래핑을 미룰 수 있습니다.
+  // map을 사용해 옵셔널 언래핑을 딜레이합니다.
   let path = encodedString.map { "https://itunes.apple.com/search?term=" + $0 }
 
   guard let url = path.flatMap(URL.init) else {
-    completionHandler(SearchResult(.invalidTerm(term)))  // 1.
+    completionHandler(SearchResult(.invalidTerm(term)))  // 1. CompletionHandler 호출
     return
   }
 
@@ -287,25 +287,26 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
       if let json = try? JSONSerialization.jsonObject(with: data, options: []),
         let jsonDictionary = json as? JSON {
           let result = SearchResult<JSON>(jsonDictionary)  
-          completionHandler(result)  // 2.
+          completionHandler(result)  // 2. CompletionHandler 호출
         } else {
           let result = SearchResult<JSON>(.invalidData)
-          completionHandler(result)  // 3.
+          completionHandler(result)  // 3. CompletionHandler 호출
         }
     case .failure(let error):
       // lower-level error를 higher-level error로 변환합니다.
       let result = SearchResult<JSON>(.underlyingError(error))
-      completionHandler(result)  // 4.
+      completionHandler(result)  // 4. CompletionHandler 호출
     }
   }
 }
 ```
 
-위의 코드에서는 여러 번의 CompletionHandler를 호출합니다. 
-여러 번의 CompletionHandler 호출에 필요한 Result 타입 또한 여러 개를 생성해야 합니다.
-이런 점에서 위의 코드는 boilerplate code를 가집니다.
+위의 코드에서는 네 번의 CompletionHandler를 호출합니다. 
+네 번의 CompletionHandler 호출에 필요한 Result 타입도 네 개가 필요합니다.
 
-이때 map, flatMap, flatMap을 사용해 단일 Result 타입의 Value와 Error를 변환해 한 번의 CompletionHandler로 search() 함수를 구현할 수 있습니다.
+이런 점이 위의 코드의 boilerplate code라고 할 수 있습니다.
+
+이때 **map, flatMap, flatMap**을 사용해 단일 Result 타입의 조작으로(Value와 Error를 변환) 한 번의 CompletionHandler 호출을 가진 함수로 구현할 수 있습니다.
 
 ## Transforming values inside Result
 
