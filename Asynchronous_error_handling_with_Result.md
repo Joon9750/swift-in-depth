@@ -116,7 +116,8 @@ func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkEr
 
 let url = URL(string: "https://itunes.apple.com/search?term=iron%20man")
 
-callURL(with: url) { (result: Result<Data, NetworkError) in  // 컴파일 타임에 failure case가 가진 error의 타입을 알 수 있습니다.
+callURL(with: url) { (result: Result<Data, NetworkError) in
+  // 컴파일 타임에 failure case가 가진 error의 타입을 알 수 있습니다.
   switch result {
   case .success(let data):
     let value = String(data: data, encoding: .utf8)
@@ -127,45 +128,52 @@ callURL(with: url) { (result: Result<Data, NetworkError) in  // 컴파일 타임
 }
 ```
 
-아직 callURL 함수 안의 URLSession API 호출 코드는 고치지 않았습니다. 해당 부분은 아래에서 살펴봅시다.
+아직 callURL 함수 안의 URLSession API 호출 코드는 고치지 않았습니다. 
+해당 부분은 이후에 살펴보고 지금은 Result 타입의 이점에 집중합시다.
 
 위의 코드와 같이 Result 타입을 사용하면 success와 failure의 패턴 매칭으로 컴파일 타임 안전성을 얻게 됩니다.
 
 더 이상 data와 error가 동시에 존재하거나 존재하지 않는 이상한 상황에 대응하지 않아도 됩니다.
 
-Result 타입을 사용하며 중요한 부분은 Result의 value를 얻기 위해서는 error에 대한 처리도 필수적이고 반대 상황에서도 value에 대한 처리가 필수적입니다.
+Result 타입의 중요한 부분은 Result의 value를 얻기 위해서는 error에 대한 처리까지 필수적으로 컴파일 단계에서 강제하여 컴파일 타임 안전성을 얻게 됩니다.
 
 물론 Result의 failure 상황의 error를 핸들링하지 않고 무시할 수 있습니다.
+
 if case let을 사용해 Result 타입의 success 케이스에만 대응하면 가능합니다.
-하지만 Result의 value를 얻고 싶다면 컴파일러에게 error에 대한 처리도 알리는 것이 올바른 방법입니다.
+하지만 Result의 value를 얻고 싶다면 error에 대한 처리까지 구현하는 것이 올바른 방법입니다.
 
-if case let 구문 외에도 Result 타입의 failure(error)를 핸들링하고 싶지 않다면 **dematerialize** 함수를 사용할 수 있습니다.
-dematerialize 함수는 Result 타입이 failure 일 때 failure의 이유를 무시할 수 있습니다.
+if case let 구문 외에도 Result 타입의 failure(error)를 핸들링하고 싶지 않다면 **get** 함수를 사용할 수 있습니다.
+get 함수는 Result 타입이 failure 일 때 failure의 이유를 무시할 수 있습니다.
 
-아래 코드와 같이 dematerialize 함수를 사용해 Result 타입을 패턴 매칭 없이 value 값을 얻을 수 있습니다.
+아래 코드와 같이 get 함수를 사용해 Result 타입을 패턴 매칭 없이 value 값을 얻을 수 있습니다.
 
 ```swift
-let value: Data? = try? result.dematerialize()
+let integerResult: Result<Int, Error> = .success(5)
+do {  
+    let value = try integerResult.get()
+    print("The value is \(value).")
+} catch {
+    print("Error retrieving the value: \(error)")
+}
+// Prints "The value is 5."
 ```
 
 **Bridging from Cocoa Touch to Result**
 
-이제는 callURL 함수 안의 URLSession API 호출 코드에 Result 타입을 사용해 봅시다.
+이제는 callURL 함수 안의 URLSession API 호출 코드에 Result 타입을 사용해 코드를 개선해봅시다.
 
 ```swift
 URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in ... }
 ```
 
-URLSession.shared.dataTask가 리턴하는 data, response, error 데이터를 Result 타입으로 변환해야 합니다.
+URLSession.shared.dataTask가 리턴하는 data, response, error 세 가지 데이터를 Result 타입으로 변환해야 합니다.
 
 세 가지 데이터를 Result 타입으로 변환하기 위해 Result 타입에 custom init을 추가해야 합니다.
-URLSession.shared.dataTask가 리턴하는 세 가지 데이터를 Result 타입으로 변환해야 
+URLSession.shared.dataTask가 리턴하는 세 가지 데이터를 Result 타입으로 변환해야 아래와 같은 callURL 함수의 completionHandler를 만족할 수 있습니다.
 
 ```swift
 func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkError>) -> Void)
 ```
-
-위와 같은 callURL 함수의 선언부를 만족할 수 있습니다.
 
 아래 코드는 Result 타입에 custom init을 추가하고 callURL 함수의 URLSession.shared.dataTask에서 리턴되는 세 가지 데이터를 Result 타입으로 변환하는 코드입니다.
 
@@ -185,7 +193,7 @@ publice enum Result<Value, ErrorType> {
   }
 }
 
-func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkErrork>) -> Void) {
+func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkError>) -> Void) {
   let task = URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in
     let dataTaskError = error.map { NetworkError.fetchFailed($0) }
     let result = Result<Data, NetworkError>(value: data, error: dataTaskError)  // Result enum의 custom init으로 Result 타입 생성
@@ -195,21 +203,24 @@ func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkEr
 }
 ```
 
-모든 API가 value를 리턴하지 않을 수 있습니다.
-Result<(), MyError> 또는 Result<Void, MyError>와 같이 () 또는 Void를 사용해 value 값을 가지지 않는 Result 타입을 만들 수 있습니다.
+위의 URLSession.shared.dataTask에서는 data를 리턴하고 있지만, 모든 API가 항상 value를 리턴하는것은 아닙니다.
+
+이때 Result<(), MyError> 또는 Result<Void, MyError>와 같이 () 또는 Void를 사용해 value 값을 가지지 않는 Result 타입을 만들 수 있습니다.
+만약 URLSession.share.dataTask가 data를 리턴하지 않는 API라면 callURL 함수의 completionHandler에서 @escaping(Result<Data, NetworkError>) -> Void가 아닌 @escaping(Result<(), NetworkError>) -> Void로 선언할 수 있습니다.
 
 ## Propagating Result
 
-Let's make your API a bit higher-level so that instead of manually creating URLs, you can search for items in the iTunes Store by passing strings.
+URL을 전달하는 callURL 함수 대신 문자열을 전달하여 iTunes Store에서 항목을 검색할 수 있도록 API를 좀 더 높은 수준으로 만들어 보겠습니다.
 
-지금까지 위에서 다룬 NetworkError와 같이 lower-level 에러가 아닌 아래와 같은 higher-level 에러 SearchResultError를 다룰 것입니다. SearchResultError가 검색 기능의 추상적인 개념과 적합합니다.
+지금까지 다룬 NetworkError와 같이 저차원 에러가 아닌 고차원 에러(SearchResultError)를 다룰 것입니다. 
+NetworkError와 같은 저차원 에러보다 SearchResultError가 검색 기능의 추상적인 개념과 보다 적합하게 때문입니다.
 
-SearchResultError 코드를 살펴봅시다.
+고차원 에러인 SearchResultError 코드를 살펴봅시다.
 
 ```swift
 enum SearchResultError: Error {
   case invalidTerm(String)  // when an URL can't be created
-  case underlyingError(NetworkError)  // underlyingError cse carries the lower-level NetworkError for troubleshooting
+  case underlyingError(NetworkError)  // underlyingError can carries the lower-level NetworkError for troubleshooting
   case invalidData  // when the raw data could not be parsed to JSON
 }
 
@@ -220,8 +231,9 @@ search(term: "Iron man") { result: Result<[String: Any]>, SearchResultError> in
 
 **Typealiasing for convenience**
 
-search() 함수를 구현하기 전에 **typealias** 키워드를 사용해 Result 타입을 축약해 편리하게 사용할 수 있습니다.
-typealias 키워드를 통해 Result 타입의 data나 error 타입을 고정할 수 있습니다.
+search() 함수를 구현하기 전에 **typealias** 키워드로 Result 타입을 축약해 편리하게 사용합시다.
+
+typealias 키워드를 통해 Result 타입의 data나 error의 타입을 고정할 수 있습니다.
 
 예를 들어 Result<Value, SearchResultError> 타입을 SearchResult<Value>로 typealias 한다면 에러 타입을 SearchResultError 타입으로 고정하게 됩니다.
 SearchResult<Value> 타입은 Value와 Error 타입 모두 제네릭 타입이었지만 이제는 Value만 제네릭 타입이 됩니다.
@@ -229,6 +241,7 @@ SearchResult<Value> 타입은 Value와 Error 타입 모두 제네릭 타입이�
 아래 코드로 살펴봅시다.
 
 ```swift
+// 에러 타입이 SearchResultError로 고정됩니다.
 typealias SearchResult<Value> = Result<Value, SearchResultError>
 
 let searchResult = SearchResult("Tony Stark")
@@ -244,12 +257,13 @@ JSON 타입도 typealias 키워드를 통해 만들어 봅시다.
 typealias JSON = [String: Any]
 ```
 
-typealias 키워드를 통해 SearchResult<JSON> 타입을 만들었습니다.
-SearchResult<JSON> 타입의 실제 타입은 Result<[String: Any], SearchResultError> 타입입니다.
+결과적으로 typealias 키워드를 통해 SearchResult<JSON> 타입을 만들었습니다.
+
+SearchResult<JSON> 타입의 실제 타입은 Result<[String: Any], SearchResultError> 타입인 사실을 기억해야 합니다.
 
 **The search function**
 
-지금부터 iTunes Store에서 문자열로 검색하는 search() 함수를 구현해 봅시다.
+이제 본격적으로 문자열을 전달하여 iTunes Store에서 항목을 검색하는 search 함수를 구현해봅시다.
 
 search() 함수에서는 completionHandler로 최종적으로 SearchResult<JSON> 타입을 리턴하기 위해, data를 JSON으로 파싱하고 lower-level error인 NetworkError를 SearchResultError로 변환하는 과정까지 포함하고 있습니다. 
 
