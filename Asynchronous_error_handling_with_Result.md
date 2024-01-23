@@ -384,7 +384,7 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 **매핑을 통해 옵셔널의 내부값을 얻기 전까지 언래핑을 연기했듯이, Result의 내부 값을 얻고 싶을 때까지 오류 처리를 연기합니다.**
 
-하지만 위의 코드에서 data를 json으로 변환에 실패하면 빈 딕셔너리를 리턴하고 있습니다.
+하지만 위의 코드에서 data를 JSON으로 변환에 실패하면 빈 딕셔너리를 리턴하고 있습니다.
 
 빈 딕셔너리를 리턴하는 대신 Error를 표현하는 방식으로 개선하려 합니다.
 이때 failure 케이스인 Result를 통해 Error를 표현할 수 있습니다.
@@ -393,13 +393,13 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 **flatMapping over Result**
 
-Result 타입 없이, 빈 딕셔너리 대신 Error를 던지는 방식으로 개선할 수 있지만 Result 타입을 사용하는 것과 error throwing이 섞이면 혼란스러울 수 있습니다. (뒤에서 Result 타입과 error throwing을 섞는 방식도 살펴볼 예정입니다.)
+Result 타입 없이, 빈 딕셔너리 대신 Error를 던지는 방식으로 개선할 수 있지만 Result 타입을 사용하는 것과 error throwing이 섞이면 혼란스러울 수 있습니다. (뒤에서 Result 타입과 error throwing을 섞는 방식도 살펴볼 예정입니다)
 
 따라서 빈 딕셔너리를 리턴하는 대신 failure 케이스를 가진 Result를 리턴하는 방식으로 코드를 개선할 것입니다.
 
 하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면, 결과적으로 중첩 Result 타입인 SearchResult<SearchResult<JSON>>가 리턴됩니다.
 
-이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화 할 수 있습니다.
+이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화할 수 있습니다.
 물론 failure 케이스인 Result는 map에서와 동일하게 flatMap에서도 무시됩니다.
 
 결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 failure의 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
@@ -444,10 +444,10 @@ Result 타입의 Error는 mapError로 변환 가능합니다.
 
 지금까지는 Result 타입의 mapping, flatmapping 연산 안에서(클로저 안에서) 에러를 던지는 함수를 호출하는 방식을 혼란스럽다는 이유로 피했습니다.
 
-지금부터 Result 타입의 mapping, flatmapping 연산 안에서 에러를 던지는 함수를 추가해보고, 마지막에는 에러를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링하는 방법을 살펴봅시다.
+지금부터 Result 타입의 mapping, flatmapping 연산 안에서 에러를 던지는 함수를 추가해 보고, 마지막에는 에러를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링하는 방법을 살펴봅시다.
 
-search 함수의 flatMap 클로저 안에서 data를 JSON으로 변환할 때 실패 시 에러를 던지는 parseData 함수를 추가해봅시다.
-parseData 함수는 JSON으로 데이터 변환에 실패 했을 때 ParsingError 타입 에러를 던집니다.
+search 함수의 flatMap 클로저 안에서 data를 JSON으로 변환할 때 실패 시 에러를 던지는 parseData 함수를 추가해 봅시다.
+parseData 함수는 JSON으로 데이터 변환에 실패했을 때 ParsingError 타입 에러를 던집니다.
 
 ParsingError 열거형과 parseData 함수를 코드로 살펴봅시다.
 
@@ -482,7 +482,7 @@ let searchResult: Result<JSON, SearchResultError> = Result(try parseData(data))
 
 하지만 위의 코드는 한 가지 문제가 있습니다.
 
-parseData 함수가 던질 에러 타입을 런타임에서야 알 수 있고, 만약 parseData 함수가 SearchResultError 타입의 에러를 던지지 않는다면 다른 타입의 에러에는 추가적으로 대응해야 합니다.
+parseData 함수가 던질 에러 타입을 런타임에서야 알 수 있고, 만약 parseData 함수가 SearchResultError 타입의 에러를 던지지 않는다면 다른 타입의 에러에는 추가로 대응해야 합니다.
 
 이를 해결하기 위해서 아래 코드와 같이 **do-catch** 구문이 필요합니다.
 
@@ -524,10 +524,10 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 **Weaving errors through a pipeline**
 
-위에서 살펴본 map, flatMap, mapError를 파이프라인 형식으로 구성하여 에러를 던지는 함수 없이도 에러를 핸들링 할 수 있습니다.
+위에서 살펴본 map, flatMap, mapError를 파이프라인 형식으로 구성하여 에러를 던지는 함수 없이도 에러를 핸들링할 수 있습니다.
 Result 타입이 파이프라인을 통과하고 나서 최종적으로 패턴 매칭을 통해 에러를 핸들링합니다.
 
-flatMap은 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸지만, map은 항상 Happy path에 프로그램의 흐름을 유지시켜줍니다.
+flatMap은 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸지만, map은 항상 Happy path에 프로그램의 흐름을 유지하게 합니다.
 
 flatMap이 사용하게 된 이유가 에러를 던질 상황에 Result 타입을 리턴하기 위함으로 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸는 것입니다.
 
@@ -576,9 +576,9 @@ flatMap에서 특정 에러로 인해 failure 케이스인 Result가 리턴된�
 
 에러 타입을 하나로 특정하는 방법은 좋은 방법입니다. 
 
-하지만 다뤄야할 에러 타입이 너무 다양하다면, 초기 프로젝트 시기에는 모든 에러 타입을 정확한 단일 에러 타입으로 확정하기에 부담스러울 수 있습니다.
+하지만 다뤄야 할 에러 타입이 너무 다양하다면, 초기 프로젝트 시기에는 모든 에러 타입을 정확한 단일 에러 타입으로 확정하기에 부담스러울 수 있습니다.
 
-이때 우리는 SPM(Swift Package Manager)에서 제공하는 제네릭 타입인 **AnyError**를 사용하여 에러의 타입을 런타임에 알 수 있도록하여 정확한 에러 타입을 선언할 부담을 덜어줍니다.
+이때 우리는 SPM(Swift Package Manager)에서 제공하는 제네릭 타입인 **AnyError**를 사용하여 에러의 타입을 런타임에 알 수 있도록 하여 정확한 에러 타입을 선언할 부담을 덜어줍니다.
 
 **AnyError는 Result 내부의 Error에 들어가는 모든 에러 타입에 대응할 수 있습니다.**
 Result 내부의 에러는 Error 타입을 따르기 때문에 AnyError 또한 Error 타입을 따르는 모든 에러에 대응할 수 있습니다.
@@ -618,7 +618,7 @@ let otherResult: Result<String, AnyError> = Result(anyError: { () throws -> Stri
 ```
 
 AnyError는 에러 타입을 런타임에 알게 됩니다. 따라서 정확한 에러 타입을 알 필요 없을 때 AnyError를 Result 타입과 함께 사용할 수 있습니다.
-파이프라인에서 각 단계별로 리턴되는 에러 타입이 다양할 경우, AnyError를 사용해 리턴되는 에러들을 특정 에러 타입으로 변환할 부담을 줄여줍니다.
+파이프라인에서 단계별로 리턴되는 에러 타입이 다양할 경우, AnyError를 사용해 리턴되는 에러들을 특정 에러 타입으로 변환할 부담을 줄여줍니다.
 
 AnyError를 활용하여 processPayment라는 돈을 이체하는 함수를 만들어봅시다.
 각 단계에서 다양한 유형의 오류를 반환할 수 있으므로 AnyError를 통해 다양한 오류를 하나의 특정 유형으로 변환해야 하는 부담을 줄일 수 있습니다.
@@ -646,7 +646,7 @@ func processPayment(fromAccount: Account, toAccount: Account, amoutInCents: Int,
 }
 ```
 
-AnyError를 가진 Result 타입을 사용하면 Result 타입에 mapAny를 사용 가능합니다.
+AnyError를 가진 Result 타입을 사용하면 Result 타입에 mapAny를 사용할 수 있습니다.
 
 mapAny 메소드는 에러를 던지는 함수를 허용한다는 점을 제외하면 map과 유사하게 작동합니다.
 
@@ -660,8 +660,8 @@ mapAny는 flatMap 처럼 클로저 안에서 새로운 Result 타입을 리턴�
 
 따라서 map은 연산에 속하는 함수가 에러를 던지지 못하는 함수임을 나타내고, mapAny는 에러를 던질 수 있는 함수임을 나타냅니다!
 
-map과 mapAny의 차이점은 map이 모든 Result 유형에서 작동하지만 함수 발생 시 오류를 포착하지 못한다는 것입니다.
-반대로, mapAny는 에러를 던지는 함수와 던지지 않는 함수 모두에서 작동하지만 AnyError를 포함하는 Result 유형에서만 사용할 수 있습니다.
+map과 mapAny의 차이점은 map이 모든 Result 유형에서 작동하지만, 함수 발생 시 오류를 포착하지 못한다는 것입니다.
+반대로, mapAny는 에러를 던지는 함수와 던지지 않는 함수 모두에서 작동하지만, AnyError를 포함하는 Result 유형에서만 사용할 수 있습니다.
 
 **결과적으로 mapAny를 통해 Result의 value를 매핑하고 에러가 발생할 경우 AnyError로 감싼 에러를 가진 Result 타입을 얻을 수 있습니다.**
 
@@ -693,7 +693,7 @@ AnyError를 사용하면 더욱 유연성있는 코드를 만듭니다.
 
 Result 타입을 가지는 프로토콜을 따를 때, 프로토콜을 따르는 타입에서 Result의 failure가 발생하는 상황이 절대 일어나지 않는 경우가 있습니다. (never fail)
 
-Result 타입은 success와 failure 케이스를 갖지만, failure 케이스가 발생할 가능성이 없을 때 빈 Error 타입을 만들어서 대응하거나 Never 타입으로 대응할 수 있습니다.
+Result 타입은 success와 failure 케이스를 가지지만, failure 케이스가 발생할 가능성이 없을 때 빈 Error 타입을 만들어서 대응하거나 Never 타입으로 대응할 수 있습니다.
 
 먼저 Result 타입을 가지는 프로토콜을 코드로 구현해 봅시다.
 
@@ -749,7 +749,7 @@ subscriptionsLoader.load { (result: Result<[Subscription], BogusError>) in
 
 **Never** 타입이 빈 열거형을 대신하는 공식적인 방식입니다.
 
-Never 타입은 컴파일러에게 특정 경로(케이스)로 프로그램의 흐름이 가지 않는다는 사실을 알립니다.
+Never 타입은 컴파일러에 특정 경로(케이스)로 프로그램의 흐름이 가지 않는다는 사실을 알립니다.
 다시 말해, 불가능한 경로를 나타냅니다.
 
 아래 코드로 Never 타입을 살펴봅시다.
@@ -769,9 +769,10 @@ Never 타입의 구현부는 아래 코드와 같습니다. Never 타입도 빈 
 public enum Never {}
 ```
 
-앞에서 봤던 빈 열거형 BogusError를 Never 타입으로 대체 가능합니다.
+앞에서 봤던 빈 열거형 BogusError를 Never 타입으로 대체 할 수 있습니다.
+
 물론 Result 타입의 에러로 Never 타입을 사용하려면 Never 타입을 Error 타입을 따르도록 해야 합니다.
-Result 타입의 에러는 Error 타입을 따르도록 타입 제약을 가지고 있기 때문입니다.
+Result 타입의 에러는 Error 타입을 따르도록 타입 제약이 있기 때문입니다.
 
 아래 코드는 BogusError를 Never 타입으로 고친 코드입니다.
 
@@ -788,7 +789,7 @@ final class SubscriptionsLoader: Service {
 }
 ```
 
-Result 타입의 Error에 Never을 넣을 수 있듯이 Success 케이스의 Value에도 Never를 넣을 수 있습니다.
+Result 타입의 Error에 Never를 넣을 수 있듯이 Success 케이스의 Value에도 Never를 넣을 수 있습니다.
 Success 케이스의 Value에 Never를 넣게 되면 절대 Success 되지 않는 동작을 의미합니다.
 
 ## Summary
