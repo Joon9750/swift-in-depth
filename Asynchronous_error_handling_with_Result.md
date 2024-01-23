@@ -46,7 +46,7 @@ Result는 success(Value)와 failure(ErrorType) 두 개의 케이스를 가진 �
 
 옵셔널은 Value 또는 nil을 가지지만, Result는 Value 또는 Error를 가지게 됩니다.
 
-failure의 경우 단순히 빈 값(nil)을 가지는 옵셔널과 달리 Error를 가지기 때문에 실패에 대한 맥락을 제공할 수 있습니다.
+failure의 경우 단순히 빈 값(nil)을 가지는 옵셔널과 달리 Error를 가지기 때문에, 실패에 대한 맥락을 제공할 수 있습니다.
 
 결과적으로 Result 타입은 이후 패턴 매칭을 통해 success와 failure에 대한 대응을 모두 구현해야 합니다.
 
@@ -58,7 +58,7 @@ Result 타입의 이점을 느끼기 위해 먼저 Cocoa Touch-style의 에러 �
 
 Cocoa Toach-style 에러 핸들링의 문제점을 Result 타입으로 해결해 봅시다.
 
-지금부터 구현할 API는 iTunes Store에서 특정 url로 검색하는 기능을 하는 API입니다.
+지금부터 구현할 API는 iTunes Store에서 특정 URL로 검색하는 기능을 하는 API입니다.
 
 먼저 Cocoa Touch-style의 코드를 살펴봅시다.
 
@@ -90,7 +90,7 @@ URLSession.dataTask 작업에 시간이 걸리기 때문에 @escaping 클로저�
 
 callURL 함수의 호출부를 보면 error와 data를 모두 체크해야 합니다. 
 
-Cocoa Touch-style 방식은 callURL 함수에서 이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수도 있습니다. error와 data 모두 없는 말도 안되는 상황까지 대응해야 합니다.
+Cocoa Touch-style 방식은 callURL 함수에서 이론적으로 error와 data를 둘 다 받을 수 있고 못받을 수도 있습니다. error와 data 모두 없는 말도 안 되는 상황까지 대응해야 합니다.
 
 또한 Cocoa Touch-style 방식은 에러 핸들링에 있어 컴파일 타임 이점을 얻지 못합니다.
 
@@ -143,7 +143,7 @@ if case let을 사용해 Result 타입의 success 케이스에만 대응하면 �
 하지만 Result의 value를 얻고 싶다면 error에 대한 처리까지 구현하는 것이 올바른 방법입니다.
 
 if case let 구문 외에도 Result 타입의 failure(error)를 핸들링하고 싶지 않다면 **get** 함수를 사용할 수 있습니다.
-get 함수는 Result 타입이 failure 일 때 failure의 이유를 무시할 수 있습니다.
+get 함수는 Result 타입이 failure일 때 failure의 이유를 무시할 수 있습니다.
 
 아래 코드와 같이 get 함수를 사용해 Result 타입을 패턴 매칭 없이 value 값을 얻을 수 있습니다.
 
@@ -160,7 +160,7 @@ do {
 
 **Bridging from Cocoa Touch to Result**
 
-이제는 callURL 함수 안의 URLSession API 호출 코드에 Result 타입을 사용해 코드를 개선해봅시다.
+이제는 callURL 함수 안의 URLSession API 호출 코드에 Result 타입을 사용해 코드를 개선해 봅시다.
 
 ```swift
 URLSession.shared.dataTask(with: url, completionHandler: { (data, response, error) -> Void in ... }
@@ -213,7 +213,7 @@ func callURL(with url: URL, completionHandler: @escaping (Result<Data, NetworkEr
 URL을 전달하는 callURL 함수 대신 문자열을 전달하여 iTunes Store에서 항목을 검색할 수 있도록 API를 좀 더 높은 수준으로 만들어 보겠습니다.
 
 지금까지 다룬 NetworkError와 같이 저차원 에러가 아닌 고차원 에러(SearchResultError)를 다룰 것입니다. 
-NetworkError와 같은 저차원 에러보다 SearchResultError가 검색 기능의 추상적인 개념과 보다 적합하게 때문입니다.
+NetworkError와 같은 저차원 에러보다 SearchResultError가 검색 기능의 추상적인 개념과 더 적합하기 때문입니다.
 
 고차원 에러인 SearchResultError 코드를 살펴봅시다.
 
@@ -263,7 +263,7 @@ SearchResult<JSON> 타입의 실제 타입은 Result<[String: Any], SearchResult
 
 **The search function**
 
-이제 본격적으로 문자열을 전달하여 iTunes Store에서 항목을 검색하는 search 함수를 구현해봅시다.
+이제 본격적으로 문자열을 전달하여 iTunes Store에서 항목을 검색하는 search 함수를 구현해 봅시다.
 
 search() 함수에서는 completionHandler로 SearchResult<JSON> 타입을 리턴하기 위해, data를 JSON으로 파싱하고 저차원 에러 NetworkError를 고차원 에러 SearchResultError로 변환하는 과정을 포함하고 있습니다.
 
@@ -304,19 +304,19 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 위의 코드에서는 네 번의 CompletionHandler를 호출합니다. 
 네 번의 CompletionHandler 호출에 필요한 Result 타입도 네 개가 필요합니다.
 
-이런 점이 위의 코드의 boilerplate code라고 할 수 있습니다.
+이런 점이 위의 코드를 boilerplate code라고 할 수 있습니다.
 
 이때 **map, flatMap, flatMap**을 사용해 단일 Result 타입의 조작으로(Value와 Error를 변환) 한 번의 CompletionHandler 호출을 가진 함수로 구현할 수 있습니다.
 
 ## Transforming values inside Result
 
-옵셔널에 map을 사용해 옵셔널 언래핑을 미뤘던것처럼 Result 타입과 map도 함께 사용할 수 있습니다.
+옵셔널에 map을 사용해 옵셔널 언래핑을 미뤘던 것처럼 Result 타입과 map도 함께 사용할 수 있습니다.
 옵셔널을 매핑하듯이 Result를 매핑하여 변형할 수 있습니다.
 
 매핑 없이 Result를 사용할 때, Result 타입을 전달하며 변형한 이후 switch(패턴 매칭)를 통해 Result 내부의 값을 추출할 수 있습니다.
 
 하지만 map을 사용하여 옵셔널을 매핑할 때 옵셔널 언래핑 없이 내부 값을 다루고 다시 옵셔널로 감쌌듯이, Result를 매핑하면 success 케이스의 경우 내부 value가 클로저로 들어가고 failure 케이스 경우 map 연산이 무시됩니다. 
-이후 내부 value는 다시 Result으로 감싸서 리턴됩니다.
+이후 내부 value는 다시 Result로 감싸서 리턴됩니다.
 
 위의 search 함수에서 Result 타입의 data를 JSON으로 변환할 때 map을 사용해 여러 번의 CompletionHandler 호출을 단일 호출 방식으로 고쳐봅시다.
 
