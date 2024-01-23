@@ -400,24 +400,19 @@ Result 타입 없이, 빈 딕셔너리 대신 Error를 던지는 방식으로 �
 하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면, 결과적으로 중첩 Result 타입인 SearchResult<SearchResult<JSON>>가 리턴됩니다.
 
 이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화 할 수 있습니다.
-
-물론 Error 케이스를 가진 Result는 map에서와 동일하게 flatMap에서도 무시됩니다.
+물론 failure 케이스인 Result는 map에서와 동일하게 flatMap에서도 무시됩니다.
 
 결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 failure의 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
 
-flatMap이 success 케이스의 Result와 동작하는 과정을 살펴봅시다.
-flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure 케이스의 Result를 생성하고 성공 시 success 케이스의 Result를 생성합니다.
+flatMap이 Result와 동작하는 과정을 살펴봅시다.
+flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure 케이스의 Result를 생성하고 성공 시 success 케이스의 Result를 생성하게 됩니다.
 
-추가적으로 flatMap은 failure 케이스의 Result는 무시하게 됩니다.
+1. **You start with a successful result containing Data(x2) and with one result containing an error.**
+2. **With flatMap, you apply a function to the value inside the result. This function will itself return a new result. (This new result could be successful and carry a value, or be a failure result containing an error. But if you start with a result containing an error, any flatMap action is ignored.)**
+3. **You end up with a nested result. (If you start with an error, then nothing is transformed or nested.)**
+4. **The nested result is flattened to a regular result. (If you start wih an error, nothing happened and the result remains the same.**
 
-1. You start with a successful result containing Data(x2) and with one result containing an error.
-2. With flatMap, you apply a function to the value inside the result. This function will itself return a new result. (This new result could be successful and carry a value, or be a failure result containing an error. But if you start with a result containing an error, any flatMap action is ignored.)
-3. You end up with a nested result. (If you start with an error, then nothing is transformed or nested.)
-4. The nested result is flattened to a regular result. (If you start wih an error, nothing happened and the result remains the same.
-
-이제는 위에서 데이터 변환 실패 시 빈 딕셔너리를 생성하는 코드를 빈 딕셔너리가 아닌 failure 케이스의 Result를 생성하도록 고쳐봅시다.
-
-아래 코드는 데이터 변환 실패 시 failure 케이스의 Result를 생성하고 이후 중첩된 Result 타입을 flatMap으로 평탄화하는 코드입니다.
+위에서 데이터 변환 실패 시 빈 딕셔너리를 리턴하는 코드를 failure 케이스의 Result를 리턴하도록 고쳐봅시다.
 
 ```swift
 func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> Void) {
@@ -447,20 +442,21 @@ Result 타입의 Error는 mapError로 변환 가능합니다.
 
 ## Mixing Result with throwing functions
 
-지금까지는 Result 타입의 mapping, flatmapping 연산 안에서(클로저 안에서) Error를 던지는 함수를 호출하는 방식을 피했습니다.
-지금부터 Result 타입의 mapping, flatmapping 연산 안에서 Error를 던지는 함수를 추가해보고 마지막에는 Error를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링해봅시다.
+지금까지는 Result 타입의 mapping, flatmapping 연산 안에서(클로저 안에서) 에러를 던지는 함수를 호출하는 방식을 혼란스럽다는 이유로 피했습니다.
 
-search 함수의 flatMap 클로저 안에서 Data -> JSON으로 변환할 때 Error를 던지는 parseData 함수를 사용해봅시다.
-parseData 함수는 JSON으로 데이터 변환에 실패 했을 때 ParsingError 에러를 던집니다.
+지금부터 Result 타입의 mapping, flatmapping 연산 안에서 에러를 던지는 함수를 추가해보고, 마지막에는 에러를 던지지 않고 파이프라인 방식으로 Result 타입의 전달만으로 에러를 핸들링하는 방법을 살펴봅시다.
 
-먼저 ParsingError 열거형과 parseData 함수를 코드로 살펴봅시다.
+search 함수의 flatMap 클로저 안에서 data를 JSON으로 변환할 때 실패 시 에러를 던지는 parseData 함수를 추가해봅시다.
+parseData 함수는 JSON으로 데이터 변환에 실패 했을 때 ParsingError 타입 에러를 던집니다.
+
+ParsingError 열거형과 parseData 함수를 코드로 살펴봅시다.
 
 ```swift
 enum ParsingError: Error {
   case couldNotParseJSON
 }
 
-// 함수에 throws 키워드를 추가해 에러를 던질 수 있음을 알립니다.
+// data를 JSON으로 변환하며 실패 시 에러를 던집니다.
 func parseData(_ data: Data) throws -> JSON {
   guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
         let jsonDictionary = json as? JSON else {
@@ -470,21 +466,23 @@ func parseData(_ data: Data) throws -> JSON {
 }
 ```
 
-error를 던지는 함수가 error를 던졌을 때 이를 failure 케이스의 Result 타입으로 변환하여 대응할 수 있습니다.
+에러를 던지는 함수가 에러를 던졌을 때 이를 failure 케이스의 Result 타입으로 변환하여 대응할 수 있습니다.
 
-Result의 생성자(init)로 error를 던지는 함수를 try 키워드와 함께 넣습니다.
-이때 함수가 error를 던지는 여부에 따라 Result가 success 케이스로 생성될지 failure 케이스로 생성될지 결정됩니다.
-함수가 error를 던졌을 때 failure 케이스의 Result 타입을 생성합니다.
+Result의 생성자(init)에 에러를 던지는 함수를 try 키워드와 함께 넣습니다.
+
+이때 함수가 에러를 던지는 여부에 따라 Result가 success 케이스로 생성될지 failure 케이스로 생성될지 결정됩니다.
+함수가 에러를 던졌을 때 failure 케이스의 Result 타입을 생성하고 에러를 던지지 않을 때 success 케이스의 Result 타입이 생성됩니다.
 
 아래 코드로 살펴봅시다.
 
 ```swift
+// parseData 함수가 에러를 던지면 Result failure, 던지지 않으면 Result success로 Result 타입이 생성됩니다.
 let searchResult: Result<JSON, SearchResultError> = Result(try parseData(data))
 ```
 
-위의 코드는 한 가지 문제가 있습니다.
+하지만 위의 코드는 한 가지 문제가 있습니다.
 
-parseData 함수가 던질 에러 타입을 런타임에서야 알 수 있고 만약 parseData 함수가 SearchResultError 타입의 에러를 던지지 않는다면 다른 타입의 에러에 추가적으로 대응해야 합니다.
+parseData 함수가 던질 에러 타입을 런타임에서야 알 수 있고, 만약 parseData 함수가 SearchResultError 타입의 에러를 던지지 않는다면 다른 타입의 에러에는 추가적으로 대응해야 합니다.
 
 이를 해결하기 위해서 아래 코드와 같이 **do-catch** 구문이 필요합니다.
 
@@ -498,7 +496,7 @@ do {
 }
 ```
 
-throwing function을 Result 타입으로 변환했다면 이 방법으로 search 함수를 완성해 봅시다.
+throwing function을 Result 타입으로 변환했다면, 위의 do-catch 구문으로 search 함수를 완성해 봅시다.
 
 아래 코드로 살펴봅시다.
 
@@ -530,7 +528,8 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 Result 타입이 파이프라인을 통과하고 나서 최종적으로 패턴 매칭을 통해 에러를 핸들링합니다.
 
 flatMap은 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸지만, map은 항상 Happy path에 프로그램의 흐름을 유지시켜줍니다.
-flatMap이 사용하게 된 이유가 Error를 던질 상황에 Result 타입을 리턴하기 위함으로 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸는 것입니다.
+
+flatMap이 사용하게 된 이유가 에러를 던질 상황에 Result 타입을 리턴하기 위함으로 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸는 것입니다.
 
 에러를 던지는 함수 없이 파이프라인 방식으로 에러를 핸들링한 아래 코드를 살펴봅시다.
 
@@ -567,8 +566,8 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 }
 ```
 
-map과 flatMap은 Result 타입이 failure일 경우 무시합니다.
-flatMap에서 특정 에러로 인해 failure인 Result가 리턴된다면 이후의 mapping이나 flatmapping은 무시됩니다.
+map과 flatMap은 Result 타입이 failure 케이스일 경우 무시됩니다.
+flatMap에서 특정 에러로 인해 failure 케이스인 Result가 리턴된다면 이후의 mapping이나 flatmapping은 무시됩니다.
 
 ## Multiple errors inside of Result
 
