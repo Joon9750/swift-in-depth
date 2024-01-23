@@ -313,44 +313,46 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 옵셔널에 map을 사용해 옵셔널 언래핑을 미뤘던것처럼 Result 타입과 map도 함께 사용할 수 있습니다.
 옵셔널을 매핑하듯이 Result를 매핑하여 변형할 수 있습니다.
 
-매핑 없이 일반적인 경우 Result를 가졌을 때 Result 타입을 넘기고 변형한 이후 switch(패턴 매칭)를 통해 Result 내부의 값을 추출할 수 있습니다.
+매핑 없이 Result를 사용할 때, Result 타입을 전달하며 변형한 이후 switch(패턴 매칭)를 통해 Result 내부의 값을 추출할 수 있습니다.
 
-하지만 map을 사용하면 옵셔널을 매핑할 때 옵셔널 언래핑을 할 필요 없이 내부 값을 다루고 다시 옵셔널로 감쌌듯이, Result를 매핑하면 success 케이스의 경우 내부 value가 클로저로 들어가고 failure 케이스 경우 map 연산이 무시됩니다. 
+하지만 map을 사용하여 옵셔널을 매핑할 때 옵셔널 언래핑 없이 내부 값을 다루고 다시 옵셔널로 감쌌듯이, Result를 매핑하면 success 케이스의 경우 내부 value가 클로저로 들어가고 failure 케이스 경우 map 연산이 무시됩니다. 
+이후 내부 value는 다시 Result으로 감싸서 리턴됩니다.
 
-따라서 위의 search() 함수에서 Result 타입의 String data를 JSON으로 변형할 때 map을 사용하면 효과적입니다.
+위의 search 함수에서 Result 타입의 data를 JSON으로 변환할 때 map을 사용해 여러 번의 CompletionHandler 호출을 단일 호출 방식으로 고쳐봅시다.
 
-map에 의해 Result 타입이 success 케이스의 경우 Result 타입의 Value를 변환하는 과정을 살펴봅시다.
+success 케이스인 Result 타입을 매핑할 때의 과정을 먼저 살펴봅시다.
 
-1. You have result: with a value.
-2. With map, you apply a function to the value inside a result.
-3. Map rewraps the transformed value in a result.
+1. **You have result: with a value.**
+2. **With map, you apply a function to the value inside a result.**
+3. **Map rewraps the transformed value in a result.**
 
-이제는 Result 타입이 failure 케이스의 경우 map이 동작하는 과정을 살펴봅시다.
+두 번째로 failure 케이스인 Result 타입을 매핑할 때의 과정을 살펴봅시다.
 
-1. You have result: with an error.
-2. Map does nothing with a failing result.
-3. The failing result is still the same old failling result.
+1. **You have result: with an error.**
+2. **Map does nothing with a failing result.**
+3. **The failing result is still the same old failling result.**
 
 map은 failure 케이스의 Result 타입에는 동작하지 않고 success 케이스의 Result 타입에만 동작합니다.
-하지만 **mapError**을 사용하면 map과 반대로 Result 타입이 failure 케이스일 때 error를 매핑하고 success 케이스의 경우 mapError가 동작하지 않습니다.
 
-mapError가 success 케이스를 가진 Result 타입에 동작하는 과정을 살펴봅시다.
+하지만 **mapError**을 사용하면 map과 반대로 Result 타입이 failure 케이스일 때 에러를 매핑하고 success 케이스의 경우 mapError가 동작하지 않습니다.
 
-1. You have success result: with a value.
-2. mapError does nothing with a successful result.
-3. The successful result is still the same.
+success 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴봅시다.
 
-이번에는 mapError가 failure 케이스를 가진 Result 타입에 동작하는 과정을 살펴봅시다.
+1. **You have success result: with a value.**
+2. **mapError does nothing with a successful result.**
+3. **The successful result is still the same.**
 
-1. You have failure result: with a error.
-2. With mapError, you apply a function to the error inside a result.
-3. mapError rewraps the transformed error in a result.
+두 번째로 failure 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴봅시다. 
 
-다시 말해 map을 통해 Result 타입의 Value를 매핑하여 값을 변환하고 mapError로 Result 타입의 Error를 매핑하여 값을 변환할 수 있습니다.
+1. **You have failure result: with a error.**
+2. **With mapError, you apply a function to the error inside a result.**
+3. **mapError rewraps the transformed error in a result.**
 
-With the power of both map and mapError combined, you can turn a Result<Data, NetworkError> into a Result<JSON, SearchResultError>, aka SearchResult<JSON>.
+**다시 말해 map을 통해 Result 타입의 Value를 매핑하여 값을 변환하고, mapError로 Result 타입의 Error를 매핑하여 값을 변환할 수 있습니다.**
 
-지금부터 map과 mapError를 통해 Result 타입의 데이터 변환하여 위의 보일러 플레이트 코드를 개선할 수 있습니다.
+map과 mapError의 기능을 결합하면 Result<Data, NetworkError>를 SearchResult<JSON>이라고도 불리는 Result<JSON, SearchResultError>로 바꿀 수 있습니다.
+
+지금부터 map과 mapError의 기능을 결합해 Result 타입의 데이터 변환하여 위의 보일러 플레이트 코드를 개선합시다.
 
 아래 코드로 살펴봅시다.
 
@@ -364,39 +366,44 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
           .map { (data: Data) -> JSON in
             guard let json = try? JSONSerialization.jsonObject(with: data, options: []),
               let jsonDictionary = json as? JSON else {
-                return [:]  // data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴합니다.
+              // data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴합니다.
+              return [:] 
             }
             return jsonDictionary
           }
           .mapError { (networkError: NetworkError) -> SearchResultError in
             return SearchResultError.underlying(networkError)
           }
+    // 단일 Result를 조작하여 completionHandler를 한 번만 호출하도록 개선합니다.
     completionHandler(convertedResult)
   }
 }
 ```
 
-위의 코드와 같이 map과 mapError를 통해 Result 타입 내의 value와 error를 변환해 마지막 Result를 completionHandler로 리턴하여 한 번의 completionHandler만 호출하도록 함수를 만들 수 있습니다.
+위의 코드와 같이 map과 mapError를 결합해 Result 타입 내의 value와 error를 변환하여, 단일 Result를 completionHandler로 리턴하여 한 번의 completionHandler만 호출하도록 함수를 개선했습니다.
 
-Just like with optionals, you delay any error handling until you want to get the value out.
+**매핑을 통해 옵셔널의 내부값을 얻기 전까지 언래핑을 연기했듯이, Result의 내부 값을 얻고 싶을 때까지 오류 처리를 연기합니다.**
 
-하지만 위의 코드에서 data를 json으로 변환 시 실패하면 빈 딕셔너리를 리턴하고 있습니다.
-빈 딕셔너리를 리턴하는 대신 Error를 가지는 방식으로 개선하려 합니다.
+하지만 위의 코드에서 data를 json으로 변환에 실패하면 빈 딕셔너리를 리턴하고 있습니다.
 
-이때 우리는 **faltMap**을 사용하여 개선할 수 있습니다.
+빈 딕셔너리를 리턴하는 대신 Error를 표현하는 방식으로 개선하려 합니다.
+이때 failure 케이스인 Result를 통해 Error를 표현할 수 있습니다.
+
+이때 우리는 **faltMap**을 사용하게 됩니다.
 
 **flatMapping over Result**
 
-빈 딕셔너리를 리턴하는 대신 Error를 던지는 방식으로 개선할 수 있지만 Result 타입을 사용하는 것과 error throwing이 섞이면 이상할 수 있습니다. (뒤에서 Result 타입과 error throwing을 섞는 방식도 살펴볼 예정입니다.)
+Result 타입 없이, 빈 딕셔너리 대신 Error를 던지는 방식으로 개선할 수 있지만 Result 타입을 사용하는 것과 error throwing이 섞이면 혼란스러울 수 있습니다. (뒤에서 Result 타입과 error throwing을 섞는 방식도 살펴볼 예정입니다.)
 
-따라서 빈 딕셔너리를 리턴하는 대신 failure 케이스를 가진 Result를 리턴하는 방식으로 코드를 개선할 수 있습니다.
+따라서 빈 딕셔너리를 리턴하는 대신 failure 케이스를 가진 Result를 리턴하는 방식으로 코드를 개선할 것입니다.
 
-하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면 결과적으로 SearchResult<SearchResult<JSON>>과 같은 중첩 Result 타입이 만들어 집니다.
+하지만 Result를 매핑한 map 클로저 내에서 빈 딕셔너리 대신 Result(failure)를 리턴하면, 결과적으로 중첩 Result 타입인 SearchResult<SearchResult<JSON>>가 리턴됩니다.
 
 이때 중첩 Result를 flatMap을 통해 단일 Result로 평탄화 할 수 있습니다.
-물론 Error 케이스를 가진 Result는 map과 동일하게 flatMap에서도 무시됩니다.
 
-결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
+물론 Error 케이스를 가진 Result는 map에서와 동일하게 flatMap에서도 무시됩니다.
+
+결과적으로 flatMap을 사용해 flatMap 클로저 내부에서 진행되는 data -> JSON 변환 과정에서 발생되는 에러를 failure의 Result 타입으로 리턴하여 중첩 Result 타입을 단일 Result 타입으로 리턴합니다.
 
 flatMap이 success 케이스의 Result와 동작하는 과정을 살펴봅시다.
 flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure 케이스의 Result를 생성하고 성공 시 success 케이스의 Result를 생성합니다.
