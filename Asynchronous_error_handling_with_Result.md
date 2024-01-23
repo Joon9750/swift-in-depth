@@ -45,7 +45,6 @@ Result는 success(Value)와 failure(ErrorType) 두 개의 케이스를 가진 �
 그에 반해 success의 Value 타입에 경우 타입 제약이 없기 때문에 모든 타입이 Value로 들어올 수 있습니다.
 
 옵셔널은 Value 또는 nil을 가지지만, Result는 Value 또는 Error를 가지게 됩니다.
-
 failure의 경우 단순히 빈 값(nil)을 가지는 옵셔널과 달리 Error를 가지기 때문에, 실패에 대한 맥락을 제공할 수 있습니다.
 
 결과적으로 Result 타입은 이후 패턴 매칭을 통해 success와 failure에 대한 대응을 모두 구현해야 합니다.
@@ -55,7 +54,6 @@ failure의 경우 단순히 빈 값(nil)을 가지는 옵셔널과 달리 Error�
 **Understanding the benefits of Result**
 
 Result 타입의 이점을 느끼기 위해 먼저 Cocoa Touch-style의 에러 핸들링이 비동기 상황에서 보이는 문제점을 살펴봅시다.
-
 Cocoa Toach-style 에러 핸들링의 문제점을 Result 타입으로 해결해 봅시다.
 
 지금부터 구현할 API는 iTunes Store에서 특정 URL로 검색하는 기능을 하는 API입니다.
