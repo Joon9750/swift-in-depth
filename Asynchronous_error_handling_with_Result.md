@@ -731,7 +731,7 @@ final class SubscriptionsLoader: Service {
 BogusError는 빈 열거형이기 때문에 인스턴스화 할 필요도 할 수 없습니다.
 또한 Error 케이스에 빈 열거형(BogusError)을 넣으면, Result 타입의 failure 케이스를 switch case 매칭할 수 없습니다.
 
-물론 아래 코드와 같이 failure 케이스 매칭 없이, success 케이스만 case 매칭할 수 있습니다. 
+물론 아래 코드와 같이 failure 케이스 매칭 없이 success 케이스만 case 매칭할 수 있습니다. 
 
 ```swift
 let subscriptionsLoader = SubscriptionsLoader()
@@ -743,14 +743,14 @@ subscriptionsLoader.load { (result: Result<[Subscription], BogusError>) in
 }
 ```
 
-이처럼 에러가 발생하지 않는 상황에서 빈 열거형을 Error 타입으로 넣는 방식의 장점은 열거형의 케이스를 줄일 수 있고 코드를 깔끔하게 만듭니다.
+이처럼 에러가 발생하지 않는 상황에서 빈 열거형을 Error 타입으로 넣는 방식의 장점은 열거형의 케이스를 줄여 패턴 매칭 코드를 줄이고 코드를 깔끔하게 만듭니다.
 
 하지만 빈 열거형을 Error 타입으로 넣는 방식은 공식적인 방식은 아닙니다.
 
 **Never** 타입이 빈 열거형을 대신하는 공식적인 방식입니다.
 
-Never 타입은 컴파일러에게 특정 경로(케이스)로 연결되지 않는다는 사실을 알립니다.
-다시 말해 불가능한 경로를 나타냅니다.
+Never 타입은 컴파일러에게 특정 경로(케이스)로 프로그램의 흐름이 가지 않는다는 사실을 알립니다.
+다시 말해, 불가능한 경로를 나타냅니다.
 
 아래 코드로 Never 타입을 살펴봅시다.
 
@@ -760,20 +760,23 @@ func crashAndBurn() -> Never {
 }
 ```
 
-위의 crashAndBurn 함수는 Never 타입을 리턴하기 때문에 절대 값을 리턴하지 않는 함수임을 보장합니다.
+위의 crashAndBurn 함수는 Never 타입을 리턴하기 때문에 절대 값을 리턴하지 않는 함수임을 알 수 있습니다.
 
-Never 타입의 구현부는 아래 코드와 같습니다.
+Never 타입의 구현부는 아래 코드와 같습니다. Never 타입도 빈 열거형입니다.
+이미 스위프트에서 지원하는 빈 열거형인 Never 타입이 있는데 굳이 추가적인 빈 열거형을 사용할 필요는 없습니다.
 
 ```swift
 public enum Never {}
 ```
 
 앞에서 봤던 빈 열거형 BogusError를 Never 타입으로 대체 가능합니다.
-물론 Result 타입의 Error로 Never 타입을 사용하려면 Never 타입을 Error 타입을 따르도록 해야 합니다.
+물론 Result 타입의 에러로 Never 타입을 사용하려면 Never 타입을 Error 타입을 따르도록 해야 합니다.
+Result 타입의 에러는 Error 타입을 따르도록 타입 제약을 가지고 있기 때문입니다.
 
 아래 코드는 BogusError를 Never 타입으로 고친 코드입니다.
 
 ```swift
+// Never 타입이 Error 타입을 따르도록 합니다.
 extension Never: Error {}
 
 final class SubscriptionsLoader: Service {
