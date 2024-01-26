@@ -83,23 +83,76 @@ struct BikeRequestBuilder: RequestBuilder {
 
 let bikeRequestBuilder = BikeRequestBuilder()
 let request = bikeRequestBuilder.makeRequest(path: "/trips/all")
-print(request)  // 
+print(request)  // https://www.biketriptracker.com/trips/all
 ```
 
+BikeRequestBuilder 타입은 RequestBilder 프로토콜을 채택하여 makeRequest 함수의 구현부(default implementation)를 얻을 수 있습니다.
 
+**Multiple extension**
 
+클래스 상속의 경우 자식 클래스가 하나의 부모 클래스에만 상속 받을 수 있습니다.
+하지만 프로토콜의 경우 하나의 타입이 여러 프로토콜을 채택할 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+enum ResponseError: Error {
+  case invalidResponse
+}
 
+protocol ResponseHandler {
+  func validate(response: URLResponse) throws
+}
 
+extension ResponseHandler {
+  func validate(response: URLResponse) throws {
+    guard let httpresponse = response as? HTTPURLResponse else {
+      throw ResponseError.invalidResponse
+    }
+  }
+}
 
+// BikeAPI 타입이 여러 프로토콜을 동시에 채택할 수 있습니다.
+class BikeAPI: RequestBuilder, ResponseHandler {
+  let baseURL: URL = URL(string: "https://www.biketriptracker.com")!
+}
+```
 
+## Protocol inheritance vs. Protocol composition
 
+지금까지 프로토콜 확장을 통해 프로토콜 함수의 구현부(default implementation)를 제공하는 방법을 살펴봤습니다.
 
+프로토콜 상속과 프로토콜 컴포지션도 데이터 모델링에 유용하게 쓰입니다.
 
+프로토콜 상속과 프로토콜 컴포지션을 살펴보고 차이점을 확인하기 위해 이메일을 보내는 SMTP 프레임워크를 구현하려 합니다.
+먼저 프로토콜 상속 방식으로 SMTP를 구현하고 이후 프로토콜 컴포지션 방식으로 다시 구현하여 trade-offs를 확인하겠습니다.
 
+먼저 Email 구조체와 Mailer 프로토콜을 만들겠습니다.
+아래 코드를 살펴봅시다.
 
+```swift
+// MailAddress가 단순 String 보다 더욱 의도를 드러냅니다.
+struct MailAddress {
+  let value: String
+}
 
+struct Email {
+  let subject: String
+  let body: String
+  let to: [MailAddress]
+  let from: MailAddress
+}
 
+protocol Mailer {
+  func send(email: Email)
+}
 
-
+// Mailer 프로토콜을 확장하여 send 함수의 구현부를 제공합니다.
+extension Mailer {
+  func send(email: Email) {
+    // Omitted: Connect to server
+    // Omitted: Submit email
+    print("Email is sent!")
+  }
+}
+```
