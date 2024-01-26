@@ -25,9 +25,32 @@
 RequestBuilder 클래스를 최상위 부모 클래스로 두고, RequestBuiler 클래스를 상속하는 RequestHeaderBuilder 자식 클래스를 만들어 RequestHeaderBuilder 클래스에서 header를 붙이는 작업을 추가합니다. 
 또한 RequestHeaderBuilder 클래스를 상속한 EncryptedRequestHeaderBuilder 자식 클래스를 만들고 네트워크 요청의 데이터를 암호화하는 기능까지 추가합니다.
 
+**RequestBuilder**
+
+**RequestHeaderBuilder(subclass)**
+
+**EncryptedRequestHeaderBuilder(subclass)**
+
 이처럼 클래스 기반 상속은 수직적(vertical) 데이터 구조를 형성합니다.
 
-그렇다면 프로토콜 기반의 상속을 통해 RequestBuilder 타입을 만든다면 아래와 같습니다.
+하지만 클래스 기반 상속과 달리 프로토콜 기반의 상속을 통해 RequestBuilder 타입을 만든다면 수평적(horizontal) 데이터 구조를 형성할 수 있습니다.
+
+**RequestBuilder** | **HeaderBuilder** | **Encryptable**
+
+RequestBuilder를 비롯해 나머지 프로토콜을 따르면 해당 프로토콜에서 제공하는 함수를 사용 가능합니다.
+enum, struct, class, subclass 상관 없이 프로토콜을 따를 수 있습니다.
+
+프로토콜을 통해 기능을 분리하여 특정 기능이 필요할 때 해당 기능을 지원하는 프로토콜을 채택하는 방식으로 새로운 함수를 추가할 수 있습니다.
+또한 프로토콜 상속을 통해서 새로운 함수를 추가하고 부모 프로토콜의 함수를 오버라이드 할 수 있습니다.
+
+프로토콜로 기능을 분리하는 방식은 코드 유연성과 재사용성이 높아집니다.
+프로토콜을 통해 더 이상 하나의 부모 클래스에 제한되지 않습니다.
+
+**Creating a protocol extension**
+
+프로토콜 확장을 통해 프로토콜에서 정의한 함수의 구현부(default implementation)를 추가할 수 있습니다.
+
+아래 코드로 살펴봅시다.
 
 
 
