@@ -48,15 +48,43 @@ enum, struct, class, subclass 상관 없이 프로토콜을 따를 수 있습니
 
 **Creating a protocol extension**
 
-프로토콜 확장을 통해 프로토콜에서 정의한 함수의 구현부(default implementation)를 추가할 수 있습니다.
+프로토콜에서는 함수를 정의할 수만 있고 프로토콜을 채택한 타입에서 해당 함수를 구현해야 합니다. 
+하지만 프로토콜 확장을 통해 프로토콜에서 정의한 함수의 구현부(default implementation)를 추가할 수 있습니다.
 
 아래 코드로 살펴봅시다.
 
+```swift
+protocol RequestBuilder {
+  var baseURL: URL { get }
+  func makeRequest(path: String) -> URLRequest
+}
 
+extension RequestBuilder {
+  func makeRequest(path: String) -> URLRequest {
+    let url = baseURL.appendingPathComponent(path)
+    var request = URLRequest(url: url)
+    request.httpShouldHandleCookies = false
+    request.timeoutInterval = 30
+  }
+}
+```
 
+위 코드와 같이 프로토콜 함수에서 정의한 함수의 default 구현부는 extension에 위치해야 합니다.
+또한 extension에서 구현하는 함수 구현부에서는 당연히 프로토콜의 프로퍼티에 접근할 수 있습니다.
 
+이제 RequestBuilder 프로토콜을 채택한 타입에서는 추가적인 makeRequest 함수 구현 없이 makeRequest 함수를 사용할 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+struct BikeRequestBuilder: RequestBuilder {
+  let baseURL: URL = URL(string: "https://www.biketriptracker.com")!
+}
+
+let bikeRequestBuilder = BikeRequestBuilder()
+let request = bikeRequestBuilder.makeRequest(path: "/trips/all")
+print(request)  // 
+```
 
 
 
