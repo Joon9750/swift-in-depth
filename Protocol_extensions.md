@@ -156,3 +156,104 @@ extension Mailer {
   }
 }
 ```
+
+이제 Mailer 프로토콜의 확장에서 구현한 함수의 구현부(default implementation)에 메일을 보내기 이전 메일의 유효성 검사를 추가하려 합니다.
+그러나 Mailer 프로토콜의 따르는 모든 타입에서 메일의 유효성 검사를 요구하지 않습니다.
+특정 타입에서만 Mailer 프로토콜을 따르며 추가적으로 메일의 유효성 검사를 요구합니다.
+
+먼저 프로토콜 상속을 사용해 위와 같은 조건을 구현해봅시다.
+
+Mailer 프로토콜을 상속해서 ValidatingMailer 자식 프로토콜을 생성하여 ValidatingMailer 프로토콜에 유효성 검사 기능을 추가합니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+protocol Mailer {
+  func send(email: Email)
+}
+
+// Mailer 프로토콜을 확장하여 send 함수의 구현부를 제공합니다.
+extension Mailer {
+  func send(email: Email) {
+    // Omitted: Connect to server
+    // Omitted: Submit email
+    print("Email is sent!")
+  }
+}
+
+protocol ValidatingMailer: Mailer {
+  func send(email: Email) throws  // 부모 프로토콜의 send 함수를 오버라이드합니다.
+  func validate(email: Email) throws
+}
+
+extension ValidatingMailer {
+  func send(email: Email) throws {
+    try validate(email: Email)
+    // Connect to Server
+    // Submit email
+    print("Email validated and sent.")
+  }
+
+  func validate(email: Email) throws {
+    // Check email address, and whether subject is missing.
+  }
+}
+
+struct SMTPClient: ValidatingMailer {
+  // Implementation omitted.
+}
+
+let client = SMTPClient()
+try? client.send(email: Email(subject: "Learn Swift", body: "Lorem ipsum", to: [MailAddress(value: "john@naver.com")], from: MailAddress(value: "Stranger@naver.com")))
+```
+
+Mailer 프로토콜의 자식 프로토콜인 ValidatingMailer에서 send 함수를 오버라이드 했기 때문에 ValidationMailer 프로토콜을 확장해 오버라이드한 send 함수의 구현부를 제공해야 합니다.
+프로토콜을 상속하여 자식 프로토콜에 요구사항에 필요한 validate 함수를 추가합니다.
+
+하지만 ValidatingMailer 프로토콜에서는 메일의 유효성 검사와 메일을 보내는 두 가지 성격의 일을 동시에 처리하게 됩니다.
+이처럼 프로토콜 상속을 통해 데이터를 모델링할 때 의미 단위로 프로토콜이 분리되지 않는다는 단점이 존재합니다.
+
+만약 메일 유효성 검사를 필요로 하지 않은 타입에서는 ValidatingMailer가 아닌 Mailer 프로토콜을 채택해야만 합니다.
+
+그렇다면 프로토콜 상속이 아닌 프로토콜 컴포지션을 사용하면 어떨까요?
+
+프로토콜 컴포지션 방식은 Mailer 프로토콜을 상속하는 ValidatingMailer 프로토콜을 생성하지 않고, 메일 유효성을 검사하는 독립된 MailValidator 프로토콜을 생성합니다.
+이후 메일 유효성 검사 기능을 필요로 하는 타입에 Mailer 프로토콜과 함께 MailValidator 프로토콜을 다중 채택하여 메일 유효성 검사 기능을 제공합니다.
+
+아래 코드는 MailValidator 프로토콜을 구현한 코드입니다.
+
+```swift
+protocol MailValidator {
+  func validate(email: Email) throws
+}
+
+extension MailValidator {
+  func validate(email: Email) throws {
+    // Omitted: Check email address, and whether subject is missing.
+  }
+}
+```
+
+이제는 Mailer 프로토콜에서 MailValidator 프로토콜에 대해 모르게 되고.
+MailValidator 프로토콜도 Mailer 프로토코르이 존재를 모릅니다.
+
+**Protocol intersection(교차점)**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
