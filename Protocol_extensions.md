@@ -232,6 +232,10 @@ extension MailValidator {
     // Omitted: Check email address, and whether subject is missing.
   }
 }
+
+struct SMTPClient: Mailer, MailValidator {
+  // Implementation omitted.
+}
 ```
 
 이제는 Mailer 프로토콜에서 MailValidator 프로토콜에 대해 모르게 되고.
@@ -239,21 +243,82 @@ MailValidator 프로토콜도 Mailer 프로토코르이 존재를 모릅니다.
 
 **Protocol intersection(교차점)**
 
+두 개의 프로토콜이 있을 때 두 프로토콜의 교차점에서 적용되는 확장을 구현(추가)할 수 있습니다.
 
+예를 들어 Mailer 프로토콜과 MailValidator 프로토콜을 모두 따르는 SMTPClient 타입이 두 프로토콜의 교차점에 있는 타입이라고 볼 수 있습니다.
+Mailer 프로토콜과 MailValidator 프로토콜의 교차점을 확장했다면 확장된 기능을 교차점에 있는 SMTPClient 타입이 사용할 수 있습니다.
 
+두 프로토콜의 교차점을 확장하기 위해서는 **Self 키워드**를 통해 둘 중 하나의 프로토콜을 확장하여 나머지 한 프로토콜을 따르도록 해야 합니다.
 
+아래 코드는 Mailer 프로토콜과 MailValidator 프로토콜의 교차점을 확장한 코드입니다.
 
+```swift
+extension MailValidator where Self: Mailer {
+  func send(email: Email) throws {
+    try validate(email: email)
+    // Connect to server
+    // Submit email
+    print("Email Validated and sent.")
+  }
+}
+```
 
+두 프로토콜의 교차점에서 send 함수의 구현부(default implementation)를 제공하여 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드하고 있습니다.
+위에서는 MailValidator를 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관 없습니다.
 
+이제 두 프로토콜을 채택하는 SMTPClient 타입에서 send 함수의 구현부는 프로토콜의 교차점에서 제공하게 됩니다.
 
+프로토콜 교차점에서 기존 함수를 오버라이드하는 경우외에도 새로운 함수를 추가할 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+extension MailValidator where Self: Mailer {
+  func send(email: Email) throws {
+    try validate(email: email)
+    // Connect to server
+    // Submit email
+    print("Email Validated and sent.")
+  }
 
+  // 새로운 send(email:, at:) 함수
+  func send(email: Email, at: Date) throws {
+    try validate(email: email)
+    // Connect to server
+    // Submit email
+    print("Email Validated and sent.")
+  }
+}
+```
 
+실제로 Mailer 프로토콜과 MailValidator 프로토콜을 모두 채택하여 두 프로토콜의 교차점에 있는 SMTPClient 프로토콜에서 교차점 확장의 함수들을 사용하는 모습을 살펴봅시다.
 
+```swift
+struct SMTPClient: Mailer, MailValidator {}
 
+let client = SMTPClient()
+let email = Email(subject: "Learn Swift", body: "Lorem ipsum", to: [MailAddress(value: "john@naver.com")], from: MailAddress(value: "Stranger@naver.com"))
 
+try? client.send(email: email)
+try? client.send(email: email, at: Date(timeIntervalSinceNow: 3600))
+```
 
+두 프로토콜을 채택한 타입도 두 프로토콜의 교차점에 있지만, 제네릭 타입에서 한 타입이 두 프로토콜로 타입 제약된 경우에도 해당 타입이 두 프로토콜의 교차점에 있다고 볼 수 있습니다.
+따라서 두 프로토콜로 타입이 제약된 제네릭 타입에서도 교차점 확장의 함수들을 사용할 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
+  try? sender.send(email: email, at: Date(timeIntervalSinceNow: 3600))
+}
+```
 
+프로토콜 컴포지션을 사용하면 의미 단위로 코드를 분리할 수 있습니다.
+
+하지만 너무 잘게 분리될 경우 오히려 단점으로 적용됩니다.
+또한 프로토콜 상속과 달리 컴포지션 방식의 경우 여러 프로토콜을 다중 채택해야 합니다.
+
+물론 프로토콜 상속은 단일 프로토콜을 채택하도록 하지만 경직된 데이터 구조를 형성하게 됩니다.
+
+프로토콜 상속과 프로토콜 컴포지션 방식의 균형을 맞춰 추상화를 이루도록 노력해야 합니다.
