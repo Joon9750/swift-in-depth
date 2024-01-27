@@ -322,3 +322,5 @@ func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
 물론 프로토콜 상속은 단일 프로토콜을 채택하도록 하지만 경직된 데이터 구조를 형성하게 됩니다.
 
 프로토콜 상속과 프로토콜 컴포지션 방식의 균형을 맞춰 추상화를 이루도록 노력해야 합니다.
+
+## Overriding priorities
