@@ -589,27 +589,35 @@ extension Collection where Element: Hashable {
 
 Collection<Element>에서 Element의 타입 제약이 다를 때도 스위프트는 가장 특수화된 구현을 고릅니다.
 
+Element 연관 값을 Hashable 프로토콜로 타입 제약한 unique 함수를 살펴보면 set 자체로 유일한 값이 저장되지만 추가적으로 [Element] 배열의 uniqueValues 변수를 만들어 set과 동일한 조건으로 조작하고 있습니다.
+물론 unique 함수의 리턴 타입이 [Element]이기 때문에 uniqueValues 변수가 필요했지만, 아래와 같이 Set을 확장하여 Set을 배열로 리턴할 수 있습니다.
 
+```swift
+extension Set {
+  func unique() -> [Element] {
+    return Array(self)
+  }
+}
+```
 
+Set을 배열로 변환하는 unique 함수 덕분에 아래와 같이 uniqueValues 배열 없이 Collection 확장의 unique 함수를 구현할 수 있습니다.
 
+```swift
+extension Collection where Element: Hashable {
+  func unique() -> [Element] {
+    var set = Set<Element>()
+    for element in self {
+      if !set.contains(element) {
+        set.insert(element)
+      }
+    }
+    return set.unique()
+  }
+}
+```
 
+The point is, finding the balance between extending the lowest common denominator without weakening the API of concrete type is a bit of an art.
 
+스위프트는 결국 가장 구체적인 구현을 선택합니다. 위에서 이야기했던 가장 특수화된 구현을 선택하다는 것과 동일한 의미입니다.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Extending with concrete constraints
