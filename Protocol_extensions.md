@@ -344,8 +344,65 @@ Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에�
 
 지금부터는 프로토콜이 상속될 때 확장에서 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아볼 예정입니다.
 
+위에서 봤던 Tree 프로토콜을 Plant 프로토콜의 상속을 받는 자식 프로토콜로 만들고 Oak 구조체가 Tree 프로토콜을 채택하도록 구현하면 Oak 구조체가 호출하는 grow 함수가 무엇인지 살펴봅시다.
 
+**스위프트는 가장 특수화된 구현을 고르는 특성이 있습니다.**
 
+여기서 특수화된 구현이라는 설명이 이해 되지 않을 수 있습니다.
+특수화된 구현은 자신과 가장 가까운 구현을 뜻하는 말입니다.
+
+부모 프로토콜인 Plant 프로토콜과 Plant 프로토콜을 상속 받는 Tree 자식 프로토콜이 있고 Oak 구조체가 Tree 프로토콜을 채택하는 상황에서 Plant 프로토콜, Tree 프로토콜, 그리고 Oak 구조체 모두 grow 함수를 오버라이드 했다면
+Oak 구조체에서 가장 가까운 grow 함수 구현부는 본인이 가진 grow 함수라고 볼 수 있습니다.
+따라서 Oak 구조체에서 호출하는 grow 함수는 본인이 오버라이드한 함수입니다.
+
+만약 Plant 프로토콜과 Tree 프로토콜에만 grow 함수를 오버라이드 했다면, Tree 프로토콜을 채택하는 Oak 구조체에서 호출되는 grow 함수는 Tree 프로토콜의 grow 함수가 될 것 입니다.
+
+마지막으로 Plant 프로토콜에만 grow 함수를 구현했다면 당연히 Oak 구조체에서 호출되는 grow 함수는 Plant 프로토콜의 grow 함수가 됩니다.
+
+아래 코드로 프로토콜 확장이 함수 구현부(default implementation)를 가질 때, 해당 프로토콜을 상속하고 오버라이드하는 과정을 살펴봅시다.
+
+```swift
+func growPlant<P: Plant>(_ plant: P) {
+  plant.grow()
+}
+
+protocol Plant {
+  func grow()
+}
+
+extension Plant {
+  func grow() {
+    print("Growing a plant")
+  }
+}
+
+protocol Tree: Plant {}
+
+extension Tree {
+  func grow() {
+    print("Growing a tree")
+  }
+}
+
+struct Oak: Tree {
+  func grow() {
+    print("The mighty oak is growing")
+  }
+}
+
+struct CherryTree: Tree {}
+
+struct KiwiPlant: Plant {}
+
+growPlant(Oak())  // The mighty oak is growing
+growPlant(CherryTree())  // Growing  a tree
+growPant(KiwiPlant())  // Growing a plant
+```
+
+클래스에서의 상속과 오버라이드 규칙과 비슷하게 프로토콜 상속과 오버라이드 규칙도 유사하게 동작한다는 사실을 알 수 있습니다.
+이와 같은 프로토콜의 동작은 클래스, 구조체, 그리고 열거형에 관계 없이 동일하게 적용됩니다.
+
+## Extending in two directions
 
 
 
