@@ -41,7 +41,8 @@ let joinMessage = Message(
   hasJoined: true,
   hasLeft: false, 
   isBeingDrafted: false,
-  isSendingBalloons: false)
+  isSendingBalloons: false
+)
 
 let brokenMessage = Message(
   userId: "1", 
@@ -50,7 +51,8 @@ let brokenMessage = Message(
   hasJoined: true,
   hasLeft: true, 
   isBeingDrafted: false, 
-  isSendingBalloons: false)
+  isSendingBalloons: false
+)
 ```
 
 위와 같이 구조체로 모델을 만드는 방식이 일반적으로 떠올리는 메세지 데이터 모델입니다.
@@ -408,7 +410,7 @@ iconName(for: "JPEG")
 
 이제는 ImageType에 case가 추가되면 컴파일러가 알려줍니다. 위의 코드는 대문자에 대응하고 다른 jpg, jpeg와 같이 다른 명칭에도 대응하도록 개선한 코드입니다.
 
-## 정리
+## Summary
 
 1. Enums are sometimes an alternative to subclassing, allowing for a flexible architecture.
 2. Enums give you the ability to catch problem at compile time instead of runtime.
