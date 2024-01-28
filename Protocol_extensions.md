@@ -533,7 +533,72 @@ unique 함수를 아래 코드와 같이 사용할 수 있습니다.
 [3, 2, 1, 1, 2, 3].unique()  // [3, 2, 1]
 
 // Strings can be unique() now, too
+"aaaaaaabcdef".unique()  // ["a", "b", "c", "d", "e", "f"]
+
+// Or a Dictionary's values
+let uniqueValues = [
+  1: "Waffle",
+  2: "Banana",
+  3: "Pancake",
+  4: "Pancake",
+  5: "Pancake"
+].values.unique()
+print(uniqueValues)  // ["Banana", "Pancake", "Waffle"]
 ```
+
+이렇게 여러 타입에 unique 함수를 적용할 수 있습니다.
+특정 타입(concrete type)을 확장하지 않고 프로토콜을 확장했기 때문에 얻을 수 있는 이점입니다.
+
+**A specialized extension**
+
+하지만 위에서 구현한 unique 함수는 성능 측면에서 개선할 부분이 있습니다.
+
+각 배열의 요소마다 uniqueValues 배열에 이미 있는 요소인지 확인해야 합니다.
+다시 말해 배열 요소 하나마다 uniqueValuew 배열을 모두 순회해야 합니다.
+
+만약 배열로 유일한 요소를 저장하지 않고 Set을 사용해 hash valuew를 통해 값을 비교하고 유일한 요소들을 저장한다면 성능을 개선시킬 수 있습니다.
+Set을 사용하려면 Element 연관 값의 타입 제약을 Equatable 프로토콜이 아닌 Hashable 프로토콜로 제약해야 합니다.
+
+Element 연관 값을 Hashable 프로토콜로 타입 제약한 상태에서 Collection 프로토콜 확장에 unique 함수를 추가 구현하게 됩니다.
+Element 연관 값을 Equatable 프로토콜로 타입 제약한 상태와 Hashable 프로토콜로 타입 제약한 상태 모두 확장에 구현할 것입니다. 
+
+**연관 값의 상속 관계에서도 스위프트는 가장 특수화된 구현을 고릅니다.**
+
+Equatable 프로토콜을 상속 받은 Hashable 프로토콜을 경우, Equatable 타입을 따르는 요소를 가진 배열은 성능적으로 개선되지 못한 배열을 사용한 위의 unique 함수를 호출하게 되고 
+Hashable 타입을 따르는 요소를 가진 배열은 Hashable 프로토콜 제약을 가한 새로운 unique 함수가 없다면 기존의 unique 함수를 호출합니다.
+
+하지만 아래 코드와 같이 Element 연관 값을 Hashable 프로토콜로 제약할 경우 기존의 unique 함수가 아닌 Set을 활용하는 개선된 unique 함수를 호출합니다. 
+
+```swift
+extension Collection where Element: Hashable {
+  func unique() -> [Element] {
+    var set = Set<Element>()
+    var uniqueValues = [Element]()
+    for element in self {
+      if !set.contains(element) {
+        uniqueValues.append(element)
+        set.insert(element)
+      }
+    }
+    return uniqueValues
+  }
+}
+```
+
+이제 Collection 프로토콜은 두 번의 확장을 통해 연관 값의 타입 제약이 다른 두 함수를 구현했습니다.
+
+Collection<Element>에서 Element의 타입 제약이 다를 때도 스위프트는 가장 특수화된 구현을 고릅니다.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
