@@ -324,3 +324,51 @@ func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
 프로토콜 상속과 프로토콜 컴포지션 방식의 균형을 맞춰 추상화를 이루도록 노력해야 합니다.
 
 ## Overriding priorities
+
+**Overriding a default implementation**
+
+프로토콜에 선언된 함수를 extension에서 구현부(default implementation)를 제공하는 방법을 살펴봤습니다.
+지금부터는 프로토콜이 상속될 때 확장에서 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아볼 예정입니다.
+
+grow 함수를 가진 Tree 프로토콜을 구현하여 프로토콜 상속 과정을 살펴봅시다.
+Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에서 Tree 프로토콜을 채택하려 합니다.
+이때 Oak 구조체에서 grow 함수를 오버라이드하는 상황입니다.
+
+만약 Oak 구조체에서 grow 함수를 오버라이드 하지 않는다면 Oak 구조체가 채택한 Tree 프로토콜의 grow 함수를 호출합니다.
+하지만 Oak 구조체에서 grow 함수를 오버라이드 한다면 Oak 구조체에서 호출되는 grow 함수는 Oak 구조체에서 오버라이드한 grow 함수가 호출됩니다.
+(If a type implements the same method as the one on a protocol extension, Swift ignores the protocol extension's method.)
+
+프로토콜의 확장에서 구현한 함수를 프로토콜을 채택하는 타입에서 오버라이드 할 수 있지만, 반대로 프로토콜 확장을 통해 실제 타입의 함수를 오버라이드 할 수는 없습니다.
+
+**Overriding with protocol inheritance**
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
