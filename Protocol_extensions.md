@@ -404,16 +404,65 @@ growPant(KiwiPlant())  // Growing a plant
 
 ## Extending in two directions
 
+**Opting in to extensions**
 
+모든 타입이 특정 프로토콜의 요구사항을 원하지 않을 경우는 많습니다.
+따라서 프레임워크에 확장을 추가할 때는 항상 주의해야 합니다.
 
+예를 들어 사용자의 동작을 분석하는 AnalyticsProtocol이 있다고 생각해 봅시다.
+또한 AnalyticsProtocol에서는 프로토콜 확장을 통해 함수 구현부(default implementation)까지 제공하고 있습니다.
 
+이때 UIViewController 타입이 AnalyticsProtocol을 채택하면 모든 UIViewController에서 AnalyticsProtocol이 제공하는 기능을 사용하게 됩니다.
+심지어 UIViewController 타입의 자식 클래스에 까지 AnalyticsProtocol의 기능을 제공하게 됩니다.
 
+모든 UIViewController에서 해당 기능을 필요로 하지 않고 일부 ViewController에 필요한 기능입니다.
 
+하지만 개발자는 UIViewController 타입이 AnalyticsProtocol의 기능을 당연히 가졌다는 생각을 하지 못합니다.
+만약 개발자가 AnalyticsProtocl의 기능을 인지하지 못하고 UIViewController 타입에 AnalyticsProtocol과 동일한 기능을 추가하는 충돌 상황까지 발생할 수 있습니다.
 
+이와 같은 이슈를 해결하기 위해 확장을 접어야 합니다. (flip the extension)
 
+확장을 접는다는 말은 프로토콜 교차점을 확장하는 것과 같습니다.
+다시 말해, AnalyticsProtocol과 UIViewController의 교차점을 확장하여 기존에 AnalyticsProtocol에서 제공하려는 기능을 추가하는 방법입니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+protocol AnalyticsProtocol {
+  func track(event: String, parameters: [String: Any])
+}
 
+// Not like this:
+extension UIViewController: AnalyticsProtocol {
+  func track(event: String, parameters: [String: Any]) { // ...snip }
+}
+
+// But as follows:
+extension AnalyticsProtocol where Self: UIViewController {
+  func track(event: String, parameters: [String: Any]) { // ...snip}
+}
+```
+
+타입이 프로토콜을 채택하였던 기존 방식이 아닌 프로토콜을 확장하여 타입을 채택하도록 구현합니다.
+
+이제 확장을 접는 방식을 통해 뷰컨트롤러 중 UIViewController 타입과 AnalyticsProtocol을 모두 따르는 뷰컨트롤러에서만 track 함수와 함수 구현부를 사용할 수 있습니다.
+모든 뷰컨트롤러가 AnalyticsProtocol을 따르는 상황을 막을 수 있습니다.
+
+```swift
+extension NewsViewController: UIViewController, AnalyticsProtocol {
+  // ...snip
+
+  override func viewDidAppear(_ animated: Bool) {
+    super.viewDidAppear(animated)
+    // UIViewController와 AnalyticsProtocl을 모두 채택해 두 타입의 교차점에 있기 때문에 교차점을 확장한 함수(track)를 사용할 수 있습니다.
+    track("News.appear", params: [:])  
+  }
+}
+```
+
+Extensions are not namespaced, so be careful with adding public extensions inside a framework, because implementers may not want their classes to adhere to a protocol by default.
+
+## Extending with associated types
 
 
 
