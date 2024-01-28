@@ -464,6 +464,76 @@ Extensions are not namespaced, so be careful with adding public extensions insid
 
 ## Extending with associated types
 
+연관 값을 가진 프로토콜의 함수가 호출되는 방식을 살펴봅시다.
+
+만약 배열(Array)에 중복 값을 제거하는 unique 함수를 적용하고 싶을 때를 예시로 살펴봅시다.
+아래 코드와 같이 앞으로 구현할 unique 함수는 배열 속의 중복된 값을 제거하고 유일한 값만 가진 배열로 만듭니다.
+
+```swift
+[3, 2, 1, 1, 2, 3].unique()  // [3, 2, 1]
+```
+
+배열은 Element라는 연관 값을 가진 구조체입니다.
+따라서 unique 함수도 Element 연관 값을 다뤄야 합니다.
+
+먼저 배열을 확장하여 unique 함수를 추가 해보겠습니다.
+이때 unique 함수에서 각 element들을 비교하기 위해서 Element 연관 값은 Equatable 프로토콜로 타입 제약 되어야 합니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+extension Array where Element: Equatable {
+  func unique() -> [Element] {
+    var uniqueValues = [Element]()
+    for element in self {
+      if !uniqueValues.contains(element) {
+        uniqueValues.append(element)
+      }
+    }
+    return uniqueValues
+  }
+}
+```
+
+Equatable로 Element 연관 값을 타입 제약했기 때문에 Element 연관 값의 타입은 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있습니다.
+(여기서 궁금증은 Element 연관 값이 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있는지, unique 함수의 사용 여부와 관계 없이 Element 연관 값이 Equatable 프로토콜을 따르지 않으면 에러가 발생하는지 입니다. 전자일것 같긴하지만...)
+
+배열을 확장해 unique 함수를 추가하는 방법은 좋은 시작입니다.
+
+그렇다면 저차원으로 내려가 Collection 프로토콜을 따르는 다른 타입에도 unique 함수를 제공하기 위해 Collection 프로토콜을 확장해 unique 함수를 추가해 봅시다.
+물론 Collection 프로토콜의 Element 연관 값도 Equatable 타입으로 제약해야 합니다.
+
+아래 코드를 살펴봅시다.
+
+```swift
+extension Collection where Element: Equatable {
+  func unique() -> [Element] {
+    var uniqueValues = [Element]()
+    for element in self {
+      if !uniqueValues.contains(element) {
+        uniqueValues.append(element)
+      }
+    }
+    return uniqueValues
+  }
+}
+```
+
+이제 Array 보다 저차원인 Collection 프로토콜을 확장하여 unique 함수를 추가했기 때문에 더 많은 타입에서 unique 함수를 사용할 수 있습니다.
+여기서 Array가 Collection 보다 저차원인 이유는 Collection 프로토콜의 자식 프로토콜들을 Array가 따르기 때문입니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f87cec24-1de8-47f8-83fb-8a1713ff1872)
+
+물론 Collection 보다 더 저차원인 Sequence 프로토콜도 존재합니다.
+
+unique 함수를 아래 코드와 같이 사용할 수 있습니다.
+
+```swift
+// Array still has unique()
+[3, 2, 1, 1, 2, 3].unique()  // [3, 2, 1]
+
+// Strings can be unique() now, too
+```
 
 
 
