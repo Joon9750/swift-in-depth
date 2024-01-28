@@ -328,7 +328,7 @@ func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
 **Overriding a default implementation**
 
 프로토콜에 선언된 함수를 extension에서 구현부(default implementation)를 제공하는 방법을 살펴봤습니다.
-지금부터는 프로토콜이 상속될 때 확장에서 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아볼 예정입니다.
+그렇다면 프로토콜 확장에서 추가한 함수 구현부를 프로토콜을 채택한 타입에서 오버라이드하면 어떻게 될까요?
 
 grow 함수를 가진 Tree 프로토콜을 구현하여 프로토콜 상속 과정을 살펴봅시다.
 Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에서 Tree 프로토콜을 채택하려 합니다.
@@ -342,7 +342,7 @@ Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에�
 
 **Overriding with protocol inheritance**
 
-
+지금부터는 프로토콜이 상속될 때 확장에서 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아볼 예정입니다.
 
 
 
