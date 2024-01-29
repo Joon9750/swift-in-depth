@@ -769,6 +769,87 @@ let firstParts = lines.take(while: { (line) -> Bool in
 print(firstParts)  //["We start with text.", "OKOK let's start."]
 ```
 
+take(while:) 함수를 구현할 때 앞에서 살펴봤던 filter 함수의 구현부를 표방해 봅시다.
+아래 코드로 take(while:) 함수를 Sequence 프로토콜 확장에 추가한 코드입니다.
+
+```swift
+extension Seequence {
+  public func take(
+    while predicate: (Element) throws -> Bool
+  ) rethrows -> [Element] {
+    
+  var iterator = makeIterator()
+
+  var result = ContiguousArray<Element>()
+
+  while let element = iterator.next() {
+    if try predicate(element) {
+      result.append(element)
+    } else {
+      break
+    }
+  }
+  return Array(result)
+}
+```
+
+위와 같이 take(while:) 함수를 Sequence 프로토콜 확장에 추가해서 프로젝트에 유용하게 사용할 수 있습니다.
+
+**Creating the Inspect method**
+
+위에서는 Sequence 프로토콜을 확장하여 take(while:) 함수를 추가했다면 이번에는 inspect 함수를 추가해 봅시다.
+inspect 함수는 파이프라인 구조로 데이터를 다룰 때 디버깅 용도로 사용되는 함수입니다.
+
+filter나 forEach는 데이터를 조작하여 변형된 데이터를 하위 파이프라인으로 전달하지만, inspect 함수에서는 데이터를 조작하지만 하위 파이프라인으로는 변형되지 않은 상태를 전달합니다.
+
+따라서 보통은 파이프라인 중간에 데이터를 디버깅하는 용도로 주로 사용합니다.
+
+```swift
+extension Sequence {
+  pubilc func inspect(
+    _ body: (Element) throws -> Void
+  ) rethrows -> Self {
+    for element in self {
+      try body(element)
+    }
+    // inspect 함수의 입력으로 들어오는 클로저로 데이터가 변형되지만 실제로 리턴하는 데이터는 변형되지 않은 상태로 리턴합니다.
+    return self
+  }
+}
+
+["C", "B", "A", "D"]
+  .sorted()
+  .inspect { (string) in
+    print("Inspecting: \(string)")
+  }.filter { (string) -> Bool in
+    string < "C"
+  }.forEach {
+    print("Result: \($0)")
+  }
+
+// Output:
+// Inspecting: A
+// Inspecting: B
+// Inspecting: C
+// Inspecting: D
+// Result: A
+// Result: B
+```
+
+저차원의 Sequence 프로토콜을 확장하여 배열을 비롯해 여러 타입에 확장된 기능을 추가할 수 있습니다.
+
+프로토콜과 확장은 재사용성이 높은 코드를 만들고 의미 단위로 코드를 분리하도록 합니다.
+하지만 특정 타입(concrete type)이 추상화를 구현하는 부분에서 더 어울릴 경우도 있습니다.
+프로토콜 확장과 특정 타입의 사용을 균형있게 사용해야 합니다.
+
+## Summary
+
+
+
+
+
+
+
 
 
 
