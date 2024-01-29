@@ -709,21 +709,65 @@ public func filter(
       result.append(element)
     }
   }
+  // ContiguousArray 타입을 다시 Array 타입으로 변환해 리턴합니다.
   return Array(result)
 } 
 ```
 
+filter 구현부를 보면 rethrows 키워드가 붙습니다.
+rethrows 키워드를 사용하여 자신의 매개변수로 전달받은 함수가 오류를 던진다는 것을 나타낼 수 있습니다.
+다시 말해 입력받은 클로저가 오류를 던질 때 해당 오류를 filter 함수의 호출부로 다시 던집니다.
 
+만약 rethrows를 사용하지 않은 경우, filter 함수를 호출하는 부분에서 오류를 처리하는게 아닌 filter 함수 내부에서 처리해야 합니다.
 
+filter 함수에 rethrows가 붙어서 try 키워드와 함께 catch를 사용하지 않아도 됩니다.
+try 키워드에서 오류가 발생할 때 filter 함수의 호출부로 에러가 던져집니다.
 
+filter 구현부에 등장하는 **ContiguousArray** 타입은 배열 요소로 클래스나 Objectivew-C 프로토콜을 가졌을 때 성능적 이점이 있습니다.
 
+filter 함수와 같은 저차원 함수는 성능이 중요시 여겨집니다. 성능을 향상 시키기위해 ContiguousArray를 사용합니다.
+하지만 그외의 요소를 가진다면 일반 Array 타입과 동일한 성능을 보입니다.
 
+**Creating the take(while:) method**
 
+지금부터 Sequence 프로토콜을 확장해 봅시다.
 
+Sequence 프로토콜이 제공하는 drop(while:) 함수와 정반대의 기능을 하는 take(while:) 함수를 Sequence 프로토콜 확장에 추가하려 합니다.
 
+drop(while:) 함수는 while로 입력 받는 클로저 속 조건을 만족할 때 요소들을 순회하며 무시하다가(drop) 조건에 만족하지 않을 때 이후의 요소들을 리턴합니다.
 
+아래 공식 문서를 통해 더 자세히 알아봅시다.
 
+https://developer.apple.com/documentation/swift/sequence/drop(while:)
 
+아래 코드와 같이 drop(while:) 함수를 사용할 수 있습니다.
+
+```swift
+let numbers = [3, 7, 4, -2, 9, -6, 10, 1]
+let startingWithNegative = numbers.drop(while: { $0 > 0 })
+// startingWithNegative == [-2, 9, -6, 10, 1]
+```
+
+그렇다면 drop(while) 함수와 정반대의 기능을 하는 take(while:) 함수는 while로 입력 받은 클로저의 조건에 만족하는 요소들을 리턴하다가 조건에 만족하지 않을 때 순회를 종료합니다.
+
+아래와 같이 take(while:) 함수가 동작합니다.
+
+```swift
+let lines =
+  """
+  We start with text.
+  OKOK let's start.
+
+  This is ignored because it came after empty space
+  and more text
+  """.components(seperatedBy: "\n")
+
+let firstParts = lines.take(while: { (line) -> Bool in
+  !line.isEmpty
+})
+
+print(firstParts)  //["We start with text.", "OKOK let's start."]
+```
 
 
 
