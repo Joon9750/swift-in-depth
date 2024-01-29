@@ -1,6 +1,6 @@
 # SwiftInDepth
 
-: Swift In Depth를 읽고 정리합니다.
+: Swift In Depth를 읽고 정리합니다. 좀 더 스위프트 언어에 어울리는 코드를 짜고 싶어 읽기 시작했습니다.
 
 ## Tools
 
