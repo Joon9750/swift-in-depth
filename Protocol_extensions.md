@@ -674,6 +674,55 @@ Collection 보다 더 저차원인 Sequence를 확장하면 더 많은 타입에
 
 ## Extending Sequence
 
+Sequence 프로토콜을 확장하면 Sequence 프로토콜을 따르는 Set, Array, Dictionary 등의 타입에 확장된 기능을 사용할 수 있습니다.
+
+실제로 프로젝트에서 Sequence 프로토콜을 확장하는 것은 프로젝트에 큰 도움이 됩니다.
+
+**Looking under the hood of filter**
+
+Sequence 프로토콜을 확장하기 전에 filter 함수를 먼저 살펴봅시다.
+
+filter 함수는 함수를 입력 받습니다.
+이때 함수는 클로저가 됩니다.
+
+아래 코드와 같이 filter 함수가 사용됩니다.
+
+```swift
+let moreThanOne = [1, 2, 3].filter { (int: Int) in
+  int > 1
+}
+print(moreThanOne)  // [2, 3]
+```
+
+이제 filter 함수의 구현부 내부를 살펴봅시다.
+
+```swift
+public func filter(
+  _ isIncluded: (Element) throws -> Bool
+) rethrows -> [Element] {
+  var result = ContiguousArray<Element>()
+
+  var iterator = self.makeIterator()
+
+  while let element = iterator.next() {
+    if try isIncluded(element) {
+      result.append(element)
+    }
+  }
+  return Array(result)
+} 
+```
+
+
+
+
+
+
+
+
+
+
+
 
 
 
