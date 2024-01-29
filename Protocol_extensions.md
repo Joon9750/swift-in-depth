@@ -843,7 +843,10 @@ extension Sequence {
 프로토콜 확장과 특정 타입의 사용을 균형있게 사용해야 합니다.
 
 ## Summary
-
+- Protocols can deliver a default implementation via protocol extensions.
+- With extensions, you can think of modeling data horizontally, whereas with subclassing, you're modeling data in a more rigid vertical way.
+- You can override a default implementation by delivering an implementation on a concrete type.
+- Protocol extensions cannot override a concrete type.
 
 
 
