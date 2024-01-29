@@ -621,3 +621,69 @@ The point is, finding the balance between extending the lowest common denominato
 스위프트는 결국 가장 구체적인 구현을 선택합니다. 위에서 이야기했던 가장 특수화된 구현을 선택하다는 것과 동일한 의미입니다.
 
 ## Extending with concrete constraints
+
+프로토콜의 연관 값(associated types)에 타입 제약을 가할 때 프로토콜이 아닌 특정 타입(concrete type)으로 연관 값의 타입을 제약할 수 있습니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+// Article 구조체가 특정 타입(concrete type)입니다.
+struct Article: Hashable {
+  let viewCount: Int
+}
+
+// Not like this:
+extension Collection where Element: Article {  ... }
+
+// But like this:
+extensioin Collection where Element == Article {
+  var totalViewCount: Int {
+    var count = 0
+    for article in self {
+      count += article.viewCount
+    }
+    return count
+  }
+}
+```
+
+특정 타입으로 프로토콜의 연관 값에 타입 제약을 할 때 : 가 아닌 == 연산자를 사용해 제약을 줄 수 있습니다.
+
+위의 Collection 확장을 아래 코드와 같이 사용할 수 있습니다.
+
+```swift
+let articleOne = Article(viewCount: 30)
+let articleTwo = Article(viewCount: 200)
+
+// Getting the total count on an Array.
+let articlesArray = [articleOne, articleTwo]
+articlesArray.totalViewCount  // 230
+
+// Getting the total count on a Set
+let articlesSet: Set<Article> = [articleOne, articleTwo]
+articlesSet.totalViewCount  // 230
+```
+
+기능 추가를 위해 확장을 사용할 때 얼마나 저차원 요소를 확장 할지 결정하는 것은 까다롭습니다.
+
+실제로 배열을 확장하면 80%의 케이스에 충족합니다.
+따라서 저차원인 Collection을 확장할 필요까지 없을 수 있습니다.
+
+물론 저차원인 Collection을 확장할 경우 더 많은 타입에 확장한 기능을 사용할 수 있게 됩니다.
+Collection 보다 더 저차원인 Sequence를 확장하면 더 많은 타입에 확장한 기능을 사용할 수 있습니다.
+
+## Extending Sequence
+
+
+
+
+
+
+
+
+
+
+
+
+
+
