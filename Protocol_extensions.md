@@ -847,20 +847,11 @@ extension Sequence {
 - With extensions, you can think of modeling data horizontally, whereas with subclassing, you're modeling data in a more rigid vertical way.
 - You can override a default implementation by delivering an implementation on a concrete type.
 - Protocol extensions cannot override a concrete type.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+- Via protocol inheritance, you can override a protocol's default implementation.
+- Swift always picks the most concrete implementation.
+- You can create a protocol extension that only unlocks when a type implements two protocols, called a protocol intersection.
+- A protocol intersection is more flexible than protocol inheritance, but it's also more abstract to understand.
+- When mixing subclasses with protocol extensions, extending a protocol and constraining it to a class is a good heuristic (as opposed to extending a class to adhere to a protocol). This way, an implementer can pick and choose a protocol implementation.
+- For associated type, such as Element on the Collection protocol, Swift picks the most specialized abstraction, such as Hashable over Equatable elements.
+- Extending a low-level protocol - such as Sequence - means you offer new methods to many types at once.
+- Swift uses a special ConiguousArray when extending Sequence for extra performance.
