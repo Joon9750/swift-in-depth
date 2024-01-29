@@ -22,6 +22,6 @@
 | 8    | [Iterators, sequences, and collections](Iterators-sequences-and-collections.md) | 2023.12.31 |
 | 9    | [Understanding map, flatMap, and compactMap](Understanding_map,flatMap,and_compactMap.md) | 2024.01.11 |
 | 10   | [Asynchronous error handling with Result](Asynchronous_error_handling_with_Result.md) | 2024.01.24 |
-| 11   | [Protocol extensions](Protocol_extensions.md) | 2024.01.29 |
-| 12   | [Swift patterns]() |  |
+| 11   | [Protocol extensions](Protocol_extensions.md) | 2024.01.30 |
+| 12   | [Swift patterns](Swift_patterns.md) | 2024.01.30 |
 | 13   | [Delivering quality Swift code]() |  |
