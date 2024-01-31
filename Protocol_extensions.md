@@ -81,9 +81,12 @@ extension RequestBuilder {
 
 이제 RequestBuilder 프로토콜을 채택한 타입에서는 makeRequest 함수 구현 없이 RequestBuiler 프로토콜 확장에서 제공하는 makeRequest 함수 구현부를 사용할 수 있습니다.
 
-물론 RequestBuiler 프로토콜을 채택한 타입에서 makeRequest 함수를 직접 구현하여 사용할 수 있습니다. 이때는 RequestBuiler 프로토콜의 확장에서 구현된 makeRequest 함수가 아닌 해당 타입에서 직접 구현한 makeRequest 함수를 호출합니다. 이 부분에 있어 아래에서 더 살펴볼 예정입니다.
+물론 RequestBuiler 프로토콜을 채택한 타입에서 makeRequest 함수를 직접 구현하여 사용할 수 있습니다. 
+이때는 RequestBuiler 프로토콜의 확장에서 구현된 makeRequest 함수가 아닌 해당 타입에서 직접 구현한 makeRequest 함수를 호출합니다. 
 
-아래 코드로 살펴봅시다.
+프로토콜 확장에서 제공하는 함수 구현부를 오버라이드하는 내용은 이후에 더 살펴볼 예정입니다.
+
+아래 코드는 프로토콜 확장에서 제공하는 함수의 구현부를 해당 프로토콜을 따르는 타입에서 사용하는 코드입니다.
 
 ```swift
 struct BikeRequestBuilder: RequestBuilder {
@@ -95,12 +98,14 @@ let request = bikeRequestBuilder.makeRequest(path: "/trips/all")
 print(request)  // https://www.biketriptracker.com/trips/all
 ```
 
-BikeRequestBuilder 타입은 RequestBilder 프로토콜을 채택하여 makeRequest 함수의 구현부(default implementation)를 얻을 수 있습니다.
+BikeRequestBuilder 타입은 RequestBilder 프로토콜을 채택하여 makeRequest 함수의 구현부(default implementation)를 사용할 수 있습니다.
 
 **Multiple extension**
 
-클래스 상속의 경우 자식 클래스가 하나의 부모 클래스에만 상속 받을 수 있습니다.
-하지만 프로토콜의 경우 하나의 타입이 여러 프로토콜을 채택할 수 있습니다.
+클래스 상속의 경우 자식 클래스가 하나의 부모 클래스만 상속 받을 수 있습니다.
+
+하지만 클래스 상속과 달리, 프로토콜의 경우에는 하나의 타입이 여러 프로토콜을 채택할 수 있습니다.
+다시 말해 다중 프로토콜 채택이 가능합니다.
 
 아래 코드로 살펴봅시다.
 
@@ -131,13 +136,13 @@ class BikeAPI: RequestBuilder, ResponseHandler {
 
 지금까지 프로토콜 확장을 통해 프로토콜 함수의 구현부(default implementation)를 제공하는 방법을 살펴봤습니다.
 
-프로토콜 상속과 프로토콜 컴포지션도 데이터 모델링에 유용하게 쓰입니다.
+지금부터는 데이터 모델링에 유용하게 쓰이는 프로토콜 상속과 프로토콜 컴포지션에 대해 살펴보겠습니다.
 
-프로토콜 상속과 프로토콜 컴포지션을 살펴보고 차이점을 확인하기 위해 이메일을 보내는 SMTP 프레임워크를 구현하려 합니다.
-먼저 프로토콜 상속 방식으로 SMTP를 구현하고 이후 프로토콜 컴포지션 방식으로 다시 구현하여 trade-offs를 확인하겠습니다.
+이메일을 보내는 SMTP 프레임워크를 구현하며 프로토콜 상속과 프로토콜 컴포지션을 살펴보고 차이점을 확인해 보겠습니다.
 
-먼저 Email 구조체와 Mailer 프로토콜을 만들겠습니다.
-아래 코드를 살펴봅시다.
+먼저 프로토콜 상속으로 SMTP를 구현하고 이후 프로토콜 컴포지션 방식으로 구현하여 trade-offs를 확인하겠습니다.
+
+SMTP의 기본이 되는 Email 구조체와 Mailer 프로토콜을 아래 코드와 같이 구현했습니다.
 
 ```swift
 // MailAddress가 단순 String 보다 더욱 의도를 드러냅니다.
@@ -166,13 +171,16 @@ extension Mailer {
 }
 ```
 
-이제 Mailer 프로토콜의 확장에서 구현한 함수의 구현부(default implementation)에 메일을 보내기 이전 메일의 유효성 검사를 추가하려 합니다.
-그러나 Mailer 프로토콜의 따르는 모든 타입에서 메일의 유효성 검사를 요구하지 않습니다.
-특정 타입에서만 Mailer 프로토콜을 따르며 추가적으로 메일의 유효성 검사를 요구합니다.
+이제 Mailer 프로토콜의 확장에서 구현한 함수의 구현부(default implementation)에 메일을 보내기 전에 메일의 유효성 검사를 추가하려 합니다.
 
-먼저 프로토콜 상속을 사용해 위와 같은 조건을 구현해봅시다.
+그러나 Mailer 프로토콜의 따르는 모든 타입에서 메일의 유효성 검사를 요구하진 않습니다.
+특정 타입에서만 Mailer 프로토콜을 따르며 추가적으로 메일의 유효성 검사를 요구하는 상황입니다.
 
-Mailer 프로토콜을 상속해서 ValidatingMailer 자식 프로토콜을 생성하여 ValidatingMailer 프로토콜에 유효성 검사 기능을 추가합니다.
+먼저 프로토콜 상속으로 위와 같은 조건을 구현해봅시다.
+
+Mailer 프로토콜을 상속 받은 ValidatingMailer 자식 프로토콜을 생성하여 ValidatingMailer 프로토콜에 유효성 검사 기능을 추가합니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/50192d93-3627-425d-999a-83c05000926e)
 
 아래 코드로 살펴봅시다.
 
@@ -191,7 +199,7 @@ extension Mailer {
 }
 
 protocol ValidatingMailer: Mailer {
-  func send(email: Email) throws  // 부모 프로토콜의 send 함수를 오버라이드합니다.
+  func send(email: Email) throws  // 부모 프로토콜의 send 함수를 오버라이드 합니다.
   func validate(email: Email) throws
 }
 
@@ -213,23 +221,32 @@ struct SMTPClient: ValidatingMailer {
 }
 
 let client = SMTPClient()
-try? client.send(email: Email(subject: "Learn Swift", body: "Lorem ipsum", to: [MailAddress(value: "john@naver.com")], from: MailAddress(value: "Stranger@naver.com")))
+try? client.send(
+  email: Email(
+    subject: "Learn Swift",
+    body: "Lorem ipsum",
+    to: [MailAddress(value: "john@naver.com")],
+    from: MailAddress(value: "Stranger@naver.com")
+  )
+)
 ```
 
-Mailer 프로토콜의 자식 프로토콜인 ValidatingMailer에서 send 함수를 오버라이드 했기 때문에 ValidationMailer 프로토콜을 확장해 오버라이드한 send 함수의 구현부를 제공해야 합니다.
-프로토콜을 상속하여 자식 프로토콜에 요구사항에 필요한 validate 함수를 추가합니다.
+Mailer 프로토콜을 상속하여 ValidationMailer 자식 프로토콜에 요구사항에 필요한 validate 함수를 추가하고 Mailer 프로토콜의 send 함수를 오버라이드하고 있습니다.
 
-하지만 ValidatingMailer 프로토콜에서는 메일의 유효성 검사와 메일을 보내는 두 가지 성격의 일을 동시에 처리하게 됩니다.
-이처럼 프로토콜 상속을 통해 데이터를 모델링할 때 의미 단위로 프로토콜이 분리되지 않는다는 단점이 존재합니다.
+Mailer 프로토콜의 자식 프로토콜인 ValidatingMailer에서 send 함수를 오버라이드 했기 때문에 ValidationMailer 프로토콜을 확장하여 send 함수의 구현부를 제공해야 합니다.
+
+프로토콜 상속에서 자식 프로토콜인 ValidatingMailer 프로토콜이 메일의 유효성 검사와 메일을 보내는 두 가지 성격의 일을 모두 처리해야 합니다.
+이처럼 프로토콜 상속을 통해 데이터를 모델링할 때 프로토콜이 의미 단위로 분리되지 않는다는 단점이 존재합니다.
 
 만약 메일 유효성 검사를 필요로 하지 않은 타입에서는 ValidatingMailer가 아닌 Mailer 프로토콜을 채택해야만 합니다.
 
 그렇다면 프로토콜 상속이 아닌 프로토콜 컴포지션을 사용하면 어떨까요?
 
 프로토콜 컴포지션 방식은 Mailer 프로토콜을 상속하는 ValidatingMailer 프로토콜을 생성하지 않고, 메일 유효성을 검사하는 독립된 MailValidator 프로토콜을 생성합니다.
+
 이후 메일 유효성 검사 기능을 필요로 하는 타입에 Mailer 프로토콜과 함께 MailValidator 프로토콜을 다중 채택하여 메일 유효성 검사 기능을 제공합니다.
 
-아래 코드는 MailValidator 프로토콜을 구현한 코드입니다.
+아래 코드는 독립된 MailValidator 프로토콜을 구현한 코드입니다.
 
 ```swift
 protocol MailValidator {
@@ -247,17 +264,20 @@ struct SMTPClient: Mailer, MailValidator {
 }
 ```
 
-이제는 Mailer 프로토콜에서 MailValidator 프로토콜에 대해 모르게 되고.
-MailValidator 프로토콜도 Mailer 프로토코르이 존재를 모릅니다.
+이제는 Mailer 프로토콜에서 MailValidator 프로토콜의 존재를 모르고, MailValidator 프로토콜도 Mailer 프로토콜의 존재를 모릅니다.
 
 **Protocol intersection(교차점)**
 
-두 개의 프로토콜이 있을 때 두 프로토콜의 교차점에서 적용되는 확장을 구현(추가)할 수 있습니다.
+두 프로토콜을 모두 채택한 타입은 두 프로토콜의 교차점에 위치하는 타입이라고 볼 수 있습니다.
+
+두 프로토콜의 교차점에 위치하는 타입에게 특정 기능을 제공하도록 교차점을 확장할 수 있습니다.
 
 예를 들어 Mailer 프로토콜과 MailValidator 프로토콜을 모두 따르는 SMTPClient 타입이 두 프로토콜의 교차점에 있는 타입이라고 볼 수 있습니다.
 Mailer 프로토콜과 MailValidator 프로토콜의 교차점을 확장했다면 확장된 기능을 교차점에 있는 SMTPClient 타입이 사용할 수 있습니다.
 
 두 프로토콜의 교차점을 확장하기 위해서는 **Self 키워드**를 통해 둘 중 하나의 프로토콜을 확장하여 나머지 한 프로토콜을 따르도록 해야 합니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/6ef6ed4a-464f-4770-9111-da3d55f19aa6)
 
 아래 코드는 Mailer 프로토콜과 MailValidator 프로토콜의 교차점을 확장한 코드입니다.
 
@@ -272,7 +292,7 @@ extension MailValidator where Self: Mailer {
 }
 ```
 
-두 프로토콜의 교차점에서 send 함수의 구현부(default implementation)를 제공하여 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드하고 있습니다.
+두 프로토콜의 교차점을 확장하여 send 함수의 구현부(default implementation)를 제공하여 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드하고 있습니다.
 위에서는 MailValidator를 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관 없습니다.
 
 이제 두 프로토콜을 채택하는 SMTPClient 타입에서 send 함수의 구현부는 프로토콜의 교차점에서 제공하게 됩니다.
