@@ -344,17 +344,18 @@ try? client.send(email: email, at: Date(timeIntervalSinceNow: 3600))
 아래 코드로 살펴봅시다.
 
 ```swift
+// Mailer, MailValidator 프로토콜로 타입 제약된 제니릭 타입도 두 프로토콜 교차점을 확장한 기능을 사용 가능합니다.
 func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
   try? sender.send(email: email, at: Date(timeIntervalSinceNow: 3600))
 }
 ```
 
-프로토콜 컴포지션을 사용하면 의미 단위로 코드를 분리할 수 있습니다.
+프로토콜 상속과 달리 프로토콜 컴포지션을 사용하면 의미 단위로 코드를 분리할 수 있습니다.
 
 하지만 너무 잘게 분리될 경우 오히려 단점으로 적용됩니다.
 또한 프로토콜 상속과 달리 컴포지션 방식의 경우 여러 프로토콜을 다중 채택해야 합니다.
 
-물론 프로토콜 상속은 단일 프로토콜을 채택하도록 하지만 경직된 데이터 구조를 형성하게 됩니다.
+물론 프로토콜 상속은 단일 프로토콜을 채택하도록 하여 경직된 데이터 구조를 형성합니다.
 
 프로토콜 상속과 프로토콜 컴포지션 방식의 균형을 맞춰 추상화를 이루도록 노력해야 합니다.
 
@@ -362,8 +363,9 @@ func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
 
 **Overriding a default implementation**
 
-프로토콜에 선언된 함수를 extension에서 구현부(default implementation)를 제공하는 방법을 살펴봤습니다.
-그렇다면 프로토콜 확장에서 추가한 함수 구현부를 프로토콜을 채택한 타입에서 오버라이드하면 어떻게 될까요?
+앞에서 프로토콜 확장으로 프로토콜에 선언된 함수의 구현부를 제공하지만, 해당 프로토콜을 채택한 타입에서 구현부를 제공하는 함수를 오버라이드 할 경우를 잠시 살펴봤습니다.
+
+지금부터 더 자세히 알아봅시다.
 
 grow 함수를 가진 Tree 프로토콜을 구현하여 프로토콜 상속 과정을 살펴봅시다.
 Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에서 Tree 프로토콜을 채택하려 합니다.
