@@ -663,8 +663,9 @@ extension Collection where Element: Hashable {
 
 Collection<Element>에서 Element의 타입 제약이 다를 때, Collection에 들어온 요소의 타입 입장에서 가장 특수화된 unique 구현을 고릅니다. 
 
-Element 연관 값을 Hashable 프로토콜로 타입 제약한 unique 함수를 살펴보면 set 자체로 유일한 값이 저장되지만 추가적으로 [Element] 배열의 uniqueValues 변수를 만들어 set과 동일한 조건으로 조작하고 있습니다.
-물론 unique 함수의 리턴 타입이 [Element]이기 때문에 uniqueValues 변수가 필요했지만, 아래와 같이 Set을 확장하여 Set을 배열로 리턴할 수 있습니다.
+Element 연관 값을 Hashable 프로토콜로 타입 제약한 unique 함수를 살펴보면 set 자체로도 유일한 값이 저장되고 있지만 추가로 [Element] 배열의 uniqueValues 변수를 만들어 사용하고 있습니다.
+
+물론 unique 함수의 리턴 타입이 [Element]이기 때문에 배열인 uniqueValues 변수가 필요했지만, 아래와 같이 Set을 확장하여 Set을 배열로 변환하도록 만들면 불필요한 uniqueValues 변수를 사용하지 않게 됩니다.
 
 ```swift
 extension Set {
@@ -692,7 +693,7 @@ extension Collection where Element: Hashable {
 
 The point is, finding the balance between extending the lowest common denominator without weakening the API of concrete type is a bit of an art.
 
-스위프트는 결국 가장 구체적인 구현을 선택합니다. 위에서 이야기했던 가장 특수화된 구현을 선택하다는 것과 동일한 의미입니다.
+스위프트는 결국 가장 구체적인 구현을 선택합니다. 가장 특수화된(가까운) 구현을 선택하다는 것과 같은 의미입니다.
 
 ## Extending with concrete constraints
 
@@ -721,7 +722,7 @@ extensioin Collection where Element == Article {
 }
 ```
 
-특정 타입으로 프로토콜의 연관 값에 타입 제약을 할 때 : 가 아닌 == 연산자를 사용해 제약을 줄 수 있습니다.
+특정 타입으로 프로토콜의 연관 값에 타입 제약을 할 때 : 가 아닌 == 연산자를 사용해 연관 값에 제약을 줄 수 있습니다.
 
 위의 Collection 확장을 아래 코드와 같이 사용할 수 있습니다.
 
@@ -738,26 +739,29 @@ let articlesSet: Set<Article> = [articleOne, articleTwo]
 articlesSet.totalViewCount  // 230
 ```
 
-기능 추가를 위해 확장을 사용할 때 얼마나 저차원 요소를 확장 할지 결정하는 것은 까다롭습니다.
+기능 추가를 위해 확장을 사용할 때 얼마나 저차원 타입을 확장 할지 결정하는 것은 까다롭습니다.
 
-실제로 배열을 확장하면 80%의 케이스에 충족합니다.
-따라서 저차원인 Collection을 확장할 필요까지 없을 수 있습니다.
+어떤 경우에는 저차원 Collection 프로토콜까지 확장할 필요 없을 수 있습니다.
 
-물론 저차원인 Collection을 확장할 경우 더 많은 타입에 확장한 기능을 사용할 수 있게 됩니다.
+물론 저차원인 Collection 프로토콜을 확장할 경우 더 많은 타입에 확장한 기능을 사용할 수 있게 됩니다.
 Collection 보다 더 저차원인 Sequence를 확장하면 더 많은 타입에 확장한 기능을 사용할 수 있습니다.
 
 ## Extending Sequence
 
-Sequence 프로토콜을 확장하면 Sequence 프로토콜을 따르는 Set, Array, Dictionary 등의 타입에 확장된 기능을 사용할 수 있습니다.
+Sequence 프로토콜을 확장하면 Sequence 프로토콜을 따르는 Set, Array, Dictionary 등의 타입에 확장된 기능을 제공할 수 있습니다.
 
-실제로 프로젝트에서 Sequence 프로토콜을 확장하는 것은 프로젝트에 큰 도움이 됩니다.
+실제로 Sequence 프로토콜을 확장하는 기술은 프로젝트에 큰 도움이 됩니다.
 
 **Looking under the hood of filter**
 
 Sequence 프로토콜을 확장하기 전에 filter 함수를 먼저 살펴봅시다.
 
-filter 함수는 함수를 입력 받습니다.
-이때 함수는 클로저가 됩니다.
+```swift
+// filter 함수의 선언부입니다.
+func filter(_ isIncluded: (Element) throws -> Bool) rethrows -> Set<Element>
+```
+
+filter 함수는 클로저를 입력으로 받습니다.
 
 아래 코드와 같이 filter 함수가 사용됩니다.
 
@@ -768,9 +772,10 @@ let moreThanOne = [1, 2, 3].filter { (int: Int) in
 print(moreThanOne)  // [2, 3]
 ```
 
-이제 filter 함수의 구현부 내부를 살펴봅시다.
+이제 filter 함수의 구현부를 살펴봅시다.
 
 ```swift
+// filter 함수의 구현부입니다.
 public func filter(
   _ isIncluded: (Element) throws -> Bool
 ) rethrows -> [Element] {
@@ -789,18 +794,27 @@ public func filter(
 ```
 
 filter 구현부를 보면 rethrows 키워드가 붙습니다.
-rethrows 키워드를 사용하여 자신의 매개변수로 전달받은 함수가 오류를 던진다는 것을 나타낼 수 있습니다.
-다시 말해 입력받은 클로저가 오류를 던질 때 해당 오류를 filter 함수의 호출부로 다시 던집니다.
+
+rethrows 키워드를 사용해 매개변수로 전달받은 클로저가 오류를 던질 수 있음을 나타냅니다.
+또한 입력받은 클로저가 오류를 던진다면 해당 오류를 filter 함수의 호출부로 전달한다는 의미이기도 합니다.
 
 만약 rethrows를 사용하지 않은 경우, filter 함수를 호출하는 부분에서 오류를 처리하는게 아닌 filter 함수 내부에서 처리해야 합니다.
 
-filter 함수에 rethrows가 붙어서 try 키워드와 함께 catch를 사용하지 않아도 됩니다.
-try 키워드에서 오류가 발생할 때 filter 함수의 호출부로 에러가 던져집니다.
+filter 함수에 rethrows가 붙어서 filter 함수의 구현부에서 try 키워드와 함께 catch를 사용하지 않아도 됩니다.
+rethrow 키워드에 의해 try 키워드에서 오류가 발생할 때 filter 함수의 호출부로 에러가 던지기 때문에 catch 구문을 필요로 하지 않습니다.
 
-filter 구현부에 등장하는 **ContiguousArray** 타입은 배열 요소로 클래스나 Objectivew-C 프로토콜을 가졌을 때 성능적 이점이 있습니다.
+filter 구현부에 등장하는 **ContiguousArray** 타입은 배열 요소로 클래스나 Objectivew-C 프로토콜을 가졌을 때 성능적 이점이 있습니다. 하지만 그외의 요소를 가진다면 일반 Array 타입과 동일한 성능을 보입니다.
 
 filter 함수와 같은 저차원 함수는 성능이 중요시 여겨집니다. 성능을 향상 시키기위해 ContiguousArray를 사용합니다.
-하지만 그외의 요소를 가진다면 일반 Array 타입과 동일한 성능을 보입니다.
+
+아래 링크에서 ContiguousArray와 관련된 자세한 내용을 살펴봅시다.
+ContiguousArray가 Array 보다 성능이 좋다면 왜 우린 Array보다 ContiguousArray를 자주 사용하지 않는지 궁금증이 있었습니다.
+
+ContiguousArray는 연속적으로 저장되어야 한다는 특징과 Array 자체로도 성능적으로 충분하다는 점이 결론입니다.
+
+https://zeddios.tistory.com/599
+
+https://jeong9216.tistory.com/555
 
 **Creating the take(while:) method**
 
@@ -808,7 +822,7 @@ filter 함수와 같은 저차원 함수는 성능이 중요시 여겨집니다.
 
 Sequence 프로토콜이 제공하는 drop(while:) 함수와 정반대의 기능을 하는 take(while:) 함수를 Sequence 프로토콜 확장에 추가하려 합니다.
 
-drop(while:) 함수는 while로 입력 받는 클로저 속 조건을 만족할 때 요소들을 순회하며 무시하다가(drop) 조건에 만족하지 않을 때 이후의 요소들을 리턴합니다.
+drop(while:) 함수는 while로 입력 받는 클로저 속 조건을 만족할 때 요소들을 순회하며 리턴하지 않다가(drop) 조건에 만족하지 않는 요소를 만나면 해당 요소를 포함하여 이후의 요소들을 리턴합니다.
 
 아래 공식 문서를 통해 더 자세히 알아봅시다.
 
@@ -822,7 +836,7 @@ let startingWithNegative = numbers.drop(while: { $0 > 0 })
 // startingWithNegative == [-2, 9, -6, 10, 1]
 ```
 
-그렇다면 drop(while) 함수와 정반대의 기능을 하는 take(while:) 함수는 while로 입력 받은 클로저의 조건에 만족하는 요소들을 리턴하다가 조건에 만족하지 않을 때 순회를 종료합니다.
+그렇다면 drop(while) 함수와 반대의 기능을 하는 take(while:) 함수는 while로 입력 받은 클로저의 조건에 만족하는 요소들을 리턴하다가 조건에 만족하지 않을 때 순회를 종료합니다.
 
 아래와 같이 take(while:) 함수가 동작합니다.
 
@@ -843,8 +857,9 @@ let firstParts = lines.take(while: { (line) -> Bool in
 print(firstParts)  //["We start with text.", "OKOK let's start."]
 ```
 
-take(while:) 함수를 구현할 때 앞에서 살펴봤던 filter 함수의 구현부를 표방해 봅시다.
-아래 코드로 take(while:) 함수를 Sequence 프로토콜 확장에 추가한 코드입니다.
+take(while:) 함수를 구현할 때 앞에서 살펴봤던 filter 함수의 구현부의 rethrow와 ContiguousArray 사용을 모방해 봅시다.
+
+아래 코드는 take(while:) 함수를 Sequence 프로토콜 확장에 추가한 코드입니다.
 
 ```swift
 extension Seequence {
@@ -872,11 +887,12 @@ extension Seequence {
 **Creating the Inspect method**
 
 위에서는 Sequence 프로토콜을 확장하여 take(while:) 함수를 추가했다면 이번에는 inspect 함수를 추가해 봅시다.
-inspect 함수는 파이프라인 구조로 데이터를 다룰 때 디버깅 용도로 사용되는 함수입니다.
 
-filter나 forEach는 데이터를 조작하여 변형된 데이터를 하위 파이프라인으로 전달하지만, inspect 함수에서는 데이터를 조작하지만 하위 파이프라인으로는 변형되지 않은 상태를 전달합니다.
+inspect 함수는 파이프라인 구조에서 데이터를 다룰 때 디버깅 용도로 사용되는 함수입니다.
 
-따라서 보통은 파이프라인 중간에 데이터를 디버깅하는 용도로 주로 사용합니다.
+filter나 forEach는 데이터를 조작하여 변형된 데이터를 하위 파이프라인으로 전달하지만, inspect 함수에서는 데이터를 조작하지만 하위 파이프라인으로는 조작된 데이터가 아닌 조작되기 이전의 데이터를 전달합니다.
+
+따라서 inspect 함수는 파이프라인 중간에 데이터를 디버깅하는 용도로 주로 사용할 수 있습니다.
 
 ```swift
 extension Sequence {
@@ -910,11 +926,12 @@ extension Sequence {
 // Result: B
 ```
 
-저차원의 Sequence 프로토콜을 확장하여 배열을 비롯해 여러 타입에 확장된 기능을 추가할 수 있습니다.
+저차원의 Sequence 프로토콜을 확장하여 배열을 비롯해 Sequence 프로토콜을 따르는 여러 타입에 확장된 기능을 추가할 수 있습니다.
 
-프로토콜과 확장은 재사용성이 높은 코드를 만들고 의미 단위로 코드를 분리하도록 합니다.
-하지만 특정 타입(concrete type)이 추상화를 구현하는 부분에서 더 어울릴 경우도 있습니다.
-프로토콜 확장과 특정 타입의 사용을 균형있게 사용해야 합니다.
+프로토콜과 프로토콜 확장은 재사용성이 높은 코드를 만들고 의미 단위로 코드를 분리합니다.
+
+하지만 어떤 경우에서는 특정 타입(concrete type)이 추상화를 구현할 때 더 어울릴 경우도 있습니다.
+프로토콜 확장과 특정 타입을 균형있게 사용해야 합니다.
 
 ## Summary
 - Protocols can deliver a default implementation via protocol extensions.
