@@ -295,11 +295,11 @@ extension MailValidator where Self: Mailer {
 두 프로토콜의 교차점을 확장하여 send 함수의 구현부(default implementation)를 제공합니다.
 교차점의 확장에서 제공하는 send 함수는 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드한 함수입니다.
 
-위 코드에서 MailValidator 프로토콜을 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관 없습니다.
+위 코드에서 MailValidator 프로토콜을 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관없습니다.
 
 이제 Mailer 프로토콜과 MailValidator 프로토콜을 모두 채택하는 SMTPClient 타입에서 send 함수의 구현부는 두 프로토콜의 교차점에서 제공하게 됩니다.
 
-프로토콜 교차점에서 기존 함수를 오버라이드하는 경우외에도 아래 코드와 같이 새로운 함수를 추가할 수 있습니다.
+프로토콜 교차점에서 기존 함수를 오버라이드하는 경우외에도 아래 코드처럼 새로운 함수를 추가할 수 있습니다.
 
 ```swift
 extension MailValidator where Self: Mailer {
@@ -377,7 +377,7 @@ Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에�
 만약 Oak 구조체에서 grow 함수를 오버라이드 하지 않는다면 Oak 구조체가 채택한 Tree 프로토콜의 grow 함수를 호출합니다.
 
 하지만 Oak 구조체에서 Tree 프로토콜이 제공하는 grow 함수를 오버라이드 한다면 Oak 구조체에서 호출되는 grow 함수는 Oak 구조체에서 오버라이드한 grow 함수가 호출됩니다.
-(If a type implements the same method as the one on a protocol extension, Swift ignores the protocol extension's method.)
+(If a type implements the same method as the one on a protocol extension, Swift ignores the protocol extension's method)
 
 프로토콜의 확장에서 구현한 함수를 프로토콜을 채택하는 타입에서 오버라이드 할 수 있지만, 반대로 프로토콜 확장을 통해 실제 타입의 함수를 오버라이드 할 수 없습니다.
 
@@ -391,14 +391,14 @@ Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에�
 
 여기서 특수화된 구현이란 자신의 타입과 가장 가까운 구현을 뜻합니다.
 
-부모 프로토콜인 Plant 프로토콜과 Plant 프로토콜을 상속 받는 Tree 자식 프로토콜이 있고, Oak 구조체가 Tree 프로토콜을 채택하는 상황에서 Plant 프로토콜, Tree 프로토콜, 그리고 Oak 구조체 모두 grow 함수를 오버라이드하고 있습니다.
+부모 프로토콜인 Plant 프로토콜과 Plant 프로토콜을 상속받는 Tree 자식 프로토콜이 있고, Oak 구조체가 Tree 프로토콜을 채택하는 상황에서 Plant 프로토콜, Tree 프로토콜, 그리고 Oak 구조체 모두 grow 함수를 오버라이드하고 있습니다.
 
 이때 Oak 구조체에서 가장 가까운 grow 함수 구현부는 본인이 가진 grow 함수라고 볼 수 있습니다.
 따라서 Oak 구조체에서 호출하는 grow 함수는 본인이 오버라이드한 함수입니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/847f79b2-cf72-4f14-b17a-4959b7f37417)
 
-만약 Plant 프로토콜과 Tree 프로토콜에만 grow 함수를 오버라이드 했다면, Tree 프로토콜을 채택하는 Oak 구조체에서 호출되는 grow 함수는 Tree 프로토콜의 grow 함수가 될 것 입니다.
+만약 Plant 프로토콜과 Tree 프로토콜에만 grow 함수를 오버라이드 했다면, Tree 프로토콜을 채택하는 Oak 구조체에서 호출되는 grow 함수는 Tree 프로토콜의 grow 함수가 될 것입니다.
 
 Plant 프로토콜보다 Tree 프로토콜이 Oak 구조체 기준으로 가까운 구현(특수화된 구현)이기 때문입니다.
 
@@ -445,14 +445,14 @@ growPant(KiwiPlant())  // Growing a plant
 ```
 
 클래스 상속에서의 오버라이드 규칙과 비슷하게 프로토콜 상속에서의 오버라이드도 유사하게 동작한다는 사실을 알 수 있습니다.
-이와 같은 프로토콜의 동작은 클래스, 구조체, 그리고 열거형에 관계 없이 동일하게 적용됩니다.
+이와 같은 프로토콜의 동작은 클래스, 구조체, 그리고 열거형과 관계없이 동일하게 적용됩니다.
 
 ## Extending in two directions
 
 **Opting in to extensions**
 
 특정 프로토콜의 요구사항을 모든 타입에서 원하지 않고 일부 타입에서만 원하는 경우가 많습니다.
-저차원의 프로토콜을 확장할 경우 확장한 기능이 필요하지 않는 타입까지 제공될 수 있습니다.
+저차원의 프로토콜을 확장할 경우 확장한 기능이 필요하지 않은 타입까지 제공될 수 있습니다.
 
 따라서 프레임워크에 확장을 추가할 때는 항상 주의해야 합니다.
 
@@ -494,9 +494,9 @@ extension AnalyticsProtocol where Self: UIViewController {
 
 위 코드와 같이 UIViewController가 AnalyticsProtocol을 채택하지 않고 두 타입의 교차점을 확장하여 AnalyticsProtocol에서 제공하는 track 함수를 추가합니다.
 
-이제 뷰컨트롤러 중 UIViewController 타입과 AnalyticsProtocol을 모두 따르는 뷰컨트롤러에서만 AnalyticsProtocol이 제공하는 track 함수와 함수 구현부를 사용할 수 있습니다.
+이제 뷰 컨트롤러 중 UIViewController 타입과 AnalyticsProtocol을 모두 따르는 뷰 컨트롤러에서만 AnalyticsProtocol이 제공하는 track 함수와 함수 구현부를 사용할 수 있습니다.
 
-모든 뷰컨트롤러가 AnalyticsProtocol을 따르는 상황을 막을 수 있습니다.
+모든 뷰 컨트롤러가 AnalyticsProtocol을 따르는 상황을 막을 수 있습니다.
 
 ```swift
 extension NewsViewController: UIViewController, AnalyticsProtocol {
@@ -514,7 +514,7 @@ Extensions are not namespaced, so be careful with adding public extensions insid
 
 ## Extending with associated types
 
-연관 값을 가진 프로토콜을 확장 했을 때를 살펴봅시다.
+연관 값을 가진 프로토콜을 확장했을 때를 살펴봅시다.
 
 배열(Array)에 중복 값을 제거하는 unique 함수를 적용하고 싶을 때를 예시로 살펴봅시다.
 
@@ -533,9 +533,9 @@ struct Array<Element>
 
 따라서 unique 함수도 Element 연관 값을 다뤄야 합니다.
 
-먼저 배열을 확장하여 unique 함수를 추가 해보겠습니다.
+먼저 배열을 확장하여 unique 함수를 추가해 보겠습니다.
 
-이때 unique 함수에서 각 element들을 비교하기 위해서 Element 연관 값은 Equatable 프로토콜로 타입 제약 되어야 합니다.
+이때 unique 함수에서 각 element들을 비교하기 위해서 Element 연관 값은 Equatable 프로토콜로 타입 제약되어야 합니다.
 
 아래 코드로 살펴봅시다.
 
@@ -556,7 +556,7 @@ extension Array where Element: Equatable {
 Equatable로 Element 연관 값을 타입 제약했기 때문에 Element 연관 값의 타입은 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있습니다.
 
 Element 연관 값이 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있습니다.
-만약 Equeatable 프로토콜을 따르지 않는 요소가 배열로 들어갈 경우 unique 함수를 사용할 수 없습니다.
+만약 Equatable 프로토콜을 따르지 않는 요소가 배열로 들어갈 경우 unique 함수를 사용할 수 없습니다.
 
 위와 같이 배열을 확장해 unique 함수를 추가하는 방법은 좋은 시작입니다.
 
@@ -585,9 +585,9 @@ extension Collection where Element: Equatable {
 }
 ```
 
-이제 Array 보다 저차원인 Collection 프로토콜을 확장하여 unique 함수를 추가했기 때문에 더 많은 타입에서 unique 함수를 사용할 수 있습니다.
+이제 Array보다 저차원인 Collection 프로토콜을 확장하여 unique 함수를 추가했기 때문에 더 많은 타입에서 unique 함수를 사용할 수 있습니다.
 
-여기서 Array가 Collection 보다 저차원인 이유는 Collection 프로토콜의 자식 프로토콜들을 Array가 따르기 때문입니다.
+여기서 Array가 Collection보다 저차원인 이유는 Collection 프로토콜의 자식 프로토콜들을 Array가 따르기 때문입니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f87cec24-1de8-47f8-83fb-8a1713ff1872)
 
@@ -614,7 +614,7 @@ print(uniqueValues)  // ["Banana", "Pancake", "Waffle"]
 이렇게 여러 타입에 unique 함수를 적용할 수 있습니다.
 특정 타입(concrete type)을 확장하지 않고 프로토콜을 확장했기 때문에 얻을 수 있는 이점입니다.
 
-물론 Collection 보다 더 저차원인 Sequence 프로토콜도 존재합니다. 
+물론 Collection보다 더 저차원인 Sequence 프로토콜도 존재합니다. 
 이후에 Sequence 프로토콜을 확장하는 경우도 살펴봅시다.
 
 **A specialized extension**
@@ -625,7 +625,7 @@ print(uniqueValues)  // ["Banana", "Pancake", "Waffle"]
 다시 말해 배열 요소 하나마다 uniqueValuew 배열을 모두 순회해야 합니다.
 입력으로 들어오는 배열의 크기를 N으로 가정하면, unique 함수는 O(N**2)의 시간 복잡도를 가집니다.
 
-만약 배열로 유일한 요소를 저장하지 않고 Set을 사용해 hash value를 통해 값을 비교하고 유일한 요소들을 저장한다면 unique 함수의 성능을 개선시킬 수 있습니다.
+만약 배열로 유일한 요소를 저장하지 않고 Set을 사용해 hash value를 통해 값을 비교하고 유일한 요소들을 저장한다면 unique 함수의 성능을 개선할 수 있습니다.
 
 Set을 사용하려면 Element 연관 값의 타입 제약을 Equatable 프로토콜이 아닌 Hashable 프로토콜로 제약해야 합니다.
 
@@ -636,7 +636,7 @@ Element 연관 값을 Equatable 프로토콜로 타입 제약한 unique 함수�
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/51fd9ba0-ee80-4269-8ee4-dc193260a5e7)
 
-Equatable 프로토콜을 상속 받은 Hashable 프로토콜을 경우, Equatable 타입을 따르는 요소를 가진 배열은 성능적으로 개선되지 못한 배열을 사용한 unique 함수를 호출하게 됩니다.
+Equatable 프로토콜을 상속받은 Hashable 프로토콜을 경우, Equatable 타입을 따르는 요소를 가진 배열은 성능적으로 개선되지 못한 배열을 사용한 unique 함수를 호출하게 됩니다.
 
 반면에 Hashable 타입을 따르는 요소를 가진 배열은 Hashable 프로토콜 제약을 가한 새로운 unique 함수를 호출합니다.
 물론 Hashable 프로토콜로 Element의 타입 제약을 가한 unique 함수가 없다면 Equatable 프로토콜로 타입 제약을 가한 unique 함수를 호출하게 됩니다.
@@ -693,7 +693,7 @@ extension Collection where Element: Hashable {
 
 The point is, finding the balance between extending the lowest common denominator without weakening the API of concrete type is a bit of an art.
 
-스위프트는 결국 가장 구체적인 구현을 선택합니다. 가장 특수화된(가까운) 구현을 선택하다는 것과 같은 의미입니다.
+스위프트는 결국 가장 구체적인 구현을 선택합니다. 가장 특수화된(가까운) 구현을 선택한다는 것과 같은 의미입니다.
 
 ## Extending with concrete constraints
 
@@ -739,12 +739,12 @@ let articlesSet: Set<Article> = [articleOne, articleTwo]
 articlesSet.totalViewCount  // 230
 ```
 
-기능 추가를 위해 확장을 사용할 때 얼마나 저차원 타입을 확장 할지 결정하는 것은 까다롭습니다.
+기능 추가를 위해 확장을 사용할 때 얼마나 저차원 타입을 확장할지 결정하기는 어렵습니다.
 
 어떤 경우에는 저차원 Collection 프로토콜까지 확장할 필요 없을 수 있습니다.
 
 물론 저차원인 Collection 프로토콜을 확장할 경우 더 많은 타입에 확장한 기능을 사용할 수 있게 됩니다.
-Collection 보다 더 저차원인 Sequence를 확장하면 더 많은 타입에 확장한 기능을 사용할 수 있습니다.
+Collection보다 더 저차원인 Sequence를 확장하면 더 많은 타입에 확장한 기능을 사용할 수 있습니다.
 
 ## Extending Sequence
 
@@ -798,17 +798,17 @@ filter 구현부를 보면 rethrows 키워드가 붙습니다.
 rethrows 키워드를 사용해 매개변수로 전달받은 클로저가 오류를 던질 수 있음을 나타냅니다.
 또한 입력받은 클로저가 오류를 던진다면 해당 오류를 filter 함수의 호출부로 전달한다는 의미이기도 합니다.
 
-만약 rethrows를 사용하지 않은 경우, filter 함수를 호출하는 부분에서 오류를 처리하는게 아닌 filter 함수 내부에서 처리해야 합니다.
+만약 rethrows를 사용하지 않은 경우, filter 함수를 호출하는 부분에서 오류를 처리하는 게 아닌 filter 함수 내부에서 처리해야 합니다.
 
 filter 함수에 rethrows가 붙어서 filter 함수의 구현부에서 try 키워드와 함께 catch를 사용하지 않아도 됩니다.
-rethrow 키워드에 의해 try 키워드에서 오류가 발생할 때 filter 함수의 호출부로 에러가 던지기 때문에 catch 구문을 필요로 하지 않습니다.
+rethrow 키워드에 의해 try 키워드에서 오류가 발생할 때 filter 함수의 호출부로 에러가 던지기 때문에 catch 구문이 필요하지 않습니다.
 
 filter 구현부에 등장하는 **ContiguousArray** 타입은 배열 요소로 클래스나 Objectivew-C 프로토콜을 가졌을 때 성능적 이점이 있습니다. 하지만 그외의 요소를 가진다면 일반 Array 타입과 동일한 성능을 보입니다.
 
-filter 함수와 같은 저차원 함수는 성능이 중요시 여겨집니다. 성능을 향상 시키기위해 ContiguousArray를 사용합니다.
+filter 함수와 같은 저차원 함수는 성능이 중요시해집니다. 성능을 향상하기 위해 ContiguousArray를 사용합니다.
 
 아래 링크에서 ContiguousArray와 관련된 자세한 내용을 살펴봅시다.
-ContiguousArray가 Array 보다 성능이 좋다면 왜 우린 Array보다 ContiguousArray를 자주 사용하지 않는지 궁금증이 있었습니다.
+ContiguousArray가 Array보다 성능이 좋다면 왜 우린 Array보다 ContiguousArray를 자주 사용하지 않는지 궁금증이 있었습니다.
 
 ContiguousArray는 연속적으로 저장되어야 한다는 특징과 Array 자체로도 성능적으로 충분하다는 점이 결론입니다.
 
@@ -822,7 +822,7 @@ https://jeong9216.tistory.com/555
 
 Sequence 프로토콜이 제공하는 drop(while:) 함수와 정반대의 기능을 하는 take(while:) 함수를 Sequence 프로토콜 확장에 추가하려 합니다.
 
-drop(while:) 함수는 while로 입력 받는 클로저 속 조건을 만족할 때 요소들을 순회하며 리턴하지 않다가(drop) 조건에 만족하지 않는 요소를 만나면 해당 요소를 포함하여 이후의 요소들을 리턴합니다.
+drop(while:) 함수는 while로 입력받는 클로저 속 조건을 만족할 때 요소들을 순회하며 리턴하지 않다가(drop) 조건에 만족하지 않는 요소를 만나면 해당 요소를 포함하여 이후의 요소들을 리턴합니다.
 
 아래 공식 문서를 통해 더 자세히 알아봅시다.
 
@@ -836,7 +836,7 @@ let startingWithNegative = numbers.drop(while: { $0 > 0 })
 // startingWithNegative == [-2, 9, -6, 10, 1]
 ```
 
-그렇다면 drop(while) 함수와 반대의 기능을 하는 take(while:) 함수는 while로 입력 받은 클로저의 조건에 만족하는 요소들을 리턴하다가 조건에 만족하지 않을 때 순회를 종료합니다.
+그렇다면 drop(while) 함수와 반대의 기능을 하는 take(while:) 함수는 while로 입력받은 클로저의 조건에 만족하는 요소들을 리턴하다가 조건에 만족하지 않을 때 순회를 종료합니다.
 
 아래와 같이 take(while:) 함수가 동작합니다.
 
@@ -890,7 +890,7 @@ extension Seequence {
 
 inspect 함수는 파이프라인 구조에서 데이터를 다룰 때 디버깅 용도로 사용되는 함수입니다.
 
-filter나 forEach는 데이터를 조작하여 변형된 데이터를 하위 파이프라인으로 전달하지만, inspect 함수에서는 데이터를 조작하지만 하위 파이프라인으로는 조작된 데이터가 아닌 조작되기 이전의 데이터를 전달합니다.
+filter나 forEach는 데이터를 조작하여 변형된 데이터를 하위 파이프라인으로 전달하지만, inspect 함수에서는 데이터를 조작하지만, 하위 파이프라인으로는 조작된 데이터가 아닌 조작되기 이전의 데이터를 전달합니다.
 
 따라서 inspect 함수는 파이프라인 중간에 데이터를 디버깅하는 용도로 주로 사용할 수 있습니다.
 
@@ -931,7 +931,7 @@ extension Sequence {
 프로토콜과 프로토콜 확장은 재사용성이 높은 코드를 만들고 의미 단위로 코드를 분리합니다.
 
 하지만 어떤 경우에서는 특정 타입(concrete type)이 추상화를 구현할 때 더 어울릴 경우도 있습니다.
-프로토콜 확장과 특정 타입을 균형있게 사용해야 합니다.
+프로토콜 확장과 특정 타입을 균형 있게 사용해야 합니다.
 
 ## Summary
 - Protocols can deliver a default implementation via protocol extensions.
