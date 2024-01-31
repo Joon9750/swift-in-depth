@@ -13,53 +13,59 @@
 ## Class inheritance vs. protocol inheritance
 
 객체지향 프로그래밍은 서브 클래싱을 사용해 전형적으로 데이터를 모델링하는 방법입니다.
-하지만 서브 클래싱의 수직적 데이터 모델링은 다소 엄격합니다.
+
+하지만 서브 클래싱이 형성하는 수직적 데이터 구조는 다소 엄격한 성격을 지닙니다.
 클래스 기반의 상속을 대신해서 스위프트는 프로토콜 기반의 상속을 제공합니다.
 
 클래스 기반의 상속은 수직적 데이터 구조를 만들고 프로토콜 기반의 상속은 수평적 데이터 구조를 이룹니다.
 
 클래스 기반의 상속에서 부모 클래스를 상속한 자식 클래스에 새로운 함수를 추가하거나 부모 클래스의 함수를 오버라이드 할 수 있습니다.
 
-만약, 네트워크 호출을 위한 URLRequest 타입을 생성하는 RequestBuilder 타입을 서브 클래싱 방식으로 만들어 봅시다.
+네트워크 호출을 위한 URLRequest 타입을 생성하는 RequestBuilder 타입을 서브 클래싱 방식으로 만들고 프로토콜을 사용한 방식으로도 만들어봅시다.
+
+먼저 서브 클래싱 방식으로 RequestBuilder 타입을 구현해 봅시다.
 
 RequestBuilder 클래스를 최상위 부모 클래스로 두고, RequestBuiler 클래스를 상속하는 RequestHeaderBuilder 자식 클래스를 만들어 RequestHeaderBuilder 클래스에서 header를 붙이는 작업을 추가합니다. 
+
 또한 RequestHeaderBuilder 클래스를 상속한 EncryptedRequestHeaderBuilder 자식 클래스를 만들고 네트워크 요청의 데이터를 암호화하는 기능까지 추가합니다.
 
-**RequestBuilder**
+이와 같이 서브 클래싱을 하며 자식 클래스에 필요한 기능을 추가하는 방식으로 데이터 구조를 형성합니다.
 
-**RequestHeaderBuilder(subclass)**
-
-**EncryptedRequestHeaderBuilder(subclass)**
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/5346bc05-2af9-49be-9166-d9a16b0f775a)
 
 이처럼 클래스 기반 상속은 수직적(vertical) 데이터 구조를 형성합니다.
 
 하지만 클래스 기반 상속과 달리 프로토콜 기반의 상속을 통해 RequestBuilder 타입을 만든다면 수평적(horizontal) 데이터 구조를 형성할 수 있습니다.
 
-**RequestBuilder** | **HeaderBuilder** | **Encryptable**
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/809509e1-51a7-4ad6-817a-f82d9ad1dd78)
 
 RequestBuilder를 비롯해 나머지 프로토콜을 따르면 해당 프로토콜에서 제공하는 함수를 사용 가능합니다.
-enum, struct, class, subclass 상관 없이 프로토콜을 따를 수 있습니다.
+enum, struct, class, subclass 상관 없이 모두 프로토콜을 따를 수 있습니다.
 
-프로토콜을 통해 기능을 분리하여 특정 기능이 필요할 때 해당 기능을 지원하는 프로토콜을 채택하는 방식으로 새로운 함수를 추가할 수 있습니다.
+프로토콜을 통해 기능을 분리하여 특정 기능이 필요할 때 해당 기능을 지원하는 프로토콜을 채택하는 방식으로 새로운 기능(함수)를 추가할 수 있습니다.
 또한 프로토콜 상속을 통해서 새로운 함수를 추가하고 부모 프로토콜의 함수를 오버라이드 할 수 있습니다.
 
-프로토콜로 기능을 분리하는 방식은 코드 유연성과 재사용성이 높아집니다.
-프로토콜을 통해 더 이상 하나의 부모 클래스에 제한되지 않습니다.
+프로토콜로 기능을 분리하는 방식은 코드 유연성과 재사용성을 높입니다.
+
+서브 클래싱 방법은 하나의 부모 클래스에 제한된 자식 클래스를 가지지만, 프로토콜을 활용한다면 하나의 부모 클래스에 제한 되지 않을 수 있습니다.
 
 **Creating a protocol extension**
 
-프로토콜에서는 함수를 정의할 수만 있고 프로토콜을 채택한 타입에서 해당 함수를 구현해야 합니다. 
-하지만 프로토콜 확장을 통해 프로토콜에서 정의한 함수의 구현부(default implementation)를 추가할 수 있습니다.
+프로토콜에서는 함수를 정의할 수만 있고, 프로토콜을 채택한 타입에서 프로토콜에 정의된 함수를 구현해야 합니다.
+
+하지만 프로토콜 확장을 통해 프로토콜에서 정의한 함수의 구현부(default implementation)를 제공할 수 있습니다.
 
 아래 코드로 살펴봅시다.
 
 ```swift
 protocol RequestBuilder {
   var baseURL: URL { get }
+  // makeRequest 함수 정의
   func makeRequest(path: String) -> URLRequest
 }
 
 extension RequestBuilder {
+  // makeRequest 함수 구현
   func makeRequest(path: String) -> URLRequest {
     let url = baseURL.appendingPathComponent(path)
     var request = URLRequest(url: url)
@@ -69,10 +75,13 @@ extension RequestBuilder {
 }
 ```
 
-위 코드와 같이 프로토콜 함수에서 정의한 함수의 default 구현부는 extension에 위치해야 합니다.
-또한 extension에서 구현하는 함수 구현부에서는 당연히 프로토콜의 프로퍼티에 접근할 수 있습니다.
+위 코드와 같이 프로토콜 함수에서 정의한 함수의 구현부(default implementation)를 제공하기 위해서는 프로토콜을 확장하여 함수 구현부를 제공해야 합니다.
 
-이제 RequestBuilder 프로토콜을 채택한 타입에서는 추가적인 makeRequest 함수 구현 없이 makeRequest 함수를 사용할 수 있습니다.
+또한 확장에서 구현하는 함수 구현부에서는 프로토콜의 프로퍼티에 접근할 수 있습니다.
+
+이제 RequestBuilder 프로토콜을 채택한 타입에서는 makeRequest 함수 구현 없이 RequestBuiler 프로토콜 확장에서 제공하는 makeRequest 함수 구현부를 사용할 수 있습니다.
+
+물론 RequestBuiler 프로토콜을 채택한 타입에서 makeRequest 함수를 직접 구현하여 사용할 수 있습니다. 이때는 RequestBuiler 프로토콜의 확장에서 구현된 makeRequest 함수가 아닌 해당 타입에서 직접 구현한 makeRequest 함수를 호출합니다. 이 부분에 있어 아래에서 더 살펴볼 예정입니다.
 
 아래 코드로 살펴봅시다.
 
@@ -337,6 +346,8 @@ Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에�
 만약 Oak 구조체에서 grow 함수를 오버라이드 하지 않는다면 Oak 구조체가 채택한 Tree 프로토콜의 grow 함수를 호출합니다.
 하지만 Oak 구조체에서 grow 함수를 오버라이드 한다면 Oak 구조체에서 호출되는 grow 함수는 Oak 구조체에서 오버라이드한 grow 함수가 호출됩니다.
 (If a type implements the same method as the one on a protocol extension, Swift ignores the protocol extension's method.)
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/847f79b2-cf72-4f14-b17a-4959b7f37417)
 
 프로토콜의 확장에서 구현한 함수를 프로토콜을 채택하는 타입에서 오버라이드 할 수 있지만, 반대로 프로토콜 확장을 통해 실제 타입의 함수를 오버라이드 할 수는 없습니다.
 
