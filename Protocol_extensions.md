@@ -514,9 +514,10 @@ Extensions are not namespaced, so be careful with adding public extensions insid
 
 ## Extending with associated types
 
-연관 값을 가진 프로토콜의 함수가 호출되는 방식을 살펴봅시다.
+연관 값을 가진 프로토콜을 확장 했을 때를 살펴봅시다.
 
-만약 배열(Array)에 중복 값을 제거하는 unique 함수를 적용하고 싶을 때를 예시로 살펴봅시다.
+배열(Array)에 중복 값을 제거하는 unique 함수를 적용하고 싶을 때를 예시로 살펴봅시다.
+
 아래 코드와 같이 앞으로 구현할 unique 함수는 배열 속의 중복된 값을 제거하고 유일한 값만 가진 배열로 만듭니다.
 
 ```swift
@@ -524,9 +525,16 @@ Extensions are not namespaced, so be careful with adding public extensions insid
 ```
 
 배열은 Element라는 연관 값을 가진 구조체입니다.
+
+```swift
+@frozen
+struct Array<Element>
+```
+
 따라서 unique 함수도 Element 연관 값을 다뤄야 합니다.
 
 먼저 배열을 확장하여 unique 함수를 추가 해보겠습니다.
+
 이때 unique 함수에서 각 element들을 비교하기 위해서 Element 연관 값은 Equatable 프로토콜로 타입 제약 되어야 합니다.
 
 아래 코드로 살펴봅시다.
@@ -546,12 +554,20 @@ extension Array where Element: Equatable {
 ```
 
 Equatable로 Element 연관 값을 타입 제약했기 때문에 Element 연관 값의 타입은 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있습니다.
-(여기서 궁금증은 Element 연관 값이 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있는지, unique 함수의 사용 여부와 관계 없이 Element 연관 값이 Equatable 프로토콜을 따르지 않으면 에러가 발생하는지 입니다. 전자일것 같긴하지만...)
 
-배열을 확장해 unique 함수를 추가하는 방법은 좋은 시작입니다.
+Element 연관 값이 Equatable 프로토콜을 따라야만 unique 함수를 사용할 수 있습니다.
+만약 Equeatable 프로토콜을 따르지 않는 요소가 배열로 들어갈 경우 unique 함수를 사용할 수 없습니다.
 
-그렇다면 저차원으로 내려가 Collection 프로토콜을 따르는 다른 타입에도 unique 함수를 제공하기 위해 Collection 프로토콜을 확장해 unique 함수를 추가해 봅시다.
-물론 Collection 프로토콜의 Element 연관 값도 Equatable 타입으로 제약해야 합니다.
+위와 같이 배열을 확장해 unique 함수를 추가하는 방법은 좋은 시작입니다.
+
+그렇다면 저차원으로 내려가 Collection 프로토콜을 확장해 unique 함수를 추가해 봅시다.
+Collection 프로토콜을 따르는 더 많은 타입에 unique 함수를 제공할 수 있습니다.
+
+```swift
+protocol Collection<Element> : Sequence
+```
+
+물론 Collection 프로토콜도 Element라는 연관 값을 가지기 때문에 Element 연관 값을 Equatable 타입으로 제약해야 합니다.
 
 아래 코드를 살펴봅시다.
 
@@ -575,9 +591,7 @@ extension Collection where Element: Equatable {
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f87cec24-1de8-47f8-83fb-8a1713ff1872)
 
-물론 Collection 보다 더 저차원인 Sequence 프로토콜도 존재합니다.
-
-unique 함수를 아래 코드와 같이 사용할 수 있습니다.
+Collection 프로토콜을 확장해 추가한 unique 함수를 아래 코드와 같이 사용할 수 있습니다.
 
 ```swift
 // Array still has unique()
@@ -600,27 +614,34 @@ print(uniqueValues)  // ["Banana", "Pancake", "Waffle"]
 이렇게 여러 타입에 unique 함수를 적용할 수 있습니다.
 특정 타입(concrete type)을 확장하지 않고 프로토콜을 확장했기 때문에 얻을 수 있는 이점입니다.
 
+물론 Collection 보다 더 저차원인 Sequence 프로토콜도 존재합니다. 
+이후에 Sequence 프로토콜을 확장하는 경우도 살펴봅시다.
+
 **A specialized extension**
 
-하지만 위에서 구현한 unique 함수는 성능 측면에서 개선할 부분이 있습니다.
+위에서 구현한 unique 함수는 성능 측면에서 더 개선할 부분이 있습니다.
 
-각 배열의 요소마다 uniqueValues 배열에 이미 있는 요소인지 확인해야 합니다.
+위의 unique 함수에서는 입력으로 들어오는 배열의 요소마다 uniqueValues 배열에 이미 있는 요소인지 확인해야 합니다.
 다시 말해 배열 요소 하나마다 uniqueValuew 배열을 모두 순회해야 합니다.
+입력으로 들어오는 배열의 크기를 N으로 가정하면, unique 함수는 O(N**2)의 시간 복잡도를 가집니다.
 
-만약 배열로 유일한 요소를 저장하지 않고 Set을 사용해 hash valuew를 통해 값을 비교하고 유일한 요소들을 저장한다면 성능을 개선시킬 수 있습니다.
+만약 배열로 유일한 요소를 저장하지 않고 Set을 사용해 hash value를 통해 값을 비교하고 유일한 요소들을 저장한다면 unique 함수의 성능을 개선시킬 수 있습니다.
+
 Set을 사용하려면 Element 연관 값의 타입 제약을 Equatable 프로토콜이 아닌 Hashable 프로토콜로 제약해야 합니다.
 
 Element 연관 값을 Hashable 프로토콜로 타입 제약한 상태에서 Collection 프로토콜 확장에 unique 함수를 추가 구현하게 됩니다.
-Element 연관 값을 Equatable 프로토콜로 타입 제약한 상태와 Hashable 프로토콜로 타입 제약한 상태 모두 확장에 구현할 것입니다. 
+Element 연관 값을 Equatable 프로토콜로 타입 제약한 unique 함수와 Hashable 프로토콜로 타입 제약한 unique 함수 모두 Collection 확장에 구현합니다. 
 
 **연관 값의 상속 관계에서도 스위프트는 가장 특수화된 구현을 고릅니다.**
 
-Equatable 프로토콜을 상속 받은 Hashable 프로토콜을 경우, Equatable 타입을 따르는 요소를 가진 배열은 성능적으로 개선되지 못한 배열을 사용한 위의 unique 함수를 호출하게 되고 
-Hashable 타입을 따르는 요소를 가진 배열은 Hashable 프로토콜 제약을 가한 새로운 unique 함수가 없다면 기존의 unique 함수를 호출합니다.
-
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/51fd9ba0-ee80-4269-8ee4-dc193260a5e7)
 
-하지만 아래 코드와 같이 Element 연관 값을 Hashable 프로토콜로 제약할 경우 기존의 unique 함수가 아닌 Set을 활용하는 개선된 unique 함수를 호출합니다. 
+Equatable 프로토콜을 상속 받은 Hashable 프로토콜을 경우, Equatable 타입을 따르는 요소를 가진 배열은 성능적으로 개선되지 못한 배열을 사용한 unique 함수를 호출하게 됩니다.
+
+반면에 Hashable 타입을 따르는 요소를 가진 배열은 Hashable 프로토콜 제약을 가한 새로운 unique 함수를 호출합니다.
+물론 Hashable 프로토콜로 Element의 타입 제약을 가한 unique 함수가 없다면 Equatable 프로토콜로 타입 제약을 가한 unique 함수를 호출하게 됩니다.
+
+이를 통해 프로토콜 연관 값의 상속 관계에서도 스위프트는 가장 특수화된 구현, 즉 본인과 가장 구현을 고른다는 특징을 알 수 있습니다.
 
 ```swift
 extension Collection where Element: Hashable {
@@ -638,9 +659,9 @@ extension Collection where Element: Hashable {
 }
 ```
 
-이제 Collection 프로토콜은 두 번의 확장을 통해 연관 값의 타입 제약이 다른 두 함수를 구현했습니다.
+이제 Collection 프로토콜은 두 번의 확장을 통해 연관 값의 타입 제약이 다른 두 unique 함수를 구현했습니다.
 
-Collection<Element>에서 Element의 타입 제약이 다를 때도 스위프트는 가장 특수화된 구현을 고릅니다.
+Collection<Element>에서 Element의 타입 제약이 다를 때, Collection에 들어온 요소의 타입 입장에서 가장 특수화된 unique 구현을 고릅니다. 
 
 Element 연관 값을 Hashable 프로토콜로 타입 제약한 unique 함수를 살펴보면 set 자체로 유일한 값이 저장되지만 추가적으로 [Element] 배열의 uniqueValues 변수를 만들어 set과 동일한 조건으로 조작하고 있습니다.
 물론 unique 함수의 리턴 타입이 [Element]이기 때문에 uniqueValues 변수가 필요했지만, 아래와 같이 Set을 확장하여 Set을 배열로 리턴할 수 있습니다.
