@@ -368,37 +368,43 @@ func submitEmail<T>(sender: T, email: Email) where T: Mailer, T: MailValidator {
 지금부터 더 자세히 알아봅시다.
 
 grow 함수를 가진 Tree 프로토콜을 구현하여 프로토콜 상속 과정을 살펴봅시다.
+
 Tree 프로토콜을 확장하여 grow 함수를 구현하고 Oak 구조체에서 Tree 프로토콜을 채택하려 합니다.
 이때 Oak 구조체에서 grow 함수를 오버라이드하는 상황입니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/16695ca4-c9ed-4c03-aa7e-75293a827af4)
+
 만약 Oak 구조체에서 grow 함수를 오버라이드 하지 않는다면 Oak 구조체가 채택한 Tree 프로토콜의 grow 함수를 호출합니다.
-하지만 Oak 구조체에서 grow 함수를 오버라이드 한다면 Oak 구조체에서 호출되는 grow 함수는 Oak 구조체에서 오버라이드한 grow 함수가 호출됩니다.
+
+하지만 Oak 구조체에서 Tree 프로토콜이 제공하는 grow 함수를 오버라이드 한다면 Oak 구조체에서 호출되는 grow 함수는 Oak 구조체에서 오버라이드한 grow 함수가 호출됩니다.
 (If a type implements the same method as the one on a protocol extension, Swift ignores the protocol extension's method.)
 
-![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/847f79b2-cf72-4f14-b17a-4959b7f37417)
-
-프로토콜의 확장에서 구현한 함수를 프로토콜을 채택하는 타입에서 오버라이드 할 수 있지만, 반대로 프로토콜 확장을 통해 실제 타입의 함수를 오버라이드 할 수는 없습니다.
+프로토콜의 확장에서 구현한 함수를 프로토콜을 채택하는 타입에서 오버라이드 할 수 있지만, 반대로 프로토콜 확장을 통해 실제 타입의 함수를 오버라이드 할 수 없습니다.
 
 **Overriding with protocol inheritance**
 
-지금부터는 프로토콜이 상속될 때 확장에서 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아볼 예정입니다.
+지금부터는 프로토콜이 상속될 때 확장에 추가한 함수 구현부(default implementation)가 상속되는 규칙을 알아봅시다.
 
-위에서 봤던 Tree 프로토콜을 Plant 프로토콜의 상속을 받는 자식 프로토콜로 만들고 Oak 구조체가 Tree 프로토콜을 채택하도록 구현하면 Oak 구조체가 호출하는 grow 함수가 무엇인지 살펴봅시다.
+위에서 봤던 Tree 프로토콜을 Plant 프로토콜의 상속을 받는 자식 프로토콜로 만들고, Oak 구조체가 Tree 프로토콜을 채택하도록 구현하면 Oak 구조체가 호출하는 grow 함수가 무엇인지 살펴봅시다.
 
 **스위프트는 가장 특수화된 구현을 고르는 특성이 있습니다.**
 
-여기서 특수화된 구현이라는 설명이 이해 되지 않을 수 있습니다.
-특수화된 구현은 자신과 가장 가까운 구현을 뜻하는 말입니다.
+여기서 특수화된 구현이란 자신의 타입과 가장 가까운 구현을 뜻합니다.
 
-부모 프로토콜인 Plant 프로토콜과 Plant 프로토콜을 상속 받는 Tree 자식 프로토콜이 있고 Oak 구조체가 Tree 프로토콜을 채택하는 상황에서 Plant 프로토콜, Tree 프로토콜, 그리고 Oak 구조체 모두 grow 함수를 오버라이드 했다면
-Oak 구조체에서 가장 가까운 grow 함수 구현부는 본인이 가진 grow 함수라고 볼 수 있습니다.
+부모 프로토콜인 Plant 프로토콜과 Plant 프로토콜을 상속 받는 Tree 자식 프로토콜이 있고, Oak 구조체가 Tree 프로토콜을 채택하는 상황에서 Plant 프로토콜, Tree 프로토콜, 그리고 Oak 구조체 모두 grow 함수를 오버라이드하고 있습니다.
+
+이때 Oak 구조체에서 가장 가까운 grow 함수 구현부는 본인이 가진 grow 함수라고 볼 수 있습니다.
 따라서 Oak 구조체에서 호출하는 grow 함수는 본인이 오버라이드한 함수입니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/847f79b2-cf72-4f14-b17a-4959b7f37417)
 
 만약 Plant 프로토콜과 Tree 프로토콜에만 grow 함수를 오버라이드 했다면, Tree 프로토콜을 채택하는 Oak 구조체에서 호출되는 grow 함수는 Tree 프로토콜의 grow 함수가 될 것 입니다.
 
-마지막으로 Plant 프로토콜에만 grow 함수를 구현했다면 당연히 Oak 구조체에서 호출되는 grow 함수는 Plant 프로토콜의 grow 함수가 됩니다.
+Plant 프로토콜보다 Tree 프로토콜이 Oak 구조체 기준으로 가까운 구현(특수화된 구현)이기 때문입니다.
 
-아래 코드로 프로토콜 확장이 함수 구현부(default implementation)를 가질 때, 해당 프로토콜을 상속하고 오버라이드하는 과정을 살펴봅시다.
+마지막으로 Plant 프로토콜에만 grow 함수를 구현했다면 Oak 구조체에서 호출되는 grow 함수는 Plant 프로토콜의 grow 함수가 됩니다.
+
+프로토콜 확장이 함수 구현부(default implementation)를 제공할 때, 해당 프로토콜을 상속하고 오버라이드하는 과정을 아래 코드로 살펴봅시다.
 
 ```swift
 func growPlant<P: Plant>(_ plant: P) {
