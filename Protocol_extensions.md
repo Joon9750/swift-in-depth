@@ -29,7 +29,7 @@ RequestBuilder 클래스를 최상위 부모 클래스로 두고, RequestBuiler 
 
 또한 RequestHeaderBuilder 클래스를 상속한 EncryptedRequestHeaderBuilder 자식 클래스를 만들고 네트워크 요청의 데이터를 암호화하는 기능까지 추가합니다.
 
-이와 같이 서브 클래싱을 하며 자식 클래스에 필요한 기능을 추가하는 방식으로 데이터 구조를 형성합니다.
+이처럼 서브 클래싱을 하며 자식 클래스에 필요한 기능을 추가하는 방식으로 데이터 구조를 형성합니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/5346bc05-2af9-49be-9166-d9a16b0f775a)
 
@@ -39,15 +39,15 @@ RequestBuilder 클래스를 최상위 부모 클래스로 두고, RequestBuiler 
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/809509e1-51a7-4ad6-817a-f82d9ad1dd78)
 
-RequestBuilder를 비롯해 나머지 프로토콜을 따르면 해당 프로토콜에서 제공하는 함수를 사용 가능합니다.
-enum, struct, class, subclass 상관 없이 모두 프로토콜을 따를 수 있습니다.
+RequestBuilder를 비롯해 나머지 프로토콜을 따르면 해당 프로토콜에서 제공하는 함수를 사용할 수 있습니다.
+enum, struct, class, subclass 상관없이 모두 프로토콜을 따를 수 있습니다.
 
-프로토콜을 통해 기능을 분리하여 특정 기능이 필요할 때 해당 기능을 지원하는 프로토콜을 채택하는 방식으로 새로운 기능(함수)를 추가할 수 있습니다.
+프로토콜을 통해 기능을 분리하여 특정 기능이 필요할 때 해당 기능을 지원하는 프로토콜을 채택하는 방식으로 새로운 기능(함수)을 추가할 수 있습니다.
 또한 프로토콜 상속을 통해서 새로운 함수를 추가하고 부모 프로토콜의 함수를 오버라이드 할 수 있습니다.
 
 프로토콜로 기능을 분리하는 방식은 코드 유연성과 재사용성을 높입니다.
 
-서브 클래싱 방법은 하나의 부모 클래스에 제한된 자식 클래스를 가지지만, 프로토콜을 활용한다면 하나의 부모 클래스에 제한 되지 않을 수 있습니다.
+서브 클래싱 방법은 하나의 부모 클래스에 제한된 자식 클래스를 가지지만, 프로토콜을 활용한다면 하나의 부모 클래스에 제한되지 않을 수 있습니다.
 
 **Creating a protocol extension**
 
@@ -102,7 +102,7 @@ BikeRequestBuilder 타입은 RequestBilder 프로토콜을 채택하여 makeRequ
 
 **Multiple extension**
 
-클래스 상속의 경우 자식 클래스가 하나의 부모 클래스만 상속 받을 수 있습니다.
+클래스 상속의 경우 자식 클래스가 하나의 부모 클래스만 상속받을 수 있습니다.
 
 하지만 클래스 상속과 달리, 프로토콜의 경우에는 하나의 타입이 여러 프로토콜을 채택할 수 있습니다.
 다시 말해 다중 프로토콜 채택이 가능합니다.
@@ -173,12 +173,12 @@ extension Mailer {
 
 이제 Mailer 프로토콜의 확장에서 구현한 함수의 구현부(default implementation)에 메일을 보내기 전에 메일의 유효성 검사를 추가하려 합니다.
 
-그러나 Mailer 프로토콜의 따르는 모든 타입에서 메일의 유효성 검사를 요구하진 않습니다.
-특정 타입에서만 Mailer 프로토콜을 따르며 추가적으로 메일의 유효성 검사를 요구하는 상황입니다.
+그러나 Mailer 프로토콜을 따르는 모든 타입에서 메일의 유효성 검사를 요구하진 않습니다.
+특정 타입에서만 Mailer 프로토콜을 따르며 추가로 메일의 유효성 검사를 요구하는 상황입니다.
 
-먼저 프로토콜 상속으로 위와 같은 조건을 구현해봅시다.
+먼저 프로토콜 상속으로 위와 같은 조건을 구현해 봅시다.
 
-Mailer 프로토콜을 상속 받은 ValidatingMailer 자식 프로토콜을 생성하여 ValidatingMailer 프로토콜에 유효성 검사 기능을 추가합니다.
+Mailer 프로토콜을 상속받은 ValidatingMailer 자식 프로토콜을 생성하여 ValidatingMailer 프로토콜에 유효성 검사 기능을 추가합니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/50192d93-3627-425d-999a-83c05000926e)
 
@@ -231,7 +231,7 @@ try? client.send(
 )
 ```
 
-Mailer 프로토콜을 상속하여 ValidationMailer 자식 프로토콜에 요구사항에 필요한 validate 함수를 추가하고 Mailer 프로토콜의 send 함수를 오버라이드하고 있습니다.
+Mailer 프로토콜을 상속하여 ValidationMailer 자식 프로토콜에 validate 함수를 추가하고 Mailer 프로토콜의 send 함수를 오버라이드하고 있습니다.
 
 Mailer 프로토콜의 자식 프로토콜인 ValidatingMailer에서 send 함수를 오버라이드 했기 때문에 ValidationMailer 프로토콜을 확장하여 send 함수의 구현부를 제공해야 합니다.
 
@@ -244,7 +244,7 @@ Mailer 프로토콜의 자식 프로토콜인 ValidatingMailer에서 send 함수
 
 프로토콜 컴포지션 방식은 Mailer 프로토콜을 상속하는 ValidatingMailer 프로토콜을 생성하지 않고, 메일 유효성을 검사하는 독립된 MailValidator 프로토콜을 생성합니다.
 
-이후 메일 유효성 검사 기능을 필요로 하는 타입에 Mailer 프로토콜과 함께 MailValidator 프로토콜을 다중 채택하여 메일 유효성 검사 기능을 제공합니다.
+이후 메일 유효성 검사 기능이 있어야 하는 타입에 Mailer 프로토콜과 함께 MailValidator 프로토콜을 다중 채택하여 메일 유효성 검사 기능을 제공합니다.
 
 아래 코드는 독립된 MailValidator 프로토콜을 구현한 코드입니다.
 
@@ -270,7 +270,7 @@ struct SMTPClient: Mailer, MailValidator {
 
 두 프로토콜을 모두 채택한 타입은 두 프로토콜의 교차점에 위치하는 타입이라고 볼 수 있습니다.
 
-두 프로토콜의 교차점에 위치하는 타입에게 특정 기능을 제공하도록 교차점을 확장할 수 있습니다.
+두 프로토콜의 교차점에 위치하는 타입에 특정 기능을 제공하도록 교차점을 확장할 수 있습니다.
 
 예를 들어 Mailer 프로토콜과 MailValidator 프로토콜을 모두 따르는 SMTPClient 타입이 두 프로토콜의 교차점에 있는 타입이라고 볼 수 있습니다.
 Mailer 프로토콜과 MailValidator 프로토콜의 교차점을 확장했다면 확장된 기능을 교차점에 있는 SMTPClient 타입이 사용할 수 있습니다.
