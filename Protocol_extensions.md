@@ -292,14 +292,14 @@ extension MailValidator where Self: Mailer {
 }
 ```
 
-두 프로토콜의 교차점을 확장하여 send 함수의 구현부(default implementation)를 제공하여 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드하고 있습니다.
-위에서는 MailValidator를 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관 없습니다.
+두 프로토콜의 교차점을 확장하여 send 함수의 구현부(default implementation)를 제공합니다.
+교차점의 확장에서 제공하는 send 함수는 Mailer 프로토콜에서 제공하는 send 함수를 오버라이드한 함수입니다.
 
-이제 두 프로토콜을 채택하는 SMTPClient 타입에서 send 함수의 구현부는 프로토콜의 교차점에서 제공하게 됩니다.
+위 코드에서 MailValidator 프로토콜을 확장하고 Mailer 프로토콜을 채택했지만, 반대로 Mailer 프로토콜을 확장하고 MailValidator 프로토콜을 채택해도 상관 없습니다.
 
-프로토콜 교차점에서 기존 함수를 오버라이드하는 경우외에도 새로운 함수를 추가할 수 있습니다.
+이제 Mailer 프로토콜과 MailValidator 프로토콜을 모두 채택하는 SMTPClient 타입에서 send 함수의 구현부는 두 프로토콜의 교차점에서 제공하게 됩니다.
 
-아래 코드로 살펴봅시다.
+프로토콜 교차점에서 기존 함수를 오버라이드하는 경우외에도 아래 코드와 같이 새로운 함수를 추가할 수 있습니다.
 
 ```swift
 extension MailValidator where Self: Mailer {
@@ -310,7 +310,7 @@ extension MailValidator where Self: Mailer {
     print("Email Validated and sent.")
   }
 
-  // 새로운 send(email:, at:) 함수
+  // 두 프로토콜의 교차점을 확장하여 추가한 새로운 send(email:, at:) 함수
   func send(email: Email, at: Date) throws {
     try validate(email: email)
     // Connect to server
@@ -320,19 +320,25 @@ extension MailValidator where Self: Mailer {
 }
 ```
 
-실제로 Mailer 프로토콜과 MailValidator 프로토콜을 모두 채택하여 두 프로토콜의 교차점에 있는 SMTPClient 프로토콜에서 교차점 확장의 함수들을 사용하는 모습을 살펴봅시다.
+실제로 Mailer 프로토콜과 MailValidator 프로토콜을 모두 채택하여 두 프로토콜의 교차점에 있는 SMTPClient 타입에서 두 프로토콜의 교차점을 확장해 제공하는 함수들을 사용하는 모습을 살펴봅시다.
 
 ```swift
 struct SMTPClient: Mailer, MailValidator {}
 
 let client = SMTPClient()
-let email = Email(subject: "Learn Swift", body: "Lorem ipsum", to: [MailAddress(value: "john@naver.com")], from: MailAddress(value: "Stranger@naver.com"))
+let email = Email(
+  subject: "Learn Swift",
+  body: "Lorem ipsum",
+  to: [MailAddress(value: "john@naver.com")],
+  from: MailAddress(value: "Stranger@naver.com")
+)
 
 try? client.send(email: email)
 try? client.send(email: email, at: Date(timeIntervalSinceNow: 3600))
 ```
 
 두 프로토콜을 채택한 타입도 두 프로토콜의 교차점에 있지만, 제네릭 타입에서 한 타입이 두 프로토콜로 타입 제약된 경우에도 해당 타입이 두 프로토콜의 교차점에 있다고 볼 수 있습니다.
+
 따라서 두 프로토콜로 타입이 제약된 제네릭 타입에서도 교차점 확장의 함수들을 사용할 수 있습니다.
 
 아래 코드로 살펴봅시다.
