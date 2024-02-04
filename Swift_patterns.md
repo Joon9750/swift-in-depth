@@ -234,15 +234,77 @@ struct MockTask: DataTask {
 
 이번에는 API를 테스트하는 APITestCase 클래스를 살펴봅시다.
 
+```swift
+class APITestCase: XCTestCase {
+  var api: API<MockSession>!
 
+  func testAPI() {
+    let expectation = XCTestExpectation(description: "Expected someweatherstartup.com")
+    let session = MockSession(expectation: expectation, expectedURLs: [URL(string: "www.someweatherstartup.com")!])
+    api = API(session: session)
+    api.run()
+    wait(for: [expectation], timeout: 1)
+  }
+}
 
+let testcase = APITestCase()
+testcase.testAPI()
+```
 
+Session 프로토콜을 확장하여 dataTask 함수의 구현부를 제공할 수도 있습니다.
+기존의 dataTask 함수가 아닌, Result 타입 클로저를 가진 dataTask 함수를 새로 만들고 해당 함수의 구현부를 프로토콜 확장에서 제공하겠습니다.
 
+chapter11에서 살펴본 Result 타입을 활용해 (Data?, URLResponse?, Error?)를 Result로 변형시켜 다루면 에러 핸들링에 유리합니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+protocol Session {
+  associatedtype Task: DataTask
 
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
+  ) -> Task
 
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Result<Data, AnyError>) -> Void
+  ) -> Task
+}
 
+extension Session {
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Result<Data, AnyError>) -> Void
+  ) -> Task {
+    return dataTask(with: url, completionHandler: { data, response, error in
+      if let error = error {
+        let anyError = AnyError(error)
+        completionHandler(Result.failure(anyError))
+      } else if let data = data {
+        completionHandler(Result.success(data))
+      } else {
+        fatalError()
+      }
+    })
+  }
+}
+
+// dataTask 함수 호출부
+URLSession.shared.dataTask(with: url) { (result: Result<Data, AnyError> in
+  // ...
+}
+
+OfflineURLSession().dataTask(with: url) { (result: Result<Data, AnyError> in
+  // ...
+}
+```
+
+의존성 주입을 활용해 여러 구현(production, debugging, testing)을 전환하며 구체적인 WeatherAPI 타입을 만들 수 있습니다.
+또한 추상화(프로토콜)에 구체적 타입을 의존하게 만들어 구체적 타입끼리의 의존관계도 피할 수 있었습니다.
+
+## Conditional conformance
 
 
 
