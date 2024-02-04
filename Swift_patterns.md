@@ -41,6 +41,27 @@
 
 스위프트에서 말하는 추상화된 객체는 프로토콜로 생각할 수 있습니다.
 
+**Swapping an implementation**
+
+지금부터 의존성 주입을 활용하여 구현부를 교환할 수 있는 WeatherAPI를 구현할 것입니다.
+여기서 구현부를 교환하는 것은 의존성 주입에 의해 실현됩니다.
+
+WeatherAPI는 실제 네트워크 세션, 오프라인 네트워크 세션 그리고 테스트 세션을 모두 대응하도록 구현합니다.
+이때 세 가지 세션은 주입 받는 객체가 됩니다.
+
+WeatherAPI에 Session 프로토콜을 따르는 타입을 주입 받습니다.
+
+주입 받는 세션의 정확한 타입과 상관없이 Session 프로토콜의 함수를 사용할 수 있습니다. 
+의존성 주입을 통해 WeatherAPI는 Session 타입과 의존 관계를 만들지 않게 됩니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/c0e48dae-9db6-48a0-a787-0575b6ed8b96)
+
+WeatherAPI가 가진 Session 프로토콜에 의해 Session 프로토콜을 따르는 URLSession, OfflineSession, MockSession 타입을 주입 받을 수 있습니다.
+이를 구현부를 교환한다고 볼 수 있습니다.
+
+Session 프로토콜을 코드로 구현해봅시다.
+
+
 
 
 
