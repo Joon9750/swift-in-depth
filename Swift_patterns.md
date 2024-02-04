@@ -390,11 +390,57 @@ struct AudioTrack: Track {
 }
 ```
 
+Track 프로토콜을 따르는 객체를 배열에 저장할 때, 배열 자체에 play 함수를 만들어 배열의 play 함수가 호출하여 모든 배열 내부 값들의 play 함수가 호출되도록 만들려합니다.
 
+Array의 연관 값 Element가 Track 프로토콜을 따를 때!
+Array 타입에 play 함수를 제공합니다.
 
+이와 같은 경우도 조건부 적합성이라 볼 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+extension Array where Element: Track {
+  // Track 프로토콜의 play 함수와 별개로 Array 타입에 추가한 함수입니다.
+  func play() {
+    for element in self {
+      // Element가 Track 프로토콜을 따르기 때문에 Track 프로토콜에서 제공하는 play 함수를 호출 가능합니다.
+      self.play()
+    }
+  }
+}
+```
 
+위 코드는 Array의 Element가 Track 프로토콜을 따를 때 Array 객체에 play 함수를 제공합니다.
+
+하지만 문제는 Array 자체로 Track 프로토콜을 따르지 않는다는 점입니다.
+단지, Element가 Track 프로토콜을 따를 때 Array를 확장한 기능을 사용할 뿐입니다.
+
+따라서 위 코드로는 Track 타입을 입력으로 받는 함수에 Element가 Track 프로토콜을 따르는 Array를 넘길 수 없습니다. 
+
+또한 중첩된 배열에서는 내부 값이 Track 프로토콜을 따르더라도 play 함수를 호출할 수 없습니다.
+Array 자체로 Track 프로토콜을 따르지 않기 때문입니다.
+
+아래 코드로 위 문제들을 살펴봅시다.
+
+```swift
+let tracks = [
+  AudioTrack(file: URL(fileURLWithPath: "1.mps"))
+  AudioTrack(file: URL(fileURLWithPath: "2.mps"))
+]
+
+// If An Array is nested, you can't call play() any more.
+[tracks, tracks].play()  // error: type of expression is ambigous without more context
+
+// Or you can't pass an array if anything expects the Track protocol.
+func playDelayed<T: Track>(_ track: T, delay: Double) {
+  // ...snip
+}
+
+playDelayed(tracks, delay: 2.0)  // argument type '[AudioTrack]' does not conform to expected type 'Track'
+```
+
+**Making Array conditionally conform to a custom protocol**
 
 
 
