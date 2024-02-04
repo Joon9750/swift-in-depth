@@ -307,7 +307,8 @@ OfflineURLSession().dataTask(with: url) { (result: Result<Data, AnyError> in
 ## Conditional conformance
 
 Conditional conformance를 직역하면 조건부 적합성 정도입니다.
-이는 Swift 4.1부터 도입되었고 특정 상태에서만 해당 타입이 프로토콜을 따르도록 만들 수 있습니다.
+
+조건부 적합성은 Swift 4.1부터 도입되었고 특정 상태에서만 해당 타입이 프로토콜을 따르도록 만들 수 있습니다.
 
 ```swift
 protocol Purchaseable {
