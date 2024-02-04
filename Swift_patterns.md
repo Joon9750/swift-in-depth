@@ -321,6 +321,7 @@ struct Book: Purchaseable {
   }
 }
 
+// 조건부 적합성!
 extension Array: Purchaseable where Element: Purchaseable {
   func buy() {
     for element in self {
@@ -331,9 +332,63 @@ extension Array: Purchaseable where Element: Purchaseable {
 ```
 
 extension Array: Purchaseable where Element: Purchaseable와 같은 코드가 생소할 수 있습니다.
+이와 같은 코드는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성을 구현한 코드입니다.
 
-위 코드는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성을 구현한 코드입니다.
+With conditional conformance, you can make a type adhere to a protocol but only under certain conditions.
 
+**Free functionality**
+
+Equatable 프로토콜이나 Hashable 프로토콜을 채택하여 두 프로토콜에서 제공하는 함수를 별도의 구현 없이 사용하는 것이 조건부 적합성의 예입니다.
+
+아래 코드와 같이 Equatable 프로토콜을 채택한 타입의 경우 == 함수 구현 없이 == 함수를 사용할 수 있습니다.
+물론 동일하다는 조건을 수정하기 위해서는 == 함수를 오버라이드 해야합니다.
+
+```swift
+struct Movie: Equatable {
+  let title: String
+  let rating: Float
+}
+
+let movie = Movie(title: "The princess bride", rate: 9.7)
+movie == movie  // true. You can already compare without implementing Equatable.
+```
+
+Swift synthesizes this for free on some protocols, such as Equatable and Hashable, but not every protocol.
+For instance, you don't get Comparable for free, or the ones that you introduce yourself.
+Unfortunately, Swift doesn't synthesize methods on classes.
+
+**Conditional conformance on associated types**
+
+지금부터는 조건부 적합성을 언제 사용하면 좋을지 살펴봅시다.
+
+결론부터 이야기하면 조건부 적합성은 제네릭을 내부 값으로 가지는 객체에 자주 쓰입니다.
+내부 인스턴스가 특정 프로토콜을 따를 때 내부 인스턴스를 감싸는 객체 또한 해당 프로토콜을 따르도록 만들어 외부 객체에서도 해당 프로토콜의 함수를 사용할 수 있도록 만듭니다.
+
+```swift
+protocol Sequence<Element>
+
+@frozen
+struct Array<Element>
+```
+
+Array가 Element 연관 값을 가졌기 때문에 조건부 적합성을 설명하기에 적합합니다.
+Array가 구조체인데 어떻게 연관 값을 가졌는지 의문일 수 있지만, Array의 연관 값 Element는 Sequence 프로토콜로부터 온 연관 값입니다.
+
+Track 프로토콜과 AudioTrack 구조체를 만들고 Array의 연관 값을 Element를 Track 프로토콜로 제약해 발생하는 문제를 살펴봅시다.
+
+```swift
+protocol Track {
+  func play()
+}
+
+struct AudioTrack: Track {
+  let file: URL
+
+  func play() {
+    print("playing audio at \(file)")
+  }
+}
+```
 
 
 
