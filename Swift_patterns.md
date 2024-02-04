@@ -61,11 +61,52 @@ WeatherAPI가 가진 Session 프로토콜에 의해 Session 프로토콜을 따�
 
 Session 프로토콜을 코드로 구현해봅시다.
 
+```swift
+protocol Session {
+  associatedType Task
 
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
+  ) -> Task
+}
+```
 
+dataTask 함수에서 URLSessionDataTask나 다른 프로토콜을 리턴하기 보다, 연관 값 Task를 리턴하도록 구현했습니다.
+프로토콜의 연관 값은 컴파일 타임에 타입이 결정되기 때문에 URLSessionDataTask와 같은 타입과 함께 여러 타입에 대응하게 됩니다.
 
+WeatherAPI에 주입할 URLSession 타입은 Session 프로토콜을 따라야 합니다.
 
+```swift
+extension URLSession: Session {}
+```
 
+이제는 본격적으로 WeatherAPI의 구현부를 살펴봅시다.
+
+```swift
+final class WeatherAPI<S: Session> {
+  let session: S
+
+  init(session: S) {
+    self.session = session
+  }
+
+  func run() {
+    guard let url = URL(string: "https://www.someweatherstartup.com") else {
+      fatalError("Could not create url")
+    }
+    let task = session.dataTask(with: url) { (data, response, error) in
+      // Work with retrieved data.
+    }
+    task.resume()
+  }
+}
+
+let weatherAPI = WeatherAPI(session: URLSession.shared)
+weatherAPI.run()
+```
+
+WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 교환 가능한 구현부를 입력 받도록 만들었습니다.
 
 
 
