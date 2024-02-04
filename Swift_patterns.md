@@ -149,7 +149,7 @@ extension URLSessionDataTask: DataTask {}
 지금부터 URLSession 이외에 OfflineURLSession과 MockSession을 생성하여 WeatherAPI가 구현부를 교체(Swapping an implementation)해 보겠습니다.
 의존성 주입으로 WeatherAPI가 구체적 타입이 아닌 추상화에 의존하기 때문에 구현부를 URLSession, OfflineURLSession, MockSession 등으로 교체해도 WeatherAPI에 수정될 부분은 없습니다.
 
-먼저 OfflinheURLSession과 OfflineTask를 구현하겠습니다.
+먼저 OfflineURLSession과 OfflineTask를 구현하겠습니다.
 
 ```swift
 final class OfflineURLSession: Session {
@@ -305,6 +305,44 @@ OfflineURLSession().dataTask(with: url) { (result: Result<Data, AnyError> in
 또한 추상화(프로토콜)에 구체적 타입을 의존하게 만들어 구체적 타입끼리의 의존관계도 피할 수 있었습니다.
 
 ## Conditional conformance
+
+Conditional conformance를 직역하면 조건부 적합성 정도입니다.
+이는 Swift 4.1부터 도입되었고 특정 상태에서만 해당 타입이 프로토콜을 따르도록 만들 수 있습니다.
+
+```swift
+protocol Purchaseable {
+  func buy()
+}
+
+struct Book: Purchaseable {
+  func buy() {
+    print("Buy book")
+  }
+}
+
+extension Array: Purchaseable where Element: Purchaseable {
+  func buy() {
+    for element in self {
+      element.buy()
+    }
+  }
+}
+```
+
+extension Array: Purchaseable where Element: Purchaseable와 같은 코드가 생소할 수 있습니다.
+
+위 코드는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성을 구현한 코드입니다.
+
+
+
+
+
+
+
+
+
+
+
 
 
 
