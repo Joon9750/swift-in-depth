@@ -151,12 +151,88 @@ extension URLSessionDataTask: DataTask {}
 
 먼저 OfflinheURLSession과 OfflineTask를 구현하겠습니다.
 
+```swift
+final class OfflineURLSession: Session {
+  var sessions = [URL: OfflineTask]()
 
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
+  ) -> OfflineTask {
+    let task = OfflineTask(completionHandler: completionHandler)
+    sessions[url] = task
+    return task
+  }
+}
 
+enum ApiError: Error {
+  case couldNotLoasData
+}
 
+struct OfflineTask: DataTask {
+  typealias Completion = (Data?, URLResponse?, Error?) -> Void
+  let completionHandler: Completion
 
+  init(completionHandler: @escaping Completion) {
+    self.completionHandler = completionHandler
+  }
 
+  func resume() {
+    let url = URL(fileURLWithPath: "prepared_response.json")
+    let data = try! Data(contentsOf: url)
+    completionHandler(data, nil, nil)
+  }
+}
+```
 
+위의 OfflineURLSession은 서버 연결 없이 로컬 데이터가 로드되도록 하여 서버 환경에 구애받지 않고 테스트할 수 있도록 합니다.
+
+우리는 의존성 주입으로 객체 간의 의존 관계를 서로가 아니라 추상적 대상에 두어 구현부를 교체할 때 추가적인 수정이 발생하지 않도록 만들었습니다.
+
+아래 코드와 같이 단지 주입하는 객체만 달라질 뿐, 구현부가 교체되었다고 해서 WeatherAPI의 코드를 수정하지 않습니다.
+
+```swift
+let productionAPI = WeatherAPI(session: URLSession.shared)
+let offlineAPI = WeatherAPI(session: OfflineURLSession())
+```
+
+Session 프로토콜이 Task 연관 값을 활용하는 것처럼 URLSession, OfflineURLSession, MockSession 등 하나의 타입으로 인스턴스화 하기 어려울 때 프로토콜 내부의 연관 값은 유용하게 사용됩니다.
+
+이번에는 MockSession과 MockTask를 구현해 WeatherAPI 클래스를 테스트하는 코드를 작성해 봅시다.
+
+```swift
+class MockSession: Session {
+  let expectedURLs: [URL]
+  let expectation: XCTestExpectation
+
+  init(expectation: XCTestExpectation, expectedURLs: [URL]) {
+    self.expectation = expectation
+    self.expectedURLs = expectedURLs
+  }
+
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
+  ) -> MockTask {
+    return MockTask(expectedURLs: espectedURLs, url: url, expectation: expectation)
+  }
+}
+
+struct MockTask: DataTask {
+  let expectedURLs: [URL]
+  let url: URL
+  let expectation: XCTestExpectation
+
+  func resume() {
+    guard expectedURLs.contains(url) else {
+      return
+    }
+    self.expectation.fulfill()
+  }
+}
+```
+
+이번에는 API를 테스트하는 APITestCase 클래스를 살펴봅시다.
 
 
 
