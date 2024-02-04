@@ -1,4 +1,4 @@
-# Swift patterns
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/dcf949e1-a45c-4220-972b-ed827ef936ed)# Swift patterns
 
 ## This chapter covers
 - Mocking types with protocols and associated types
@@ -106,16 +106,50 @@ let weatherAPI = WeatherAPI(session: URLSession.shared)
 weatherAPI.run()
 ```
 
-WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 교환 가능한 구현부를 입력 받도록 만들었습니다.
+WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 구현부를 교환하여 입력 받도록 만들었습니다.
 
+위에서 task.resume() 함수를 호출하고 있지만, 아직 Session 프로토콜의 연관 값인 Task에 resume 함수를 구현하지 않았습니다.
 
+resume 함수를 가진 DataTask 프로토콜을 만들고 Session 프로토콜의 연관 값인 Task를 DataTask로 타입 제약한다면, Task의 resume 함수를 호출할 수 있습니다.
 
+아래 코드로 살펴봅시다.
 
+```swift
+protocol DataTask {
+  func resume()
+}
 
+protocol Session {
+  associatedtype Task: DataTask
 
+  func dataTask(
+    with url: URL,
+    completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void
+  ) -> Task
+}
+```
 
+Session 프로토콜의 연관 값 Task에 DataTask 프로토콜로 타입 제약을 걸어 dataTask 함수가 리턴하는 Task 타입의 객체에 resume 함수를 호출할 수 있게 되었습니다.
 
+지금까지의 추상화 과정을 그림으로 살펴봅시다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/ab8ce8de-e1c1-4388-b25b-a3ec806ec9ee)
+
+구체적인 객체인 URLSession과 URLSessionDataTask 모두 추상화(protocol)에 의존하고 있습니다.
+
+위에서 만든 DataTask 프로토콜을 따르는 URLSession에서 쓰일 URLSessionDataTask도 만들어주면 URLSession이 완성됩니다.
+
+```swift
+extension URLSessionDataTask: DataTask {}
+```
+
+이제 URLSession을 생성하여 WeatherAPI에 주입할 수 있게 되었습니다.
+물론 URLSession 이외에도 Session 프로토콜을 따르는 타입이라면 WeatherAPI의 생성자로 주입될 수 있습니다.
+
+지금부터 URLSession 이외에 OfflineURLSession과 MockSession을 생성하여 WeatherAPI가 구현부를 교체(Swapping an implementation)해 보겠습니다.
+의존성 주입으로 WeatherAPI가 구체적 타입이 아닌 추상화에 의존하기 때문에 구현부를 URLSession, OfflineURLSession, MockSession 등으로 교체해도 WeatherAPI에 수정될 부분은 없습니다.
+
+먼저 OfflinheURLSession과 OfflineTask를 구현하겠습니다.
 
 
 
