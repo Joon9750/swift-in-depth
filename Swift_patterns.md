@@ -654,6 +654,11 @@ Conditional conformance works best when storing the lowest common denominator in
 
 ## Dealing with protocol shortcomings
 
+프로토콜은 좋은 방법이지만, 단점 있습니다.
+지금부터 프로토콜의 단점을 살펴보고 두 가지 방법(enum, type erasure)으로 해결해 봅시다.
+
+Hashable 타입을 저장하려 할 때 프로토콜을 단점을 찾을 수 있습니다.
+
 
 
 
