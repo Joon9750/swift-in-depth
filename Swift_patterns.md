@@ -1,4 +1,4 @@
-# Swift patterns
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f4ba5e36-c5ea-4c51-8a79-a930c6161ba8)![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/23243cfa-0278-4382-b331-7fe29a04dc93)# Swift patterns
 
 ## This chapter covers
 - Mocking types with protocols and associated types
@@ -539,15 +539,92 @@ Conditional conformace becomes powerful when you hace a generic type storing an 
 
 Optional의 제네릭 타입외에도 커스텀 제네릭 타입에도 조건부 적합성을 적용해 봅시다.
 
+CachedValue 타입을 만들어 커스텀 제네릭 타입에 조건부 적합성을 적용해 봅시다.
+CachedValue는 시간이 오래 소요되는 계산의 결과를 캐싱하고 리프레쉬 전까지 캐싱한 결과를 유지합니다.
 
+먼저 CachedValue가 동작하는 방식을 살펴봅시다.
 
+```swift
+// CachedValue를 생성하고 커스텀 클로저를 전달합니다.
+let simplecache = CachedValue(timeToLive: 2, load: { () -> String in
+  print("I am being refreshed!")
+  return "I am the value inside CachedValue"
+}
 
+// Prints: "I am being refreshed!"
+simplecache.value  // "I am the value inside CachedValue"
+simplecache.value  // "I am the value inside CachedValue"
 
+sleep(3)  // wait 3 seconds
 
+// Prints: "I am being refreshed!"
+simplecache.value  // "I am the value inside CachedValue"
+```
 
+CachedValue의 구현부를 살펴봅시다.
 
+```swift
+final class CachedValue<T> {
+  private let load: () -> T
+  private var lastLoaded: Date
 
+  private var timeToLive: Double
+  private var currentValue: T
 
+  public var value: T {
+    let needsRefresh = abs(lastLoaded.timeIntervalSinceNow) > timeToLive
+    if needsRefresh {
+      currentValue = load()
+      lastLoaded = Date()
+    }
+    return currentValue
+  }
+
+  init(timeToLive: Double, load: @escaping (() -> T)) {
+    self.timeToLive = timeToLive
+    self.load = load
+    self.currentValue = load()
+    self.lastLoaded = Date()
+  }
+}
+```
+
+아직 CachedValue<T> 타입은 조건부 적합성이 적용되지 않았습니다.
+
+CachedValue의 제네릭 타입이 Equatable을 따를 때, Comparable을 따를 때 그리고 Hashable을 따를 때, 제네릭 타입을 가진 CachedValue 또한 해당 프로토콜을 따르도록 조건부 적합성을 구현해 봅시다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/33637c6f-3da8-49a2-84a1-3c4c76772527)
+
+코드로 살펴봅시다.
+
+```swift
+// Conforming to Equatable
+extension CachedValue: Equatable where T: Equatable {
+  static func == (lhs: CachedValue, rhs: CachedValue) -> Bool {
+    return lhs.value == rhs.value
+  }
+}
+
+// Conforming to Hashable
+extension CachedValue: Hashable where T: Hashable {
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(value)
+  }
+}
+
+// Conforming to Comparable
+extension CachedValue: Comparable where T: Comparable {
+  static func <(lhs: CachedValue, rhs: CachedValue) -> Bool {
+    return lhs.value < rhs.value
+  }
+
+  static func == (lhs: CachedValue, rhs: CachedValue) -> Bool {
+    return lhs.value == rhs.value
+  }
+} 
+```
+
+위와 같이 CachedValue에 조건부 적합성을 적용하면 아래 코드와 같이 사용 가능합니다.
 
 
 
