@@ -1,4 +1,4 @@
-![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f4ba5e36-c5ea-4c51-8a79-a930c6161ba8)![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/23243cfa-0278-4382-b331-7fe29a04dc93)# Swift patterns
+# Swift patterns
 
 ## This chapter covers
 - Mocking types with protocols and associated types
@@ -626,9 +626,33 @@ extension CachedValue: Comparable where T: Comparable {
 
 위와 같이 CachedValue에 조건부 적합성을 적용하면 아래 코드와 같이 사용 가능합니다.
 
+```swift
+let cachedValueOne = CacheValue(timeToLive: 60) {
+  // Perform expensive operation
+  // E.g. Calculate the purpose of life
+  return 42
+}
 
+let cachedValueTwo = CacheValue(timeToLive: 120) {
+  // Perform another expensive operation
+  return 100
+}
 
+cachedValueOne == cachedValueTwo // Equatable: You can check for equality.
+cachedValueOne > cachedValueTwo  // Equatable: You can compare two cached values.
 
+let set = Set(arrayLiteral: cachedValueOne, cachedValueTwo)  // Hashable: You can store CachedValue in a set
+```
+
+Conditional conformance works best when storing the lowest common denominator inside the generic, meaning that you should aim to not add too many constraints on T in the case.
+
+제네릭에 너무 많은 타입 제약을 걸지 않아야 합니다. 
+너무 많은 타입을 제약하지 않아야 제네릭 타입에 조건부 적합성을 적용할 경우 타입을 확장하기 쉽습니다.
+
+과장해서 CacheValue의 제네릭 T가 10개의 프로토콜의 타입 제약을 받는다면 매우 적은 타입이 제네릭 T를 만족합니다.
+따라서 조건부 적합성의 이점을 크게 얻을 수 없습니다.
+
+## Dealing with protocol shortcomings
 
 
 
