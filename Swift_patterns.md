@@ -395,8 +395,6 @@ Track 프로토콜을 따르는 객체를 배열에 저장할 때, 배열 자체
 Array의 연관 값 Element가 Track 프로토콜을 따를 때!
 Array 타입에 play 함수를 제공합니다.
 
-이와 같은 경우도 조건부 적합성이라 볼 수 있습니다.
-
 아래 코드로 살펴봅시다.
 
 ```swift
@@ -441,6 +439,118 @@ playDelayed(tracks, delay: 2.0)  // argument type '[AudioTrack]' does not confor
 ```
 
 **Making Array conditionally conform to a custom protocol**
+
+지금부터 위의 문제를 조건부 적합성으로 해결해봅시다.
+
+지금까지는 Array의 Element가 특정 프로토콜을 따를 때 Array의 확장에서 함수를 제공하는 조건부 적합성을 만들어 Array 자체가 특정 프로토콜을 따르진 못했습니다.
+
+이제는 Array의 Element가 특정 프로토콜을 따를 때 Array의 확장에서 함수를 제공하는 동시에 Array 또한 해당 프로토콜을 따르는 타입이 되도록 구현할 예정입니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+// Before. Not conditionally conforming!!
+extension Array where Element: Track {
+  // ... snip
+}
+
+// After. You have conditional conformance!!!
+extension Array: Track where Element: Track {
+  func play() {
+    for element in self {
+      element.play()
+    }
+  }
+}
+```
+
+extension Array: Track where Element: Track을 통해 Element 연관 값이 Track 프로토콜을 따를 때, Array 또한 Track 프로토콜을 따르는 타입이 됩니다.
+
+Array에 조건부 적합성을 적용해 Track 타입을 원하는 함수로 Array를 넘길 수 있고 중첩 배열에 play 함수도 호출할 수 있습니다.
+
+```swift
+let nestedTracks = [
+  [
+    AudioTrack(file: URL(fileURLWithPath: "1.mps")),
+    AudioTrack(file: URL(fileURLWithPath: "2.mps"))
+  ],
+  [
+    AudioTrack(file: URL(fileURLWithPath: "3.mps")),
+    AudioTrack(file: URL(fileURLWithPath: "4.mps"))
+  ]
+]
+
+// Nesting works.
+nestedTracks.play()
+
+// And, you can pass this array to a function expecting a Track!
+playDelayed(tracks, delay: 2.0)
+```
+
+**Conditional conformance and generics**
+
+지금까지 연관 값을 가진 프로토콜에 조건부 적합성을 적용했다면, 이제는 조건부 적합성을 제네릭 타입에 사용해 봅시다.
+
+조건부 적합성은 연관 값을 가진 프로토콜에도 사용할 수 있지만 제네릭 타입에도 사용 가능합니다.
+
+Optional이 대표적인 제네릭 타입을 가진 열거형입니다.
+열거형 Optional은 Wrapped 제네릭 타입을 가지고 있습니다.
+
+아래 코드로 Optional에 조건부 적합성을 적용한 코드를 살펴봅시다.
+
+```swift
+extension Optional: Track where Wrapped: Track {
+  func play() {
+    switch self {
+    case .some(let track):
+      track.play()
+    case nil:
+      break  // do nothing
+    }
+  }
+}
+```
+
+위 코드는 Optional의 제네릭 타입인 Wrapped가 Track 프로토콜을 따를 때 Optional 또한 Track 프로토콜을 따르고 play 함수를 제공합니다.
+
+물론 extension Optional: Track where Wrapped: Track 방식이 아닌 extension Optional where Wrapped: Track 코드를 사용해도 play 함수를 제공 받지만, Optional 자체가 Track 타입이 되지 못합니다.
+
+```swift
+let audio: AudioTrack? = AudioTrack(file: URL(fileURLWithPath: "1.mps"))
+audio?.play()
+```
+
+audio가 Optional(AudioTrack) 타입이기 때문에 audio?는 Optional(AudioTrack)의 Value 값이므로 Track 타입입니다. 따라서 Track 타입을 입력 받는 함수에 audio?를 넣을 수 있습니다.
+
+```swift
+let audio: AudioTrack? = AudioTrack(file: URL(fileURLWithPath: "1.mps"))
+playDelayed(audio, delay: 2.0)
+```
+
+**Conditional conformance on your types**
+
+위에서 봤듯이 조건부 적합성은 제네릭 타입에 적용하기 좋습니다.
+
+Conditional conformace becomes powerful when you hace a generic type storing an inner type, and you want the generic type to mimic the behavior of the inner type inside.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/c2e1874a-494e-4cf7-93b6-fb3f45281ba8)
+
+좀전에 봤듯이, 조건부 적합성을 통해서 inner 값의 타입이 Track 타입일 때 Array가 Track 타입이 됩니다.
+
+Optional의 제네릭 타입외에도 커스텀 제네릭 타입에도 조건부 적합성을 적용해 봅시다.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
