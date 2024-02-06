@@ -659,6 +659,61 @@ Conditional conformance works best when storing the lowest common denominator in
 
 Hashable 타입을 저장하려 할 때 프로토콜을 단점을 찾을 수 있습니다.
 
+Hashable 프로토콜을 따르는 PokerGame 프로토콜과 PokerGame 프로토콜을 따르는 StudPoker 구조체와 TexasHoldem 구조체를 만들었습니다.
+
+```swift
+protocol PokerGame: Hashable {
+  func start()
+}
+
+struct StudPoker: PokerGame {
+  func start() {
+    print("Starting StudPoker")
+  }
+}
+
+struct TexasHolem: PokerGame {
+  func start() {
+    print("Starting Texas Hodlem")
+  }
+}
+```
+
+위의 PokerGame 프로토콜을 따르는 타입은 동시에 Hashable을 따르기 때문에 Set에 저장되거나 Dictionary의 Key에 저장될 수 있습니다.
+
+하지만 아래와 같이 StudPoker 구조체나 TexasHolem 구조체 같은 특정 타입이 아니라 PokerGame 프로토콜로 Dictionary의 Key에 저장될 수 없습니다.
+
+If you want to mix and match different types of PokerGame as keys in a dictionary or inside an array, you stumble upon a shortcoming.
+
+코드로 살펴봅시다.
+
+```swift
+// This won't work
+var numberOfPlayers = [PlayerGame: Int]()
+
+// The error that the Swift compiler throws is:
+// error: using 'PokerGame' as a concrete type conforming to protocol 'Hashable' is not supported
+var numberOfPlayers = [PokerGame: Int]()
+```
+
+프로토콜이 특정 타입(concrete type)으로 사용될 수 없기 때문에 프로토콜로 타입을 지정하고 해당 프로토콜을 따르는 타입들을 섞을 수 없습니다.
+
+PlayerGame 프로토콜을 따르는 StudPoker 구조체와 같이 특정 타입(concrete type)을 사용할 경우 [StudPoker: Int]()와 같이 Dictionary의 Key나 Array에 저장할 수 있습니다.
+하지만 StudPoker 타입을 사용할 경우 PlayerGame 프로토콜을 따르는 타입들을 섞어서 저장할 수 없습니다.
+
+그렇다면 제네릭을 사용하면 추상화된 타입을 사용해 하위 타입들을 섞고 컴파일 에러도 피할 수 있을까요?
+
+아래 코드와 같이 제네릭을 사용해 해결하려... 해봅시다.
+
+```swift
+func storeGame<T: PokerGame>(games: [T]) -> [T: Int] {
+  /// ... snip
+}
+```
+
+하지만 
+
+
 
 
 
