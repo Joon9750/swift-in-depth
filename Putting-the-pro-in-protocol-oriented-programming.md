@@ -221,6 +221,8 @@ Worker 프로토콜의 start 함수는 입력과 출력 데이터 타입이 Stri
 위의 Worker 프로토콜의 start 함수로는 다양한 타입에 대응하지 못합니다.
 만약 파일을 삭제하는 FileRemover 객체가 URL을 입력 받아 [String]을 리턴하는 start 함수가 필요하다면 위와 같은 Worker 프로토콜의 start 함수로는 대응할 수 없습니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/7df87670-5c98-44f3-8cbc-29262fa56863)
+
 단순한 프로토콜(연관 값이 없는 프로토콜)은 적용 가능한 범위가 넓지 못합니다.
 
 위와 같이 함수(start) 동작의 과정은 동일하지만, 동작에 사용되는 타입이 다를 경우 프로토콜에 연관 값을 추가해서 구현할 수 있습니다.
@@ -312,6 +314,8 @@ class MailJob: Worker {
 
 associatedtype은 제네릭과 비슷한 성격을 가지지만 제네릭과 달리 프로토콜 내부에 정의됩니다.
 Worker 프로토콜의 associatedtype을 통해 MailJob은 Input을 string 타입, Output을 Bool 타입으로 구현할 수 있고 FileRemover는 Input을 URL 타입, Output을 [string] 타입으로 구현할 수 있습니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/dedf272d-6a39-4852-904d-a4561958a14b)
 
 프로토콜의 연관 값을 통해 프로토콜을 따르는 타입이 특정 프로토콜에 대한 유일한 구현을 가지는 동시에 여러 타입에 대응하도록 만들 수 있습니다.
 
@@ -425,13 +429,9 @@ class Centaur: AbstractEnemy {
 
 먼저 함수로 연관 값을 가진 프로토콜을 넘기는 코드를 살펴봅시다.
 
-```swift
-func runWorker<W: Worker>(worker: W, input: [W.Input]) {
-  input.forEach { (value: W.Input) in
-    worker.start(input: value)
-  }
-}
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/1819622d-b699-48b4-ad7b-8c62996e13f3)
 
+```swift
 let mailJob = MailJob()
 runWorker(worker: mailJob, input: ["grover@sesamestreetcom", "bigbird@sesamestreet.com"])
 
@@ -477,6 +477,8 @@ By constraining an associated type, the function is specialized to work only wit
 이미지를 다루는 ImageProcesser 클래스를 만들며 다양한 타입들과 프로토콜 연관 값이 함께 사용되는 상황을 살펴 봅시다.
 아래의 예시에서는 Worker 프로토콜을 따르는 ImageCropper 클래스를 프로퍼티로 가진 ImageProcessor 클래스를 만들고 있습니다.
 ImageProcessor 클래스가 하는 일은 Worker 프로토콜에 의해 결정됩니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/95b35a7f-8afb-4dda-9280-7506708860c5)
 
 아래 코드로 확인해 봅시다.
 
