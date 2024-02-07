@@ -49,6 +49,8 @@ func firstLast<T>(array:[T]) -> (T, T) {
 결과적으로 제네릭 함수는 하나의 함수로 여러 타입에 대응할 수 있습니다. 
 Any를 사용했다면 추가적인 다운 캐스팅을 해야 하지만, 제네릭으로 컴파일 타임에 모든 타입을 선언할 수 있습니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/e1ac17ec-7377-4599-a458-8efa25af6219)
+
 처음부터 제네릭 함수를 구현하는 건 어려울 수 있습니다. 
 먼저 제네릭 없이 함수를 구현해보고 이후 제네릭 함수로 고치는 방식이 더 쉽습니다.
 
@@ -481,6 +483,8 @@ course.start  // "Starting Swift course."
 
 하지만 만약 Container<OnlineCourse>와 Container<SwiftOnTheServer> 같이 상속 관계의 클래스를 제네릭 타입 안으로 넣을 경우
 Container<OnlineCourse>와 Container<SwiftOnTheServer>는 더 이상 상속 관계를 유지하지 않습니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/4951f891-846a-44fe-8037-81830d02cc0f)
 
 다시 말해, 제네릭 안에서는 클래스끼리의 상속 관계를 잃습니다.
 따라서 아래 코드를 보면 부모 클래스로 자식 클래스를 참조하려 할 때 제네릭으로 인해 상속 관계가 깨지며 부모 타입으로 자식 타입을 참조할 수 없습니다.
