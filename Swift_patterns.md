@@ -797,12 +797,14 @@ let studPoker = StudPoker()
 let holdEm = TexasHoldem()
 
 // You can mix multiple poker game inside an array.
+// Wrapper type으로 추상화합니다.
 let games: [AnyPokerGame] = [
   AnyPokerGame(studPoker),
   AnyPokerGame(holdEm)
 ]
 
 games.forEach { (pokerGame: AnyPokerGame) in
+  // Wrapper type의 start 함수 호출 시 inner value의 start 함수가 호출되도록 Wrapper type에 구현해야 합니다.
   pokerGame.start()
 }
 
@@ -819,11 +821,49 @@ var numberOfPlayers = [
 ]
 ```
 
+이전 챕터에서 살펴본 AnyError(Result 속 error에 들어가는 모든 타입에 대응, 모든 error를 대표 가능)와 AnyIterator 모두 type erased가 사용된 것들입니다.
 
+다시 말해, PokerGame을 감싸는 AnyPokerGame 구조체는 내부 값으로 PokerGame 프로토콜을 따르는 변수를 가지고 AnyPokerGame 또한 PokerGame을 채택합니다.
 
+AnyPokerGame이 PokerGame을 채택하여 PokerGame이 제공하는 함수가 호출되었을 때 AnyPokerGame에서 내부 값으로 함수 호출을 전달할 수 있습니다.
 
+이제 AnyPokerGame 구조체의 구현부를 살펴봅시다.
 
+```swift
+struct AnyPokerGame: PokerGame {
 
+  private let _start: () -> Void
+  private let _hashable: AnyHashable
+
+  init<Game: PokerGame>(_ pokerGame: Game) {
+    _start = pokerGame.start
+    _hashable: AnyHashable(pokerGame)
+  }
+
+  func start() {
+    _start()
+  }
+}
+
+extension AnyPokerGame: Hashable {
+  func hash(into hasher: inout Hasher) {
+    _hashable.hash(into: &hasher)
+  }
+
+  static func ==(lhs: AnyPokerGame, rhs: AnyPokerGame) -> Bool {
+    return lhs._hashable == rhs._hashable
+  }
+}
+```
+
+PokerGame 프로토콜이 Hashable 프로토콜을 따르기 때문에 AnyPokerGame 구조체도 Hashable 프로토콜을 따르도록 해야합니다. 이때 type erased가 사용된 AnyHashable을 사용해 Hashable 프로토콜이 제공하는 함수를 AnyPokerGame에서도 제공할 수 있습니다.
+
+AnyPokerGame 구현부처럼 함수의 호출을(start 함수 호출) Wrapped type의 inner value로 전달해야 합니다.
+PokerGame 프로토콜이 start 함수만 가졌기 때문에 AnyPokerGame이 start 함수만 모방했지만, 더 많은 함수를 PokerGame 프로토콜이 가졌다면 모두 모방해서 함수 호출을 inner value로 전달해야 합니다.
+
+AnyPokerGame wraps any PokerGame type, and now you're free to use AnyPokerGame inside Collections.
+
+## An alternative to protocols
 
 
 
