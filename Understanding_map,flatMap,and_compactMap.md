@@ -471,6 +471,8 @@ title.map에서 map이 기본적으로 새로운 값을 리턴하기 때문에 �
 map 클로저에서 추가적인 옵셔널 언래핑 과정이 필요 없이 옵셔널 내부 값을 사용할 수 있습니다.
 또한 title이 nil이었을 때 nil이 map 클로저로 넘어가지 않고 단순히 nil이 리턴됩니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/b411baa7-142f-45f7-a8a4-d2069d6375ad)
+
 하지만 옵셔널을 mapping 했을 때 결과적으로 return 하는 값은 다시 옵셔널을 씌워서 리턴합니다.
 이는 위에서 살펴봤던 기존 Functor로 감싸서 리턴되는 성격을 따르는 것입니다.
 물론 nil은 Optional(nil)이 아닌 nil로 리턴됩니다.
@@ -693,10 +695,7 @@ flatMap은 map과 동일한 동작을 하지만 매핑이 끝난 이후 중첩�
 
 아래 순서로 flatMap이 동작합니다.
 
-1. Start with an optional.
-2. With flatmap, you apply a function to the value inside an optional. This function will itself return an optional.
-3. You end up with a nested(중첩) optional.
-4. The nested optional is flattened(평탄화) to a regular optional!
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/62c80cbf-900f-41c8-b219-a66d3b830201)
 
 코드를 통해 flatMap이 동작하는 방법을 살펴봅시다.
 
@@ -745,6 +744,8 @@ flatMap도 map과 동일하게 동작하기 때문에 옵셔널에 flatMap 연�
 flatMap을 통해 중첩 if let 구문을 피하면 if let에 의해 만들어야 했던 무의미한 임시 변수를 더 이상 추적할 필요 없습니다.
 
 map과 같이 nil이 flatMap으로 들어오면 이후의 동작은 이루어지지 않고 nil을 리턴하게 됩니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/0c4a2494-3d55-4071-bf96-d72c7627b4eb)
 
 아래 코드로 nil이 flatMap으로 들어왔을 때를 살펴봅시다.
 
@@ -821,9 +822,7 @@ flatMap이 중첩 옵셔널을 평탄화했듯이 Collection 타입들과 사용
 Optional(Optional(3))을 Optional(3)로 평탄화했듯이 [[1, 2],[3, 4]] 배열을 [1, 2, 3, 4]로 평탄화합니다.
 flatMap이 Collection 타입과 동작하는 과정을 살펴봅시다.
 
-1. You have a regular array [2, 3].
-2. With flatMap, you apply a function to each value inside the array. This function turns a value into [value, value], another array.
-3. You end up with subarrays [[2, 2], [3, 3]]. flatMap flattens the nested arrays to [2, 2, 3, 3].
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/aef6e2b4-4ae3-4d54-a50c-0d742d45bc9b)
 
 아래 코드는 flatMap을 Collection 타입 중 하나인 배열에 적용한 코드입니다.
 
