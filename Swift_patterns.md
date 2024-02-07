@@ -1,4 +1,4 @@
-![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/035beb04-f9bb-42e5-b837-bd7cc14718c8)# Swift patterns
+# Swift patterns
 
 ## This chapter covers
 - Mocking types with protocols and associated types
