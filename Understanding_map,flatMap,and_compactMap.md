@@ -84,9 +84,7 @@ func resolveCounts(statistics: [(String, Int)]) -> [String] {
 
 위 코드는 아래와 같은 과정에 따라 데이터를 변환합니다.
 
-1. You being with an array.
-2. With map, you apply a function to each value inside the array.(in closure)
-3. Map creates a new array with the transformed values inside.
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/79c11b8e-a1d0-443f-8898-c4cad9eaeb11)
 
 map과 for loop가 동일한 결과를 만들지만, map은 for loop 보다 간결하고 불변한(immutable) 코드를 만들 수 있습니다.
 
