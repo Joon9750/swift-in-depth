@@ -318,42 +318,21 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 위의 search 함수에서 Result 타입의 data를 JSON으로 변환할 때 map을 사용해 여러 번의 CompletionHandler 호출을 단일 호출 방식으로 고쳐봅시다.
 
+Result 타입에 map이 동작하는 방법을 살펴봅시다.
+
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f6acd685-7b52-4394-8484-947a78d969c3)
-
-success 케이스인 Result 타입을 매핑할 때의 과정을 먼저 살펴봅시다.
-
-1. **You have result: with a value.**
-2. **With map, you apply a function to the value inside a result.**
-3. **Map rewraps the transformed value in a result.**
-
-두 번째로 failure 케이스인 Result 타입을 매핑할 때의 과정을 살펴봅시다.
-
-1. **You have result: with an error.**
-2. **Map does nothing with a failing result.**
-3. **The failing result is still the same old failling result.**
 
 map은 failure 케이스의 Result 타입에는 동작하지 않고 success 케이스의 Result 타입에만 동작합니다.
 
 하지만 **mapError**을 사용하면 map과 반대로 Result 타입이 failure 케이스일 때 에러를 매핑하고 success 케이스의 경우 mapError가 동작하지 않습니다.
 
+Result 타입에 mapError가 동작하는 과정을 살펴봅시다.
+
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f9decc92-6cfa-4b7d-a235-fa3042eaeab2)
 
-success 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴봅시다.
-
-1. **You have success result: with a value.**
-2. **mapError does nothing with a successful result.**
-3. **The successful result is still the same.**
-
-두 번째로 failure 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴봅시다. 
-
-1. **You have failure result: with a error.**
-2. **With mapError, you apply a function to the error inside a result.**
-3. **mapError rewraps the transformed error in a result.**
-
-![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/24645496-143d-4f59-ab28-9b87877798f2)
-
-
 **다시 말해 map을 통해 Result 타입의 Value를 매핑하여 값을 변환하고, mapError로 Result 타입의 Error를 매핑하여 값을 변환할 수 있습니다.**
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/01a3f81c-4caf-4c40-bb4e-63e391c5e6b3)
 
 map과 mapError의 기능을 결합하면 Result<Data, NetworkError>를 SearchResult<JSON>이라고도 불리는 Result<JSON, SearchResultError>로 바꿀 수 있습니다.
 
