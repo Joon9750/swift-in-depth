@@ -393,11 +393,6 @@ flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure �
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/2004f1fb-8d88-4fb4-b324-068012c2ca0f)
 
-1. **You start with a successful result containing Data(x2) and with one result containing an error.**
-2. **With flatMap, you apply a function to the value inside the result. This function will itself return a new result. (This new result could be successful and carry a value, or be a failure result containing an error. But if you start with a result containing an error, any flatMap action is ignored.)**
-3. **You end up with a nested result. (If you start with an error, then nothing is transformed or nested.)**
-4. **The nested result is flattened to a regular result. (If you start wih an error, nothing happened and the result remains the same.**
-
 위에서 데이터 변환 실패 시 빈 딕셔너리를 리턴하는 코드를 failure 케이스의 Result를 리턴하도록 고쳐봅시다.
 
 ```swift
