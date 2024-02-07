@@ -769,8 +769,7 @@ struct TexasHoldem: Hashable {
 이때 우리는 Type erasing을 사용해 프로토콜을 사용하면서 프로토콜을 따르는 타입들을 섞어서 사용할 수 있습니다.
 
 Type erasing은 Boxing으로 불리기도 합니다.
-
-
+Type erasing을 살펴보기 전에 Some과 Any 키워드를 먼저 살펴봅시다.
 
 
 
