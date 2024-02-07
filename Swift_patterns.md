@@ -856,22 +856,67 @@ extension AnyPokerGame: Hashable {
 }
 ```
 
-PokerGame 프로토콜이 Hashable 프로토콜을 따르기 때문에 AnyPokerGame 구조체도 Hashable 프로토콜을 따르도록 해야합니다. 이때 type erased가 사용된 AnyHashable을 사용해 Hashable 프로토콜이 제공하는 함수를 AnyPokerGame에서도 제공할 수 있습니다.
+PokerGame 프로토콜이 Hashable 프로토콜을 따르기 때문에 AnyPokerGame 구조체도 Hashable 프로토콜을 따르도록 해야합니다. 
+
+이때 type erased가 사용된 AnyHashable을 사용해 Hashable 프로토콜이 제공하는 함수를 AnyPokerGame에서도 제공할 수 있습니다.
 
 AnyPokerGame 구현부처럼 함수의 호출을(start 함수 호출) Wrapped type의 inner value로 전달해야 합니다.
+
 PokerGame 프로토콜이 start 함수만 가졌기 때문에 AnyPokerGame이 start 함수만 모방했지만, 더 많은 함수를 PokerGame 프로토콜이 가졌다면 모두 모방해서 함수 호출을 inner value로 전달해야 합니다.
 
 AnyPokerGame wraps any PokerGame type, and now you're free to use AnyPokerGame inside Collections.
 
 ## An alternative to protocols
 
+프로토콜은 지금까지 살펴봤던 것처럼 유용합니다.
+특히 복잡한 API를 구현할 때 API 사용하는 곳에서 알지 못하도록 복잡성을 숨길 수 있습니다.
 
+하지만 오히려 프로토콜의 오용으로 프로젝트에 불필요한 복잡성을 증가시킵니다.
 
+따라서 지금부터는 프로토콜의 대안으로 **제네릭 구조체**를 살펴볼 예정입니다.
 
+먼저 프로토콜을 사용하여 데이터의 유효성 여부를 검사하는 Validator 구조체를 구현해봅시다.
 
+```swift
+protocol Validator {
+  associatedtype Value
+  func validate(_ value: Value) -> Bool
+}
 
+struct MinimalCountValidator: Validator {
+  let minimalChars: Int
 
+  func validate(_ value: String) -> Bool {
+    guard minimalChars > 0 else { return true }
+    // isEmpty is faster than count check
+    guard !value.isEmpty else { return false }
+    return value.count >= minimalChars
+  }
+}
 
+let validator = MinimalCountValidator(minimalChars: 5)
+validator.validate("1234567890") // true
+```
+
+프로토콜을 사용한 방식은 프로토콜이 가진 연관 값의 타입에 따라 다른 프로토콜 구현부를 구현해야 합니다.
+
+**Creating a generic struct**
+
+이때 Validator를 프로토콜이 아닌 제네릭 구조체로 만들면, 각 타입에 대응하는 구현부를 만들 필요 없이 여러 타입에 대응하는 하나의 구현부를 만들 수 있습니다.
+
+아래 코드와 같이 Validator 제네릭 구조체를 만들었습니다.
+
+```swift
+struct Validator<T> {
+  let validate: (T) -> Bool
+
+  init(validate: @escaping (T) -> Bool) {
+    self.validate = validate
+  }
+}  
+```
+
+제네릭 구조체에서는 유효성의 조건을 클로저로 입력 받아 여러 타입을 하나의 구현부로 대응할 수 있게 됩니다.
 
 
 
