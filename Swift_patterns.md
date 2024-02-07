@@ -698,7 +698,7 @@ var numberOfPlayers = [PokerGame: Int]()
 
 프로토콜이 특정 타입(concrete type)으로 사용될 수 없기 때문에 프로토콜로 타입을 지정하고 해당 프로토콜을 따르는 타입들을 섞을 수 없습니다.
 
-PlayerGame 프로토콜을 따르는 StudPoker 구조체와 같이 특정 타입(concrete type)을 사용할 경우 [StudPoker: Int]()와 같이 Dictionary의 Key나 Array에 저장할 수 있습니다.
+PlayerGame 프로토콜을 따르는 StudPoker 구조체와 같이 특정 타입(concrete type)을 사용할 경우 [StudPoker: Int] 와 같이 Dictionary의 Key나 Array에 저장할 수 있습니다.
 하지만 StudPoker 타입을 사용할 경우 PlayerGame 프로토콜을 따르는 타입들을 섞어서 저장할 수 없습니다.
 
 그렇다면 제네릭을 사용하면 추상화된 타입을 사용해 하위 타입들을 섞고 컴파일 에러도 피할 수 있을까요?
@@ -711,7 +711,72 @@ func storeGame<T: PokerGame>(games: [T]) -> [T: Int] {
 }
 ```
 
-하지만 
+하지만 위 코드와 같은 제네릭 함수는 PokerGame 프로토콜을 따르는 단일 타입으로만 결정됩니다.
+결국 제네릭 타입을 사용해도 특정 프로토콜을 따르는 여러 타입을 섞을 수 없습니다.
+
+아래와 코드와 같이 결국 단일 특정 타입으로 storeGame 함수의 입력 타입이 결정됩니다.
+
+```swift
+func storeGame(games: [TexasHoldem]) -> [TexasHoldem: Int] {
+  /// ... snip
+}
+
+func storeGame(games: [StudPoker]) -> [StudPoker: Int] {
+  /// ... snip
+}
+```
+
+Again, you can't easily mix and match PokerGame types into a single container, such as a dictionary.
+
+제네릭으로 해결할 수 없었지만, 열거형을 사용하거나 type erasure를 사용해 지금까지의 문제를 해결할 수 있습니다.
+
+**Avoiding a protocol using an enum**
+
+열거형은 프로토콜과 달리 특정 타입(concrete type)입니다.
+
+먼저 열거형의 케이스에 사용할 타입들을 넣습니다.
+예를 들어 위에서 프로토콜 PokerGame을 따르는 StudPoker와 TexasHoldem 타입을 열거형의 케이스에 넣습니다.
+
+아래 코드로 살펴봅시다.
+
+```swift
+enum PokerGame: Hashable {
+  case studPoker(StudPoker)
+  case texasHoldem(TexasHoldem)
+}
+
+struct StudPoker: Hashable {
+  // ... 구현부 생략
+}
+
+struct TexasHoldem: Hashable {
+  // ... 구현부 생략
+}  
+```
+
+프로토콜과 달리 StudPoker와 TexasHoldem 구조체 모두 Hashable 프로토콜을 채택해야 합니다.
+
+위와 같이 섞어서 사용할 타입들을 열거형의 케이스에 넣어 Set, Array 그리고 Dictionary의 Key 등에 사용할 수 있습니다.
+이때 프로토콜과 달리 열거형은 특정 타입(concrete type)이기 때문에 컴파일 에러를 피할 수 있습니다.
+
+**Type erasing a protocol**
+
+프로토콜을 특정 타입으로 사용할 수 없을 때 위와 같이 열거형을 사용하는 방식은 유용합니다.
+하지만 너무 많은 타입을 섞으려 할 경우 너무 많은 케이스를 가진 열거형을 만들어 혼란스럽습니다.
+
+또한 프로토콜은 테스트를 위한 의존성 주입을 위해 꼭 필요합니다. (열거형으로 대체되기 어려울 수 있습니다.)
+
+이때 우리는 Type erasing을 사용해 프로토콜을 사용하면서 프로토콜을 따르는 타입들을 섞어서 사용할 수 있습니다.
+
+Type erasing은 Boxing으로 불리기도 합니다.
+
+
+
+
+
+
+
+
 
 
 
