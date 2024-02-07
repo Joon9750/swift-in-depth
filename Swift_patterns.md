@@ -952,6 +952,12 @@ combinedValidator.validate("This one is way too long")  // false
 
 Here are some heuristics to keep in mind when reasoning about polymorphism in Swift.
 
+- Light-weight polymorphism -> Use enums.
+- A type that needs to work with multiple types -> Make a generic type.
+- A type that needs a single configurable implementation -> Store a closure.
+- A type that works on multiple types and has a single configurable implementation -> Use a generic struct or class that stores a closure.
+- When you need advanced polymorphism, default extensions, and other advanced use cases -> Use protocols.
+
 ## Summary
 - You can use protocols as an interface to swap out implementations, for testing, or for other use cases.
 - An associated type can resolve to a type that you don't own.
