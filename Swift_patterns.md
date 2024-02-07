@@ -952,6 +952,13 @@ combinedValidator.validate("This one is way too long")  // false
 
 Here are some heuristics to keep in mind when reasoning about polymorphism in Swift.
 
-
-
-
+## Summary
+- You can use protocols as an interface to swap out implementations, for testing, or for other use cases.
+- An associated type can resolve to a type that you don't own.
+- With conditional conformance, a type can adhere to a protocol, as long as its generic type or associated type adheres to this protocol.
+- Conditional conformance works well when you have a generic type with very few constraints.
+- A protocol with associated types or Self requirements can't be used as a concrete type.
+- Sometimes, you can replace a protocol with an enum, and use that as a concrete type.
+- You can use a protocol with associated types or Self requirements at runtime via type erasure.
+- Often a generic struct is an excellent alternative to a protocol.
+- Combining a higher-order function with a generic struct enables you to create hightly flexible types.
