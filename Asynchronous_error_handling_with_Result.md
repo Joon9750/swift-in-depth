@@ -318,6 +318,8 @@ func search(term: String, completionHandler: @escaping (SearchResult<JSON>) -> V
 
 위의 search 함수에서 Result 타입의 data를 JSON으로 변환할 때 map을 사용해 여러 번의 CompletionHandler 호출을 단일 호출 방식으로 고쳐봅시다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f6acd685-7b52-4394-8484-947a78d969c3)
+
 success 케이스인 Result 타입을 매핑할 때의 과정을 먼저 살펴봅시다.
 
 1. **You have result: with a value.**
@@ -334,6 +336,8 @@ map은 failure 케이스의 Result 타입에는 동작하지 않고 success 케�
 
 하지만 **mapError**을 사용하면 map과 반대로 Result 타입이 failure 케이스일 때 에러를 매핑하고 success 케이스의 경우 mapError가 동작하지 않습니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/f9decc92-6cfa-4b7d-a235-fa3042eaeab2)
+
 success 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴봅시다.
 
 1. **You have success result: with a value.**
@@ -345,6 +349,9 @@ success 케이스인 Result 타입에 mapError가 동작하는 과정을 살펴�
 1. **You have failure result: with a error.**
 2. **With mapError, you apply a function to the error inside a result.**
 3. **mapError rewraps the transformed error in a result.**
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/24645496-143d-4f59-ab28-9b87877798f2)
+
 
 **다시 말해 map을 통해 Result 타입의 Value를 매핑하여 값을 변환하고, mapError로 Result 타입의 Error를 매핑하여 값을 변환할 수 있습니다.**
 
@@ -404,6 +411,8 @@ Result 타입 없이, 빈 딕셔너리 대신 Error를 던지는 방식으로 �
 
 flatMap이 Result와 동작하는 과정을 살펴봅시다.
 flatMap의 클로저에서 데이터를 변환하고 변환 실패 시 failure 케이스의 Result를 생성하고 성공 시 success 케이스의 Result를 생성하게 됩니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/2004f1fb-8d88-4fb4-b324-068012c2ca0f)
 
 1. **You start with a successful result containing Data(x2) and with one result containing an error.**
 2. **With flatMap, you apply a function to the value inside the result. This function will itself return a new result. (This new result could be successful and carry a value, or be a failure result containing an error. But if you start with a result containing an error, any flatMap action is ignored.)**
@@ -528,6 +537,8 @@ Result 타입이 파이프라인을 통과하고 나서 최종적으로 패턴 �
 flatMap은 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸지만, map은 항상 Happy path에 프로그램의 흐름을 유지하게 합니다.
 
 flatMap이 사용하게 된 이유가 에러를 던질 상황에 Result 타입을 리턴하기 위함으로 에러가 발생한 상황에 프로그램의 흐름을 Error path로 바꾸는 것입니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/e4e0e055-c024-4cb2-9633-bf8bca4fcfc3)
 
 에러를 던지는 함수 없이 파이프라인 방식으로 에러를 핸들링한 아래 코드를 살펴봅시다.
 
