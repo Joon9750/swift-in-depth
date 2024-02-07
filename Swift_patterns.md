@@ -1,4 +1,4 @@
-# Swift patterns
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/035beb04-f9bb-42e5-b837-bd7cc14718c8)# Swift patterns
 
 ## This chapter covers
 - Mocking types with protocols and associated types
@@ -767,9 +767,63 @@ struct TexasHoldem: Hashable {
 또한 프로토콜은 테스트를 위한 의존성 주입을 위해 꼭 필요합니다. (열거형으로 대체되기 어려울 수 있습니다.)
 
 이때 우리는 Type erasing을 사용해 프로토콜을 사용하면서 프로토콜을 따르는 타입들을 섞어서 사용할 수 있습니다.
+Type erasing으로 컨테이너에 타입을 감싸서 컴파일 타임 프로토콜을 런타임으로 옮길 수 있습니다.
 
-Type erasing은 Boxing으로 불리기도 합니다.
-Type erasing을 살펴보기 전에 Some과 Any 키워드를 먼저 살펴봅시다.
+그렇다면 PockerGame 예시를 Type erasing 한 구조를 그림으로 살펴봅시다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/7cc1901f-2ec6-4fe6-8a7b-b773d0508b77)
+
+Type erasing으로 프로토콜을 따르는 변수를 감싸는 컨테이너는 Any를 붙인 변수명으로 대게 선언합니다.
+
+위 그림과 같이 Type erasing은 프로토콜을 따른는 변수를 내부 값을 구조체로 감싸는 개념입니다.
+PokerGame 예시에서도 PokerGame 프로토콜을 따르는 변수(타입)를 만들어 AnyPokerGame 구조체로 감싸고 있습니다.
+
+이때 AnyPokerGame 구조체도 PokerGame 프로토콜을 따르도록 하여 AnyPokerGame 객체에 PokerGame 프로토콜이 제공하는 함수를 호출했을 때 함수 호출을 내부 변수로 전달합니다.
+
+Type erasing을 통해 외부 컨테이너는 구조체로 특정 타입(concrete type)이기 때문에 Array, Set, 그리고 Dictionary의 Key로 넣을 수 있습니다.
+또한 외부 컨테이너의 내부 값이 PokerGame 프로토콜을 따르는 변수로 PokerGame 프로토콜의 자식 프로토콜을 섞어서 저장할 수 있게 됩니다.
+
+Each AnyPokerGame can store a different PokerGame type.
+
+이제 AnyPokerGame은 구조체로 특정 타입(concrete type)이 되었기 때문에 AnyPokerGame을 가진 Arrary, Set, Dictionary 등에 넣어 AnyPokerGame의 내부 값을 PokerGame 프로토콜을 따르는 다양한 타입을 저장할 수 있습니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/def7b28a-0489-4650-8934-7a75705287d5)
+
+이번에는 코드로 AnyPokerGame이 동작하는 방식을 살펴봅시다.
+이제 AnyPokerGame 타입을 Array, Set, Dictionary key로 사용 가능합니다.
+
+```swift
+let studPoker = StudPoker()
+let holdEm = TexasHoldem()
+
+// You can mix multiple poker game inside an array.
+let games: [AnyPokerGame] = [
+  AnyPokerGame(studPoker),
+  AnyPokerGame(holdEm)
+]
+
+games.forEach { (pokerGame: AnyPokerGame) in
+  pokerGame.start()
+}
+
+// You can store them inside a Set, too
+let setOfGames: Set<AnyPokerGame> = [
+  AnyPokerGame(studPoker),
+  AnyPokerGame(holdEm)
+]
+
+// You can even use poker games as keys!
+var numberOfPlayers = [
+  AnyPokerGame(studPoker): 300,
+  AnyPokerGame(holdEm): 400
+]
+```
+
+
+
+
+
+
 
 
 
