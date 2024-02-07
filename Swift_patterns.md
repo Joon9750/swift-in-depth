@@ -918,9 +918,39 @@ struct Validator<T> {
 
 제네릭 구조체에서는 유효성의 조건을 클로저로 입력 받아 여러 타입을 하나의 구현부로 대응할 수 있게 됩니다.
 
+또한 Validator 구조체를 확장하여 함수도 추가할 수 있습니다.
 
+```swift
+extension Validator {
+  func combine(_ other: Validator<T>) -> Validator<T> {
+    let combinedValidator = Validator<T>(validate: { (value: T) -> Bool in
+      let ownResult = self.validate(value)
+      let otherResult = other.validate(value)
+      return ownResult && otherResult
+    })
+    return combinedValidator
+  }
+}
 
+let notEmpty = Validator<String>(validate: { string -> Bool in
+  return !string.isEmpty
+})
 
+let maxTenChars = Validator<String>(validate: { string -> Bool in
+  return string.count <= 10
+})
+
+let combinedValidator: Validator<String> = notEmpty.combine(maxTenChars)
+combinedValidator.validate("")  // false
+combinedValidator.validate("Hi")  // true
+combinedValidator.validate("This one is way too long")  // false 
+```
+
+이처럼 제네릭 구조체는 프로토콜의 대안이 될 수 있습니다.
+
+**Rules of thumb for polymorphism**
+
+Here are some heuristics to keep in mind when reasoning about polymorphism in Swift.
 
 
 
