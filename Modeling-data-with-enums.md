@@ -203,6 +203,10 @@ for dateType in dates {
 }
 ```
 
+아래 그림과 같이 Array enum을 만들었습니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/15049f54-7e5b-4ea7-b28a-697a8ea281d3)
+
 열거형과 함께 튜플을 사용해 데이터 타입이 다른 Date과 Range<Date>을 각 케이스 별 튜플에 넣어 다형성을 이루게 됩니다.
 
 ## Enums instead of subclassing
@@ -280,6 +284,9 @@ struct PaymentStatus {
 ```
 
 위와 같이 PaymentStatus를 만든다면 2가지(Bool)와 3가지(PaymentType)를 곱하여 6가지 변화를 가지는 데이터로 볼 수 있습니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/1ab4c111-7b7b-4bab-8261-054d0cea4b15)
+
 이를 sum types인 열거형을 통해 리팩토링한다면 3가지 변화를 가지는 데이터로 바꿀 수 있습니다.
 
 ```swift
