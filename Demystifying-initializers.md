@@ -97,6 +97,8 @@ Nevertheless, subclassing is still a valid tool that Swift offers.
 Designated init(지정 초기자)은 모든 프로퍼티를 초기화해야 하며 클래스 타입에는 반드시 한 개 이상의 Designated init이 필요합니다.
 부모 클래스가 있을 경우 자식 클래스는 부모 클래스의 Designated init을 상속받습니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/3d2b333a-f23e-4d94-b264-e71e9674adb1)
+
 convenience init(편의 초기자)은 초기자 내부에서 마지막에는 반드시 Designated init를 호출해야 합니다. (self.init())
 convenience init를 통해 default value를 제공하거나 단순화한 init을 제공할 수 있고 다른 convenience init를 호출할 수 있습니다.
 
@@ -145,12 +147,17 @@ let boardGame = BoardGame(players: players, numberOfTiles: 32)
 기본적으로 자식 클래스는 부모 클래스의 모든 init(Designated init & covenience init)을 상속받습니다.
 따라서 자식 클래스도 부모 클래스와 동일한 방식으로 초기화 가능합니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/a951fed1-8a32-4b25-a941-d5106ea30779)
+
 하지만 자식 클래스에서 부모 클래스에 없는 새로운 프로퍼티를 추가했을 때는 다릅니다.
 
 자식 클래스에 새로운 프로퍼티가 추가되면 자식 클래스에 있던 부모 클래스의 모든 init은 사라집니다.
 위에서 말했듯이 클래스의 모든 프로퍼티는 초기화되어야 합니다. 하지만 부모 클래스에 없는 프로퍼티가 자식 클래스에 추가되며 더 이상 부모 클래스 init으로 자식 클래스의 프로퍼티를 초기화할 수 없어지게 됩니다.
 
 이때 우린 자식 클래스의 모든 프로퍼티를 초기화하는 새로운 designated init을 구현해야 합니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/cfa77de4-1a32-46b9-ba0e-26a801ba32c3)
+
 자식 클래스에 초기화 되어야 하는 새로운 프로퍼티가 추가되면 자식 클래스에 새로운 designated init을 구현하고 자식 클래스의 designated init에서 부모 클래스의 designated init을 호출하는 방식으로
 프로퍼티를 초기화해야 합니다.
 
@@ -182,6 +189,8 @@ instructions가 추가되며 MutabilityLane 클래스는 부모 클래스인 Boa
 여기서 주의해야할 점은 super.init은 부모 클래스의 designated init을 자식 클래스에서 호출할 뿐이지 부모 클래스의 init을 상속받은건 아닙니다.
 
 하지만 자식 클래스에 초기화될 필요가 있는 새로운 프로퍼티가 생겨도 부모 클래스의 init을 상속받는 방법이 있습니다!
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/191ffa6d-109d-44a6-a47c-f3e58bcb763b)
 
 자식 클래스에서 새로운 designated init을 만들지 않고, 부모 클래스의 designated init을 override하면 자식 클래스는 부모 클래스의 모든 init을 상속받을 수 있습니다.
 물론 override한 부모 클래스의 designated init에서는 자식 클래스의 새로운 프로퍼티를 반드시 초기화해야 합니다.
@@ -220,6 +229,8 @@ In a class hierarchy, convenience init go horizontal, and designated init go ver
 
 designated init을 override 할 때 convenience init으로 부모 클래스의 designated init을 override한다면 자식 클래스의 designated init을 한 개로 유지할 수 있습니다.
 
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/faef01e3-ddcc-4c7f-a69c-01b7f1ffcd60)
+
 여기서 부모 클래스의 designated init을 자식 클래스의 convenience init으로 override 할 때 자식 클래스의 convenience override init에서 자식 클래스의 designated init을 호출하고 designated init에서 부모 클래스의 designated init을 
 호출하도록 구현하면 부모 클래스의 모든 init을 상속 받으며 하위 자식 클래스의 designated init을 한 개로 유지할 수 있습니다.
 
@@ -247,11 +258,15 @@ class MutabilityLand: BoardGame {
 ```
 
 위의 코드처럼 override init(designated init)을 convenience override init으로 바꾸면 자식 클래스의 designated init을 두 개에서 한 개로 줄입니다.
+
 이제는 MutabilityLand의 자식 클래스가 생기면 자식 클래스에서는 하나의 designated init만 override하면 MutabilityLand의 모든 init을 상속 받을 수 있습니다.
 
 물론 designated init의 특성상 designated init에서 모든 프로퍼티가 초기화되어야 합니다.
 따라서 자식 클래스에 추가된 초기화가 필요한 프로퍼티는 designated init에서 초기화하고 부모 클래스의 designated init을 호출합시다.
+
 다시 말하지만 designated init은 모든 클래스에 한 개 이상 존재해야 하고 모든 프로퍼티를 초기화할 수 있어야 합니다.
+
+![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/8b31c897-857c-4e05-ab5d-bfc380e5c4d5)
 
 ```swift
 class MutabilityLandJunior: MutabilityLand { 
@@ -359,10 +374,10 @@ BoardGame이 BoardGameType 프로토콜을 따르기 때문에 BoardGame의 자�
 만약, 클래스에 final 키워드를 붙였다면 어떨까요?
 
 init을 가진 프로토콜을 채택한 클래스를 final로 만든다면, 자식 클래스로 subclassing 될 가능성이 없어졌기 때문에 init을 required 할 필요가 없어집니다.
+
 required 자체가 subclassing의 상황에 대응하기 위해 사용하는데 final로 subclassing 기능을 막는다면 init을 가진 프로토콜, factory method 경우 모두 init에 required 키워드를 붙일 필요가 없습니다.
 
 ## Summary
-
 - Structs and classes want all their non-optional properties initialized
 - Structs generate "free" memberwise initializers
 - Structs lose memberwise initializers if you add a custom initializer
