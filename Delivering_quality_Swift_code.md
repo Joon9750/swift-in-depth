@@ -16,6 +16,9 @@
 프로젝트는 주로 여러 동료들과 함께합니다. 따라서 자연스럽게 동료들이 만든 코드를 해석해야 합니다.
 이때 API documentation을 만들어 프로젝트의 코드를 문서화 할 수 있습니다.
 
+API documentation은 외부에서 사용 가능한 public 요소를 설명하는데 중요한 역할을 합니다.
+프로젝트 안에서 public 요소에 접근하기 위해서 완성된 문서를 읽는 개념입니다.
+
 프로젝트의 코드를 문서화하는 방법은 Quick Help를 사용하거나 Jazzy 패키지를 사용해 문서화된 웹 페이지를 만드는 방법이 있습니다.
 
 먼저 Quick Help를 사용하는 방법을 살펴봅시다.
@@ -32,16 +35,72 @@ Quick Help는 짧은 마크다운으로 코드상에서 아래와 같이 표시�
 위와 같은 Quick Help는 '///'를 통해 작성할 수 있습니다.
 아래 코드로 살펴봅시다.
 
+```swift
+/// A player's turn in a turn-based online game.
+enum Turn {
+  /// Player skips turn, will receive gold.
+  case skip
+  /// Player uses turn to attack location.
+  /// - x: Coordinate of x location in 2D space.
+  /// - y: Coordinate of y location in 2D space.
+  case attack(x: Int, y: Int)
+  /// Player uses round to heal, will not receive gold.
+  case heal
+}
+```
 
+**Adding callouts to Quick Help**
 
+Quick Help에 함수가 에러를 던지는 여부나 예시 코드를 추가할 수 있습니다.
 
+이때 'tab text'를 통해 Quick Help에 설명을 추가합니다.
+아래 코드로 살펴봅시다.
 
+```swift
+/// Takes an array of turns and plays them in a row.
+///
+/// - Parameter turns: One or multiple turns to play in a round.
+/// - Returns: A description of what happened in the turn.
+/// - Throws: TurnError
+/// - Example: Passing turns to `playTurn`.
+///
+///         let turns = [Turn.heal, Turn.heal]
+///         try print(playTurns(turns)) "Player healed twice."
+func playTurns(_ turns: [Turn]) throws -> String {
+```
 
+위와 같이 tab text가 추가되어 아래와 같은 Quick Help가 작성됩니다.
 
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/64052fdd-cd2f-4650-b173-9303bc8170d8)
 
+**Documentation as HTML with Jazzy**
 
+Quick Help를 작성하는 방법 이외에도 프로젝트를 문서화하는 방법이 있습니다.
 
+realm에서 제공하는 Jazzy 패키지를 사용하여 프로젝트를 문서화할 수 있습니다.
 
+You can apply Jazzy to any project where you'd like to generate a website with documentation.
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/e23d3992-9c35-43e3-9321-1f13186e72a9)
+
+Jazzy는 command-line에서 적용할 수 있고 아래 코드와 같이 실행할 수 있습니다.
+
+```swift
+// Jazzy 패키지 설치합니다.
+gem install jazzy
+jazzy
+```
+
+```swift
+// Jazzy output
+Running xcodebuild
+building site
+building search index
+downloading coverage badge
+jam out ♪♫ to your fresh new docs in `docs`
+```
+
+## Comments
 
 
 
