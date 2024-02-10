@@ -155,14 +155,16 @@ Not all "Why" need to be explained.
 
 특히 적절하지 않은 변수명이나 함수명을 보충 설명하기 위한 주석은 최악입니다.
 
-The code has the truth.
+**The code has the truth.**
 
 ## Settling on a style
 
+팀원들과 개발을 하다보면 서로 다른 코딩 스타일로 일관되지 못한 결과물이 만들어집니다.
+어떤 개발자는 for loop을 선호하고 또 다른 개발자는 forEach를 선호할 수 있습니다.
 
+이때 SwiftLint를 사용하면 일관되는 코딩 스타일을 가진 결과물을 만들 수 있습니다.
 
-
-
+결국 코딩 스타일은 가독성 높은 코드를 위한 수단이지, 목표 자체가 될 수 없습니다.
 
 
 
