@@ -164,7 +164,99 @@ Not all "Why" need to be explained.
 
 이때 SwiftLint를 사용하면 일관되는 코딩 스타일을 가진 결과물을 만들 수 있습니다.
 
-결국 코딩 스타일은 가독성 높은 코드를 위한 수단이지, 목표 자체가 될 수 없습니다.
+SwiftLint는 아래와 같은 .yml 파일로 관리됩니다.
+
+```swift
+disabled_rules: # rule identifiers to exclude from running
+  - variable_name
+  - nesting
+  - function_parameter_count
+opt_in_rules: # some rules are only opt-in
+  - control_statement
+  - empty_count
+  - trailing_newline
+  - colon
+  - comma
+included: # paths to include during linting. `--path` is ignored if present.
+  - Project
+  - ProjectTests
+  - ProjectUITests
+excluded: # paths to ignore during linting. Takes precedence over `included`.
+  - Pods
+  - Project/R.generated.swift
+
+# configurable rules can be customized from this configuration file
+# binary rules can set their severity level
+force_cast: warning # implicitly. Give warning only for force casting
+
+force_try:
+  severity: warning # explicitly. Give warning only for force try
+
+type_body_length:
+  - 300 # warning
+  - 400 # error
+
+# or they can set both explicitly
+file_length:
+  warning: 500
+  error: 800
+
+large_tuple: # warn user when using 3 values in tuple, give error if there are 4
+   - 3
+   - 4
+
+# naming rules can set warnings/errors for min_length and max_length
+# additionally they can set excluded names
+type_name:
+  min_length: 4 # only warning
+
+    error: 35
+  excluded: iPhone # excluded via string
+reporter: "xcode"
+```
+
+.swiftlint.yml 파일을 수정하여 SwiftLint의 규칙을 수정할 수 있습니다.
+
+SwiftLint를 적용한 후 규칙을 따르지 않을 경우 아래와 같이 경고를 띄우거나 아예 에러를 띄울 수도 있습니다.
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/47699c60-61e6-444a-8920-33b8b84d13d4)
+
+물론 :previous, :this 또는 :next 키워드로 특정 코드에서 SwiftLint의 규칙을 비활성화 시킬 수 있습니다.
+아래 코드로 살펴봅시다.
+
+```swift
+//  Turning off violating rules
+if list.count == 0 { // swiftlint:disable:this empty_count
+      // swiftlint:disable:next force_unwrapping
+      print(lastLogin!)
+}
+```
+
+## Kill the managers
+
+개발을 하다보면 Manager 클래스를 빈번히 볼 수 있습니다.
+BluetoothManger나 ApiRequestManger와 같이 Manager가 접미사로 붙는 객체는 너무 많을 책임을 가지게 됩니다.
+
+하나의 클래스가 여러 책임을 가질 경우 코드 수정이 어려워지고 가독성도 떨어집니다.
+
+여러 책임을 가지는 클래스를 작은 타입으로 나누고 앱 다른 부분에서도 쓰일 만한 타입은 제네릭 타입으로 만들어 봅시다.
+
+여러 책임을 가진 ApiRequestManager 클래스를 예시로 살펴봅시다.
+
+ApiRequestManager 클래스는 네트워크 호출, 데이터 캐싱, 큐에 저장, 웹 소켓과 관련된 모든 책임을 갖는 Manager 클래스입니다.
+ApiRequestManager 클래스가 가진 책임을 아래와 같이 명시하여 얼마나 많은 책임을 갖는지 살펴봅시다.
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/81346efe-dad3-45f1-bc02-6e0967e4c92c)
+
+여러 책임들을 각 타입으로 만
+
+
+
+
+
+
+
+
 
 
 
