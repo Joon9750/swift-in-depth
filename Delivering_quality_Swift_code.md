@@ -112,9 +112,49 @@ jam out to your fresh new docs in `docs`
 
 **Explain the "why"**
 
-"무엇"을 하는 요소인지 설명하는 주석은 코드의 가독성을 떨어뜨리고
+"무엇"을 하는 변수인지 설명하는 주석은 코드의 가독성을 떨어뜨리고, 변수가 "왜" 여기 있는지를 설명하는 주석은 코드의 가독성을 높입니다.
 
-"왜" 이 요소가 여기 있는지를 설명하는 주석은 코드의 가독성을 높입니다.
+변수가 "무엇"을 하는지 설명하는 가독성을 떨어뜨리는 주석을 먼저 살펴봅시다.
+
+```swift
+struct Message {
+  // The id of the message
+  let id: String
+
+  // The date of the message
+  let date: Date
+
+  // The contents of the message
+  let contents: String
+}
+```
+
+변수가 무엇을 하는지 설명하는 주석은 필요하지 않습니다.
+이미 변수명으로 해당 변수가 어떤 역할을 하는지 충분히 설명하고 있기 때문입니다.
+
+아래 코드와 같이 변수가 "왜" 여기 위치하는지 설명하는 주석으로 코드의 가독성을 높입시다.
+
+```swift
+struct Message {
+  let id: String
+  let date: Date
+  let contents: String
+
+  // Messages can get silently cut off by the server at 280 characters.
+  let maxLength = 280
+}
+```
+
+Message 구조체가 maxLength 변수를 가지는 이유를 주석으로 설명하고 있습니다.
+이와 같은 왜 변수가 해당 위치에 있는지에 대한 설명은 변수명으로 부족할 수 있기 때문에 주석이 부족한 설명을 보충하게 됩니다.
+
+**Only explain obscure elements**
+
+Not all "Why" need to be
+
+
+
+
 
 
 
