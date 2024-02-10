@@ -257,23 +257,66 @@ ApiRequestManager 클래스가 가진 책임을 아래와 같이 명시하여 �
 
 **Paving the road for generics**
 
-만약 queueing과 caching 동작이 Network 클래스
+만약 queueing과 caching 동작이 Network 클래스 이외에 앱 다른 부분에도 사용된다면, ResponseQueue와 ResponseCache를 제네릭 타입으로 만들어 사용할 수 있습니다.
+
+아래와 같이 ResponseQueue를 Queue<T>로 수정하고 제네릭 T 타입에 Response 타입을 넣는 방식으로 제네릭 Queue<T>를 만들게 됩니다.
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/98a8a3bb-a82d-44a8-9423-afeaf1a724b7)
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/40266d8f-644b-40c1-88db-9868cf7f0a88)
+
+## Naming abstractions
+
+**Good names don't change**
+
+변수명을 짓는 일이 중요하다는 것은 모두들 알고 있습니다.
+하지만 보통 별 고민 없이 변수명을 짓는 경우 아래와 같이 너무 특수화된(overspecified) 변수명을 짓게 됩니다.
+
+너무 특수화된 변수명은 추가적인 기능을 구현할 때 해당 기능과 어울리지 않을 수 있습니다.
+
+아래 코드는 방문했던 커피 가게 중 가장 마음에 들었던 커피 가게 다섯개를 뽑는 요구사항을 구현한 코드입니다.
+
+```swift
+let locations = ... // extracted locations.
+let favoritePlaces = FavoritePlaces(locations: locations)
+let topFiveFavoritePlaces = favoritePlaces.calculateMostCommonPlaces()
+
+let coffeePlaces = topFiveFavoritePlaces.filter { place in place.type == "Coffee" }****
+```
+
+가장 마음에 들었던 커피 가게를 뽑는 요구사항에는 favoritePlaces 변수명이 적합할지 몰라도 favoritePlaces는 너무 특정 상황에 국한된 변수명입니다.
+
+만약 사용자가 방문한 커피 가게 중 가장 적게 방문한 커피 가게를 뽑는 요구사항에는 favoritePlaces 변수명이 적합하지 않습니다.
+이처럼 너무 특수화된 변수명은 새로운 요구사항에 어울리지 않을 수 있습니다.
+
+The type is named after how it is used, which is to find the favorite places. But the type's name would be better if you can name it after what it does, which is find and group occurrences of places.
+
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/379dd4d1-92d7-4ef7-8ccc-798703481a14)
 
 
+favoritePlaces과 달리 LocationGroper 변수명은 요구사항이 추가되어도 잘 어울려 변수명을 수정하지 않아도 됩니다.
 
+결과적으로 좋은 변수명은 수정할 필요 없는 변수명입니다.
 
+몇가지 예를 더 살펴봅시다.
 
+1. Don't use something like 'redColor' as a button's property for a warning state; a 'warning' property might be better because the warning's design might change, but a warning's purpose won't.
+2. When creating a 'UserheaderView' - which is nothing more than an image and label you can reuse as something else - perhaps 'ImageDescriptionView' would be more fitting as well as reusable.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+## Summary
+- Quick Help documentation is fruitful way to add small snippets of documentation to your codebase.
+- Quick Help documentation is especially valuable to public and internal elements offered inside a project and framework.
+- Quick Help supports many useful callouts that enrich documentation.
+- You can use Jazzy to generate Quick Help documentation.
+- Comments explain the "why", not the "what".
+- Be stingy with comments.
+- Comments are no bandage for bad naming.
+- There's no need to let commented-out code, aka Zombie Code, linger around.
+- Code consistency is more important than code style.
+- Consistency can be enforced by installing SwiftLint.
+- SwiftLint supports configurations that you can let your team decide, which helps eliminate style discussions and disagreements.
+- Manager classes can drop the -Manager suffix and still convey the same meaning.
+- A large type can be composed of smaller types with focused responsibilities.
+- Smaller components are good candidates to make generic.
+- Name your types after what they do, not how they are used.
+- The more abstract a type is, the more easily you can make it generic and reusable.
