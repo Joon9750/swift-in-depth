@@ -97,11 +97,24 @@ Running xcodebuild
 building site
 building search index
 downloading coverage badge
-jam out ♪♫ to your fresh new docs in `docs`
+jam out to your fresh new docs in `docs`
 ```
 
 ## Comments
 
+개발을 하다보면 주석을 자주 보게됩니다. 
+어렴풋이 주석은 코드의 가독성을 떨어뜨린다고 들었을 것입니다.
+
+하지만 개발에 주석은 어쩔수 없이 쓰이는 존재입니다. 
+주석이 코드 가독성을 떨어뜨릴 수 있지만, 반대로 가독성을 높일 수도 있습니다.
+
+지금부터 코드 가독성을 떨어뜨리는 주석과 가독성을 높이는 주석의 차이를 살펴봅시다.
+
+**Explain the "why"**
+
+"무엇"을 하는 요소인지 설명하는 주석은 코드의 가독성을 떨어뜨리고
+
+"왜" 이 요소가 여기 있는지를 설명하는 주석은 코드의 가독성을 높입니다.
 
 
 
