@@ -24,4 +24,4 @@
 | 10   | [Asynchronous error handling with Result](Asynchronous_error_handling_with_Result.md) | 2024.01.24 |
 | 11   | [Protocol extensions](Protocol_extensions.md) | 2024.01.31 |
 | 12   | [Swift patterns](Swift_patterns.md) | 2024.02.07 |
-| 13   | [Delivering quality Swift code](Delivering_quality_Swift_code.md) | 2024.02.07 |
+| 13   | [Delivering quality Swift code](Delivering_quality_Swift_code.md) | 2024.02.10 |
