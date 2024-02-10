@@ -248,8 +248,16 @@ ApiRequestManager 클래스가 가진 책임을 아래와 같이 명시하여 �
 
 ![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/81346efe-dad3-45f1-bc02-6e0967e4c92c)
 
-여러 책임들을 각 타입으로 만
+여러 책임을 나누기 위해서 먼저 여러 책임들을 각 독립된 타입으로 만들어야 합니다.
+각 역할을 하는 타입들을 독립시켜, 특정 부분에 문제가 생겼을 때 특정 독립된 타입만 수정할 수 있습니다.
 
+예를 들어 Cache에 문제가 발생했을 때 ApiRequestManager 클래스 전체가 아닌 ResponseCache 속 코드만 살펴보면 됩니다.
+
+또한 ApiRequestManager 클래스를 Network 클래스로 더 정밀한 이름을 사용할 수 있습니다.
+
+**Paving the road for generics**
+
+만약 queueing과 caching 동작이 Network 클래스
 
 
 
