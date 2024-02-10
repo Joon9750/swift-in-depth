@@ -148,11 +148,16 @@ struct Message {
 Message 구조체가 maxLength 변수를 가지는 이유를 주석으로 설명하고 있습니다.
 이와 같은 왜 변수가 해당 위치에 있는지에 대한 설명은 변수명으로 부족할 수 있기 때문에 주석이 부족한 설명을 보충하게 됩니다.
 
-**Only explain obscure elements**
+Not all "Why" need to be explained.
 
-Not all "Why" need to be
+아무리 유용한 주석이더라도 시간이 지나면 쓸모 없어지거나 오히려 코드에 피해만 끼칩니다.
+따라서 무분별한 주석 작성은 피해야 합니다.
 
+특히 적절하지 않은 변수명이나 함수명을 보충 설명하기 위한 주석은 최악입니다.
 
+The code has the truth.
+
+## Settling on a style
 
 
 
