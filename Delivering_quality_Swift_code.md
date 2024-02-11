@@ -237,19 +237,19 @@ if list.count == 0 { // swiftlint:disable:this empty_count
 
 ## Kill the managers
 
-개발을 하다보면 Manager 클래스를 빈번히 볼 수 있습니다.
-BluetoothManger나 ApiRequestManger와 같이 Manager가 접미사로 붙는 객체는 너무 많을 책임을 가지게 됩니다.
-하나의 클래스가 여러 책임을 가질 경우 코드 수정이 어려워지고 가독성도 떨어집니다.
+개발하다 보면 Manager 클래스를 빈번히 볼 수 있습니다.
+BluetoothManger나 ApiRequestManger와 같이 Manager가 접미사로 붙는 객체는 너무 많을 책임을 지게 됩니다.
+하나의 클래스가 여러 책임을 질 경우 코드 수정이 어려워지고 가독성도 떨어집니다.
 
-여러 책임을 가지는 클래스를 작은 타입으로 나누고 앱 다른 부분에서도 쓰일 만한 타입은 제네릭 타입으로 만들어 봅시다.
+여러 책임을 지는 클래스를 작은 타입으로 나누고 앱 다른 부분에서도 쓰일 만한 타입은 제네릭 타입으로 만들어 봅시다.
 
-여러 책임을 가진 ApiRequestManager 클래스를 예시로 살펴봅시다.
+여러 책임을 진 ApiRequestManager 클래스를 예시로 살펴봅시다.
 
 ApiRequestManager 클래스는 네트워크 호출, 데이터 캐싱, 큐에 저장, 웹 소켓과 관련된 모든 책임을 갖는 Manager 클래스입니다. ApiRequestManager 클래스가 가진 책임을 아래와 같이 명시하여 얼마나 많은 책임을 갖는지 살펴봅시다.
 
 ![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/81346efe-dad3-45f1-bc02-6e0967e4c92c)
 
-여러 책임을 나누기 위해서 먼저 여러 책임들을 각 독립된 타입으로 만들어야 합니다.
+여러 책임을 나누기 위해서 먼저 여러 책임을 각각 독립된 타입으로 만들어야 합니다.
 각 역할을 하는 타입들을 독립시켜, 특정 부분에 문제가 생겼을 때 특정 독립된 타입만 수정할 수 있습니다.
 
 예를 들어 Cache에 문제가 발생했을 때 ApiRequestManager 클래스 전체가 아닌 ResponseCache 속 코드만 살펴보면 됩니다.
@@ -258,7 +258,7 @@ ApiRequestManager 클래스는 네트워크 호출, 데이터 캐싱, 큐에 저
 
 **Paving the road for generics**
 
-만약 queueing과 caching 동작이 Network 클래스 이외에 앱 다른 부분에도 사용된다면, ResponseQueue와 ResponseCache를 제네릭 타입으로 만들어 사용할 수 있습니다.
+만약 queuing과 caching 동작이 Network 클래스 이외에 앱 다른 부분에도 사용된다면, ResponseQueue와 ResponseCache를 제네릭 타입으로 만들어 사용할 수 있습니다.
 
 아래와 같이 ResponseQueue를 Queue<T>로 수정하고 제네릭 T 타입에 Response 타입을 넣는 방식으로 제네릭 Queue<T>를 만들게 됩니다.
 
@@ -270,13 +270,13 @@ ApiRequestManager 클래스는 네트워크 호출, 데이터 캐싱, 큐에 저
 
 **Good names don't change**
 
-변수명을 짓는 일이 중요하다는 것은 모두들 알고 있습니다.
+변수명을 짓는 일이 중요하다는 것은 모두 알고 있습니다.
 
 하지만 보통 별 고민 없이 변수명을 짓는 경우 아래와 같이 너무 특수화된(overspecified) 상황만 어울리는 변수명을 짓게 됩니다.
 
 너무 특수화된 변수명은 추가적인 기능을 구현할 때 해당 기능과 어울리지 않을 수 있습니다.
 
-아래 코드는 방문했던 커피 가게 중 가장 마음에 들었던 커피 가게 다섯개를 뽑는 요구사항을 구현한 코드입니다.
+아래 코드는 방문했던 커피 가게 중 가장 마음에 들었던 커피 가게 다섯 개를 뽑는 요구사항을 구현한 코드입니다.
 
 ```swift
 let locations = ... // extracted locations.
@@ -296,11 +296,11 @@ The type is named after how it is used, which is to find the favorite places. Bu
 
 ![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/379dd4d1-92d7-4ef7-8ccc-798703481a14)
 
-favoritePlaces과 달리 LocationGroper 변수명은 요구사항이 추가되어도 잘 어울려 변수명을 수정하지 않아도 됩니다.
+favoritePlaces와 달리 LocationGroper 변수명은 요구사항이 추가되어도 잘 어울려 변수명을 수정하지 않아도 됩니다.
 
 **결과적으로 좋은 변수명은 수정할 필요 없는 변수명입니다.**
 
-몇가지 예를 더 살펴봅시다.
+몇 가지 예를 더 살펴봅시다.
 
 1. Don't use something like 'redColor' as a button's property for a warning state; a 'warning' property might be better because the warning's design might change, but a warning's purpose won't.
 2. When creating a 'UserheaderView' - which is nothing more than an image and label you can reuse as something else - perhaps 'ImageDescriptionView' would be more fitting as well as reusable.
