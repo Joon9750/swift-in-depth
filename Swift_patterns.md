@@ -15,14 +15,14 @@
 먼저 의존성 주입(Dependency injection)을 살펴봅시다.
 
 의존성 주입에서 말하는 의존성이란 서로 다른 객체 사이에 의존 관계를 말합니다.
-A 클래스에 B 클래스 객체를 인스턴스로 사용한다면 A 클래스와 B 클래스 사이에 의존 관계가 있는것입니다.
+A 클래스에 B 클래스 객체를 인스턴스로 사용한다면 A 클래스와 B 클래스 사이에 의존 관계가 있는 것입니다.
 
 다시 말해, 의존하는 객체가 수정되면 다른 객체도 영향을 받게 됩니다.
 
-또한 의존성 주입에서 주입이란 생성자를 활용한 방법 등으로 외부에서 생성한 객체를 넣는것을 의미합니다.
+또한 의존성 주입에서 주입이란 생성자를 활용한 방법 등으로 외부에서 생성한 객체를 넣는 것을 의미합니다.
 
 의존성을 가진 코드가 많을수록 코드의 재사용성이 떨어집니다.
-재사용을 위해 코드를 수정하면 매번 의존성을 가진 객체들을 함께 수정해야하기 때문입니다.
+재사용을 위해 코드를 수정하면 매번 의존성을 가진 객체들을 함께 수정해야 하기 때문입니다.
 
 의존성을 강하게 가지는 코드를 의존성 주입으로 의존 관계를 끊을 수 있습니다.
 
@@ -30,21 +30,21 @@ A 클래스에 B 클래스 객체를 인스턴스로 사용한다면 A 클래스
 
 1. Unit Test가 용이해집니다.
 2. 코드의 재활용성을 높여줍니다.
-3. 객체 간의 의존성(종속성)을 줄이거나 없엘 수 있습니다.
-4. 객체 간의 결합도이 낮추면서 유연한 코드를 작성할 수 있습니다.
+3. 객체 간의 의존성(종속성)을 줄이거나 없앨 수 있습니다.
+4. 객체 간의 결합을 낮추면서 유연한 코드를 작성할 수 있습니다.
 
 의존성 주입은 DIP(의존 관계 역전 법칙)와도 관련이 깊습니다.
 
-의존 관계 역전 법칙은 객체 지향 프로그래밍 설계의 다섯가지 기본 원칙(SOLID) 중 하나입니다. 
+의존 관계 역전 법칙은 객체 지향 프로그래밍 설계의 다섯 가지 기본 원칙(SOLID) 중 하나입니다. 
 
-추상화 된 것은 구체적인 것에 의존하면 안되고, 구체적인 것이 추상화된 것에 의존 해야합니다.
-즉, 구체적인 객체는 추상화된 객체에 의존 해야 한다는 것이 핵심입니다.
+추상화된 것은 구체적인 것에 의존하면 안 되고, 구체적인 것이 추상화된 것에 의존해야 합니다.
+즉, 구체적인 객체는 추상화된 객체에 의존해야 한다는 것이 핵심입니다.
 
 스위프트에서 말하는 추상화는 프로토콜로 구현할 수 있습니다.
 
 **Swapping an implementation**
 
-구현부를 교환할 수 있다는 특징은 의존성 주입에 의해 만들어집니다.
+구현부를 교환할 수 있는 특징은 의존성 주입에 의해 만들어집니다.
 지금부터 의존성 주입을 활용하여 구현부를 교환할 수 있는 WeatherAPI를 구현할 것입니다.
 
 구체적 객체에 의존하지 않고 추상화된 객체에 의존하기 때문에 추상화된 객체를 따르는 여러 구현부를 교환할 수 있게 됩니다.
@@ -57,14 +57,14 @@ WeatherAPI가 URLSession과 같은 구체적인 타입에 의존하면 강한 �
 
 추상화된 Session 프로토콜에 의존하기 때문에 주입 받는 세션의 타입과 상관없이 Session 프로토콜의 함수를 사용할 수 있습니다. 
 
-의존성 주입을 통해 WeatherAPI는 URLSession, OfflineURLSession 그리고 MockSession 타입과의 강한 의존 관계를 만들지 않게 됩니다.
+의존성 주입을 통해 WeatherAPI는 URLSession, OfflineURLSession 그리고 MockSession 타입과 강한 의존 관계를 만들지 않게 됩니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/c0e48dae-9db6-48a0-a787-0575b6ed8b96)
 
 WeatherAPI가 가진 Session 프로토콜에 의해 Session 프로토콜을 따르는 URLSession, OfflineSession, MockSession 타입을 주입 받을 수 있습니다.
-의존성 주입으로 구현부를 교환이 가능해졌습니다.
+의존성 주입으로 구현부를 교환할 수 있습니다.
 
-Session 프로토콜을 코드로 구현해봅시다.
+Session 프로토콜을 코드로 구현해 봅시다.
 
 ```swift
 protocol Session {
@@ -111,7 +111,7 @@ let weatherAPI = WeatherAPI(session: URLSession.shared)
 weatherAPI.run()
 ```
 
-WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 구현부를 교환하여 입력 받도록 만들었습니다.
+WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 구현부를 교환하여 입력받도록 만들었습니다.
 
 위에서 task.resume() 함수를 호출하고 있지만, 아직 Session 프로토콜의 연관 값인 Task에 resume 함수를 구현하지 않았습니다.
 resume 함수를 가진 DataTask 프로토콜을 만들고 Session 프로토콜의 연관 값인 Task를 DataTask로 타입 제약한다면, task의 resume 함수를 호출할 수 있습니다.
@@ -135,6 +135,7 @@ protocol Session {
 ```
 
 먼저 DataTask 프로토콜을 만들고 resume 함수를 선언했습니다.
+
 이후 Session 프로토콜의 연관 값 Task에 DataTask 프로토콜로 타입 제약을 걸어 dataTask 함수가 리턴하는 Task 타입의 객체에 resume 함수를 호출할 수 있게 되었습니다.
 
 지금까지의 추상화 과정을 그림으로 살펴봅시다.
@@ -153,6 +154,7 @@ extension URLSessionDataTask: DataTask {}
 물론 URLSession 이외에도 Session 프로토콜을 따르는 타입이라면 WeatherAPI의 생성자로 주입할 수 있습니다.
 
 지금부터 URLSession 이외에 OfflineURLSession과 MockSession을 생성하여 WeatherAPI가 구현부를 교체(Swapping an implementation)해 보겠습니다.
+
 의존성 주입으로 WeatherAPI가 구체적 타입이 아닌 추상화에 의존하기 때문에 구현부를 URLSession, OfflineURLSession, MockSession 등으로 교체해도 WeatherAPI에 수정할 부분이 없습니다.
 
 먼저 OfflineURLSession과 OfflineTask를 구현하겠습니다.
@@ -191,7 +193,7 @@ struct OfflineTask: DataTask {
 }
 ```
 
-위의 OfflineURLSession은 서버 연결 없이 로컬 데이터가 로드되도록 하여 서버 환경에 구애받지 않고  WeatherAPI 클래스를 테스트할 수 있도록 합니다.
+위의 OfflineURLSession은 서버 연결 없이 로컬 데이터가 로드되도록 하여 서버 환경에 구애받지 않고 WeatherAPI 클래스를 테스트할 수 있도록 합니다.
 
 우리는 의존성 주입으로 객체 간의 의존 관계를 서로가 아니라 추상적 대상에 두어 구현부를 교체할 때 추가적인 코드 수정이 발생하지 않도록 만듭니다.
 아래 코드와 같이 단지 주입하는 객체만 달라질 뿐, 구현부가 교체되었다고 해서 WeatherAPI의 코드를 수정하지 않습니다.
