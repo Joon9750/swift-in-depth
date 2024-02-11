@@ -259,7 +259,7 @@ testcase.testAPI()
 ```
 
 Session 프로토콜을 확장하여 dataTask 함수의 구현부를 제공할 수도 있습니다.
-기존의 dataTask 함수가 아닌, Result 타입 클로저를 가진 dataTask 함수를 새로 만들고 해당 함수의 구현부를 프로토콜 확장에서 제공해봅시다.
+기존의 dataTask 함수가 아닌, Result 타입 클로저를 가진 dataTask 함수를 새로 만들고 해당 함수의 구현부를 프로토콜 확장에서 제공해 봅시다.
 
 챕터11에서 살펴본 Result 타입을 활용해 (Data?, URLResponse?, Error?)를 Result로 변형시켜 다루면 에러 핸들링에 유리합니다.
 
@@ -338,7 +338,7 @@ extension Array: Purchaseable where Element: Purchaseable {
 }
 ```
 
-extension Array: Purchaseable where Element: Purchaseable와 같은 코드가 생소할 수 있습니다.
+extension Array: Purchaseable where Element: Purchaseable과 같은 코드가 생소할 수 있습니다.
 이는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성 코드입니다.
 
 With conditional conformance, you can make a type adhere to a protocol but only under certain conditions.
@@ -381,6 +381,7 @@ struct Array<Element>
 ```
 
 Array는 Element 연관 값을 가졌기 때문에 조건부 적합성을 설명하기에 적합합니다.
+
 Array가 구조체인데 어떻게 연관 값을 가졌는지 의문일 수 있지만, Array의 연관 값 Element는 Sequence 프로토콜로부터 온 연관 값입니다.
 
 조건부 적합성을 사용하지 않고 코드를 구현한다면 어떤 문제가 발생하는지 살펴봅시다.
@@ -499,7 +500,7 @@ playDelayed(tracks, delay: 2.0)
 **Conditional conformance and generics**
 
 지금까지 연관 값을 가진 프로토콜에 조건부 적합성을 적용했다면, 이제는 조건부 적합성을 제네릭 타입에 사용해 봅시다.
-조건부 적합성은 연관 값을 가진 프로토콜에도 사용할 수 있지만 제네릭 타입에도 사용 가능합니다.
+조건부 적합성은 연관 값을 가진 프로토콜에도 사용할 수 있지만 제네릭 타입에도 사용할 수 있습니다.
 
 Optional은 대표적인 제네릭 타입을 가진 열거형입니다.
 열거형 Optional은 Wrapped 제네릭 타입을 가지고 있습니다.
@@ -522,7 +523,7 @@ extension Optional: Track where Wrapped: Track {
 
 위 코드는 Optional의 제네릭 타입인 Wrapped가 Track 프로토콜을 따를 때, Optional 또한 Track 프로토콜을 따르고 play 함수를 제공합니다.
 
-물론 extension Optional: Track where Wrapped: Track 방식이 아닌 extension Optional where Wrapped: Track 코드를 사용해도 play 함수를 제공 받지만, Optional 자체가 Track 타입이 되진 못합니다.
+물론 extension Optional: Track where Wrapped: Track 방식이 아닌 extension Optional where Wrapped: Track 코드를 사용해도 play 함수를 제공받지만, Optional 자체가 Track 타입이 되진 못합니다.
 
 ```swift
 let audio: AudioTrack? = AudioTrack(file: URL(fileURLWithPath: "1.mps"))
@@ -544,9 +545,9 @@ Conditional conformace becomes powerful when you hace a generic type storing an 
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/c2e1874a-494e-4cf7-93b6-fb3f45281ba8)
 
-좀전에 봤듯이, 조건부 적합성을 통해서 inner 값의 타입이 Track 타입일 때 Array가 Track 타입이 됩니다.
+조건부 적합성을 통해서 inner 값의 타입이 Track 타입일 때 Array가 Track 타입이 됩니다.
 
-Optional의 제네릭 타입외에도 커스텀 제네릭 타입에도 조건부 적합성을 적용해 봅시다.
+Optional의 제네릭 타입 외에도 커스텀 제네릭 타입에도 조건부 적합성을 적용해 봅시다.
 
 CachedValue 타입을 만들어 커스텀 제네릭 타입에 조건부 적합성을 적용해 봅시다.
 CachedValue는 시간이 오래 소요되는 계산의 결과를 캐싱하고 리프레쉬 전까지 캐싱한 결과를 유지합니다.
@@ -633,7 +634,7 @@ extension CachedValue: Comparable where T: Comparable {
 } 
 ```
 
-위와 같이 CachedValue에 조건부 적합성을 적용하면 아래 코드와 같이 사용 가능합니다.
+위와 같이 CachedValue에 조건부 적합성을 적용하면 아래 코드와 같이 사용할 수 있습니다.
 
 ```swift
 let cachedValueOne = CacheValue(timeToLive: 60) {
@@ -667,7 +668,7 @@ Conditional conformance works best when storing the lowest common denominator in
 
 지금부터 프로토콜의 단점을 살펴보고 두 가지 방법(enum, type erasure)으로 해결해 봅시다.
 
-Hashable 타입을 딕셔너리의 키에 저장하거나 Array, Set에 저장할 때 프로토콜을 단점을 찾을 수 있습니다.
+Hashable 타입을 Dictionary Key에 저장하거나 Array, Set에 저장할 때 프로토콜의 단점을 찾을 수 있습니다.
 
 Hashable 프로토콜을 따르는 PokerGame 프로토콜과 PokerGame 프로토콜을 따르는 StudPoker 구조체와 TexasHoldem 구조체를 만들었습니다.
 
@@ -708,13 +709,13 @@ var numberOfPlayers = [PokerGame: Int]()
 
 프로토콜이 특정 타입(concrete type)으로 사용될 수 없기 때문에 프로토콜로 타입을 지정하고 해당 프로토콜을 따르는 타입들을 섞을 수 없습니다.
 
-PlayerGame 프로토콜을 따르는 StudPoker 구조체와 같이 특정 타입(concrete type)을 사용할 경우 [StudPoker: Int] 와 같이 Dictionary의 Key나 Array에 저장할 수 있습니다.
+PlayerGame 프로토콜을 따르는 StudPoker 구조체와 같이 특정 타입(concrete type)을 사용할 경우 [StudPoker: Int]와 같이 Dictionary의 Key나 Array에 저장할 수 있습니다.
 
 하지만 StudPoker 타입을 사용할 경우 PlayerGame 프로토콜을 따르는 타입들을 섞어서 저장할 수 없습니다.
 
 그렇다면 제네릭을 사용하면 추상화된 타입을 사용해 하위 타입들을 섞고 컴파일 에러도 피할 수 있을까요?
 
-아래 코드와 같이 제네릭을 사용해 해결하려... 해봅시다. (제네릭으로 문제를 해결할 수 없습니다)
+아래 코드와 같이 제네릭을 사용해 해결하려...해봅시다. (제네릭으로 문제를 해결할 수 없습니다.)
 
 ```swift
 func storeGame<T: PokerGame>(games: [T]) -> [T: Int] {
@@ -777,7 +778,7 @@ struct TexasHoldem: Hashable {
 
 하지만 많은 타입을 섞으려 할 경우 너무 많은 케이스를 가진 열거형을 만들어 혼란스럽게 됩니다.
 
-또한 프로토콜은 테스트를 위한 의존성 주입을 위해 꼭 필요합니다. (열거형으로 대체되기 어려울 수 있습니다)
+또한 프로토콜은 테스트를 위한 의존성 주입을 위해 꼭 필요합니다. (열거형으로 대체되기 어려울 수 있습니다.)
 
 이때 우리는 Type erasing을 사용해 프로토콜을 사용하면서 프로토콜을 따르는 타입들을 섞어서 사용할 수 있습니다.
 Type erasing으로 컨테이너에 타입을 감싸서 기존 컴파일 타임 프로토콜을 런타임으로 옮길 수 있습니다.
@@ -799,12 +800,12 @@ Type erasing을 통해 외부 컨테이너는 구조체로 특정 타입(concret
 
 Each AnyPokerGame can store a different PokerGame type.
 
-이제 AnyPokerGame은 구조체로 특정 타입(concrete type)이 되었기 때문에 AnyPokerGame을 가진 Arrary, Set, Dictionary 등에 넣어 AnyPokerGame의 내부 값을 PokerGame 프로토콜을 따르는 다양한 타입을 저장할 수 있습니다.
+이제 AnyPokerGame은 구조체로 특정 타입(concrete type)이 되었기 때문에 AnyPokerGame을 가진 Array, Set, Dictionary 등에 넣어 AnyPokerGame의 내부 값을 PokerGame 프로토콜을 따르는 다양한 타입을 저장할 수 있습니다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/def7b28a-0489-4650-8934-7a75705287d5)
 
 이번에는 코드로 AnyPokerGame이 동작하는 방식을 살펴봅시다.
-이제 AnyPokerGame 타입을 Array, Set, Dictionary key로 사용 가능합니다.
+이제 AnyPokerGame 타입을 Array, Set, Dictionary key로 사용할 수 있습니다.
 
 ```swift
 let studPoker = StudPoker()
@@ -835,7 +836,7 @@ var numberOfPlayers = [
 ]
 ```
 
-이전 챕터에서 살펴본 AnyError(Result 속 error에 들어가는 모든 타입에 대응, 모든 error를 대표 가능)와 AnyIterator 모두 type erased가 사용된 것들입니다.
+이전 장에서 살펴본 AnyError(Result 속 error에 들어가는 모든 타입에 대응, 모든 error를 대표 가능)와 AnyIterator 모두 type erased가 사용된 것들입니다.
 
 다시 말해, PokerGame을 감싸는 AnyPokerGame 구조체는 내부 값으로 PokerGame 프로토콜을 따르는 변수를 가지고 AnyPokerGame 또한 PokerGame을 채택합니다.
 
@@ -871,7 +872,7 @@ extension AnyPokerGame: Hashable {
 }
 ```
 
-PokerGame 프로토콜이 Hashable 프로토콜을 따르기 때문에 AnyPokerGame 구조체도 Hashable 프로토콜을 따르도록 해야합니다. 
+PokerGame 프로토콜이 Hashable 프로토콜을 따르기 때문에 AnyPokerGame 구조체도 Hashable 프로토콜을 따르도록 해야 합니다. 
 
 이때 type erased가 사용된 AnyHashable을 사용해 Hashable 프로토콜이 제공하는 함수를 AnyPokerGame에서도 제공할 수 있습니다.
 
@@ -932,7 +933,7 @@ struct Validator<T> {
 }  
 ```
 
-제네릭 구조체에서는 유효성의 조건을 클로저로 입력 받아 여러 타입을 하나의 구현부로 대응할 수 있게 됩니다.
+제네릭 구조체에서는 유효성의 조건을 클로저로 입력받아 여러 타입을 하나의 구현부로 대응할 수 있게 됩니다.
 
 또한 Validator 구조체를 확장하여 함수도 추가할 수 있습니다.
 
