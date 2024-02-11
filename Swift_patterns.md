@@ -77,16 +77,16 @@ protocol Session {
 }
 ```
 
-dataTask 함수에서 URLSessionDataTask나 다른 프로토콜을 리턴하기 보다, 연관 값 Task를 리턴하도록 구현했습니다.
-프로토콜의 연관 값은 컴파일 타임에 타입이 결정되기 때문에 URLSessionDataTask와 같은 타입과 함께 여러 타입에 대응하게 됩니다.
+dataTask 함수에서 URLSessionDataTask나 다른 특정 타입을 리턴하지 않고 연관 값 Task를 리턴하도록 구현했습니다.
+프로토콜의 연관 값은 컴파일 타임에 타입이 결정되기 때문에 여러 타입에 대응할 수 있습니다.
 
-WeatherAPI에 주입할 URLSession 타입은 Session 프로토콜을 따라야 합니다.
+WeatherAPI가 Session 프로토콜에 의존하기 때문에 WeatherAPI에 주입할 URLSession 타입은 Session 프로토콜을 따라야 합니다.
 
 ```swift
 extension URLSession: Session {}
 ```
 
-이제는 본격적으로 WeatherAPI의 구현부를 살펴봅시다.
+본격적으로 WeatherAPI의 구현부를 살펴봅시다.
 
 ```swift
 final class WeatherAPI<S: Session> {
@@ -114,8 +114,7 @@ weatherAPI.run()
 WeatherAPI는 제네릭 타입을 활용하여 Session 프로토콜을 따르는 구현부를 교환하여 입력 받도록 만들었습니다.
 
 위에서 task.resume() 함수를 호출하고 있지만, 아직 Session 프로토콜의 연관 값인 Task에 resume 함수를 구현하지 않았습니다.
-
-resume 함수를 가진 DataTask 프로토콜을 만들고 Session 프로토콜의 연관 값인 Task를 DataTask로 타입 제약한다면, Task의 resume 함수를 호출할 수 있습니다.
+resume 함수를 가진 DataTask 프로토콜을 만들고 Session 프로토콜의 연관 값인 Task를 DataTask로 타입 제약한다면, task의 resume 함수를 호출할 수 있습니다.
 
 아래 코드로 살펴봅시다.
 
@@ -125,6 +124,7 @@ protocol DataTask {
 }
 
 protocol Session {
+  // 연관 값 Task를 DataTask 타입으로 제약합니다.
   associatedtype Task: DataTask
 
   func dataTask(
@@ -134,25 +134,26 @@ protocol Session {
 }
 ```
 
-Session 프로토콜의 연관 값 Task에 DataTask 프로토콜로 타입 제약을 걸어 dataTask 함수가 리턴하는 Task 타입의 객체에 resume 함수를 호출할 수 있게 되었습니다.
+먼저 DataTask 프로토콜을 만들고 resume 함수를 선언했습니다.
+이후 Session 프로토콜의 연관 값 Task에 DataTask 프로토콜로 타입 제약을 걸어 dataTask 함수가 리턴하는 Task 타입의 객체에 resume 함수를 호출할 수 있게 되었습니다.
 
 지금까지의 추상화 과정을 그림으로 살펴봅시다.
 
 ![image](https://github.com/hongjunehuke/swift-in-depth/assets/83629193/ab8ce8de-e1c1-4388-b25b-a3ec806ec9ee)
 
-구체적인 객체인 URLSession과 URLSessionDataTask 모두 추상화(protocol)에 의존하고 있습니다.
+구체적인 객체인 URLSession과 URLSessionDataTask 모두 추상화(protocol)된 Session 프로토콜과 DataTask 프로토콜에 의존하고 있습니다.
 
-위에서 만든 DataTask 프로토콜을 따르는 URLSession에서 쓰일 URLSessionDataTask도 만들어주면 URLSession이 완성됩니다.
+URLSession에서 쓰일 URLSessionDataTask도 DataTask 프로토콜을 따르도록 만들어주면 URLSession 코드가 완성됩니다.
 
 ```swift
 extension URLSessionDataTask: DataTask {}
 ```
 
 이제 URLSession을 생성하여 WeatherAPI에 주입할 수 있게 되었습니다.
-물론 URLSession 이외에도 Session 프로토콜을 따르는 타입이라면 WeatherAPI의 생성자로 주입될 수 있습니다.
+물론 URLSession 이외에도 Session 프로토콜을 따르는 타입이라면 WeatherAPI의 생성자로 주입할 수 있습니다.
 
 지금부터 URLSession 이외에 OfflineURLSession과 MockSession을 생성하여 WeatherAPI가 구현부를 교체(Swapping an implementation)해 보겠습니다.
-의존성 주입으로 WeatherAPI가 구체적 타입이 아닌 추상화에 의존하기 때문에 구현부를 URLSession, OfflineURLSession, MockSession 등으로 교체해도 WeatherAPI에 수정될 부분은 없습니다.
+의존성 주입으로 WeatherAPI가 구체적 타입이 아닌 추상화에 의존하기 때문에 구현부를 URLSession, OfflineURLSession, MockSession 등으로 교체해도 WeatherAPI에 수정할 부분이 없습니다.
 
 먼저 OfflineURLSession과 OfflineTask를 구현하겠습니다.
 
@@ -190,10 +191,9 @@ struct OfflineTask: DataTask {
 }
 ```
 
-위의 OfflineURLSession은 서버 연결 없이 로컬 데이터가 로드되도록 하여 서버 환경에 구애받지 않고 테스트할 수 있도록 합니다.
+위의 OfflineURLSession은 서버 연결 없이 로컬 데이터가 로드되도록 하여 서버 환경에 구애받지 않고  WeatherAPI 클래스를 테스트할 수 있도록 합니다.
 
-우리는 의존성 주입으로 객체 간의 의존 관계를 서로가 아니라 추상적 대상에 두어 구현부를 교체할 때 추가적인 수정이 발생하지 않도록 만들었습니다.
-
+우리는 의존성 주입으로 객체 간의 의존 관계를 서로가 아니라 추상적 대상에 두어 구현부를 교체할 때 추가적인 코드 수정이 발생하지 않도록 만듭니다.
 아래 코드와 같이 단지 주입하는 객체만 달라질 뿐, 구현부가 교체되었다고 해서 WeatherAPI의 코드를 수정하지 않습니다.
 
 ```swift
@@ -201,7 +201,7 @@ let productionAPI = WeatherAPI(session: URLSession.shared)
 let offlineAPI = WeatherAPI(session: OfflineURLSession())
 ```
 
-Session 프로토콜이 Task 연관 값을 활용하는 것처럼 URLSession, OfflineURLSession, MockSession 등 하나의 타입으로 인스턴스화 하기 어려울 때 프로토콜 내부의 연관 값은 유용하게 사용됩니다.
+Session 프로토콜이 Task 연관 값을 활용하는 것처럼 URLSession, OfflineURLSession, MockSession 등 하나의 타입으로 인스턴스화 하기 어려울 때 프로토콜의 연관 값은 유용하게 사용됩니다.
 
 이번에는 MockSession과 MockTask를 구현해 WeatherAPI 클래스를 테스트하는 코드를 작성해 봅시다.
 
@@ -257,9 +257,9 @@ testcase.testAPI()
 ```
 
 Session 프로토콜을 확장하여 dataTask 함수의 구현부를 제공할 수도 있습니다.
-기존의 dataTask 함수가 아닌, Result 타입 클로저를 가진 dataTask 함수를 새로 만들고 해당 함수의 구현부를 프로토콜 확장에서 제공하겠습니다.
+기존의 dataTask 함수가 아닌, Result 타입 클로저를 가진 dataTask 함수를 새로 만들고 해당 함수의 구현부를 프로토콜 확장에서 제공해봅시다.
 
-chapter11에서 살펴본 Result 타입을 활용해 (Data?, URLResponse?, Error?)를 Result로 변형시켜 다루면 에러 핸들링에 유리합니다.
+챕터11에서 살펴본 Result 타입을 활용해 (Data?, URLResponse?, Error?)를 Result로 변형시켜 다루면 에러 핸들링에 유리합니다.
 
 아래 코드로 살펴봅시다.
 
@@ -306,14 +306,14 @@ OfflineURLSession().dataTask(with: url) { (result: Result<Data, AnyError> in
 }
 ```
 
-의존성 주입을 활용해 여러 구현(production, debugging, testing)을 전환하며 구체적인 WeatherAPI 타입을 만들 수 있습니다.
+의존성 주입을 활용해 여러 구현(production, debugging, testing)에 대응하는 WeatherAPI 타입을 만들 수 있습니다.
 또한 추상화(프로토콜)에 구체적 타입을 의존하게 만들어 구체적 타입끼리의 의존관계도 피할 수 있었습니다.
 
 ## Conditional conformance
 
-Conditional conformance를 직역하면 조건부 적합성 정도입니다.
+Conditional conformance를 직역하면 **조건부 적합성**입니다.
 
-조건부 적합성은 Swift 4.1부터 도입되었고 특정 상태에서만 해당 타입이 프로토콜을 따르도록 만들 수 있습니다.
+조건부 적합성은 Swift 4.1부터 도입되었고 특정 조건에서만 해당 타입이 프로토콜을 따르도록 만들 수 있습니다.
 
 ```swift
 protocol Purchaseable {
@@ -326,7 +326,7 @@ struct Book: Purchaseable {
   }
 }
 
-// 조건부 적합성!
+// 조건부 적합성 예시입니다. (Array의 Element 연관 값이 Purchaseable 프로토콜을 따를 때 Array도 Purchaseable 프로토콜을 따른다)
 extension Array: Purchaseable where Element: Purchaseable {
   func buy() {
     for element in self {
@@ -337,7 +337,7 @@ extension Array: Purchaseable where Element: Purchaseable {
 ```
 
 extension Array: Purchaseable where Element: Purchaseable와 같은 코드가 생소할 수 있습니다.
-이와 같은 코드는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성을 구현한 코드입니다.
+이는 Array 타입의 연관 값인 Element가 Purchaseable 프로토콜을 따를 때 Array 타입이 Purchaseable 프로토콜을 따른다는 조건부 적합성 코드입니다.
 
 With conditional conformance, you can make a type adhere to a protocol but only under certain conditions.
 
@@ -346,7 +346,7 @@ With conditional conformance, you can make a type adhere to a protocol but only 
 Equatable 프로토콜이나 Hashable 프로토콜을 채택하여 두 프로토콜에서 제공하는 함수를 별도의 구현 없이 사용하는 것이 조건부 적합성의 예입니다.
 
 아래 코드와 같이 Equatable 프로토콜을 채택한 타입의 경우 == 함수 구현 없이 == 함수를 사용할 수 있습니다.
-물론 동일하다는 조건을 수정하기 위해서는 == 함수를 오버라이드 해야합니다.
+물론 동일하다는 조건을 수정하기 위해서는 == 함수를 오버라이드하여 재구현해야 합니다.
 
 ```swift
 struct Movie: Equatable {
@@ -360,14 +360,16 @@ movie == movie  // true. You can already compare without implementing Equatable.
 
 Swift synthesizes this for free on some protocols, such as Equatable and Hashable, but not every protocol.
 For instance, you don't get Comparable for free, or the ones that you introduce yourself.
+
 Unfortunately, Swift doesn't synthesize methods on classes.
 
 **Conditional conformance on associated types**
 
-지금부터는 조건부 적합성을 언제 사용하면 좋을지 살펴봅시다.
+그렇다면 조건부 적합성을 언제 사용하면 좋을까요?
 
-결론부터 이야기하면 조건부 적합성은 제네릭을 내부 값으로 가지는 객체에 자주 쓰입니다.
-내부 인스턴스가 특정 프로토콜을 따를 때 내부 인스턴스를 감싸는 객체 또한 해당 프로토콜을 따르도록 만들어 외부 객체에서도 해당 프로토콜의 함수를 사용할 수 있도록 만듭니다.
+결론부터 이야기하면 조건부 적합성은 제네릭을 인스턴스로 가지는 객체에 자주 쓰입니다.
+
+내부 인스턴스가 특정 프로토콜을 따를 때 내부 인스턴스를 감싸는 객체 또한 해당 프로토콜을 따르도록 만들어 외부 객체에서도 해당 프로토콜의 함수를 사용하도록 만듭니다.
 
 ```swift
 protocol Sequence<Element>
@@ -376,10 +378,11 @@ protocol Sequence<Element>
 struct Array<Element>
 ```
 
-Array가 Element 연관 값을 가졌기 때문에 조건부 적합성을 설명하기에 적합합니다.
+Array는 Element 연관 값을 가졌기 때문에 조건부 적합성을 설명하기에 적합합니다.
 Array가 구조체인데 어떻게 연관 값을 가졌는지 의문일 수 있지만, Array의 연관 값 Element는 Sequence 프로토콜로부터 온 연관 값입니다.
 
-Track 프로토콜과 AudioTrack 구조체를 만들고 Array의 연관 값을 Element를 Track 프로토콜로 제약해 발생하는 문제를 살펴봅시다.
+조건부 적합성을 사용하지 않고 코드를 구현한다면 어떤 문제가 발생하는지 살펴봅시다.
+아래 코드는 일반적인 프로토콜과 해당 프로토콜을 따르는 구조체입니다.
 
 ```swift
 protocol Track {
@@ -395,10 +398,9 @@ struct AudioTrack: Track {
 }
 ```
 
-Track 프로토콜을 따르는 객체를 배열에 저장할 때, 배열 자체에 play 함수를 만들어 배열의 play 함수가 호출하여 모든 배열 내부 값들의 play 함수가 호출되도록 만들려합니다.
+Track 프로토콜을 따르는 객체를 배열에 저장할 때, 배열 자체에 play 함수를 만들어 배열의 play 함수가 호출될 때 배열 요소들의 play 함수가 호출되도록 할 생각입니다.
 
-Array의 연관 값 Element가 Track 프로토콜을 따를 때!
-Array 타입에 play 함수를 제공합니다.
+다시 말해, Array의 연관 값 Element가 Track 프로토콜을 따를 때, Array 타입에 play 함수를 제공합니다.
 
 아래 코드로 살펴봅시다.
 
@@ -414,7 +416,7 @@ extension Array where Element: Track {
 }
 ```
 
-위 코드는 Array의 Element가 Track 프로토콜을 따를 때 Array 객체에 play 함수를 제공합니다.
+위 코드로 Array의 Element가 Track 프로토콜을 따를 때 Array 객체에 play 함수를 제공하게 됩니다.
 
 하지만 문제는 Array 자체로 Track 프로토콜을 따르지 않는다는 점입니다.
 단지, Element가 Track 프로토콜을 따를 때 Array를 확장한 기능을 사용할 뿐입니다.
