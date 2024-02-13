@@ -1,6 +1,10 @@
 # SwiftInDepth
 
-: Swift In Depth를 읽고 정리합니다. 좀 더 스위프트 언어에 어울리는 코드를 짜고 싶어 읽기 시작했습니다.
+![image](https://github.com/hongjunehuke/Swift-in-depth/assets/83629193/5505a939-8807-49e6-b62e-2b2c8c5f9f4c)
+
+Swift In Depth를 읽고 정리한 리포지토리입니다.
+
+좀 더 스위프트 언어에 어울리는 코드를 짜고 싶어 읽기 시작했습니다.
 
 ## Tools
 
